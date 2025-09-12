@@ -16,7 +16,7 @@ const User = sequelize.define("User", {
     allowNull: true,
   },
   identityNumber: {
-    type: DataTypes.STRING,
+    type: DataTypes.BIGINT,
     allowNull: false,
   },
   phoneNumber: {
