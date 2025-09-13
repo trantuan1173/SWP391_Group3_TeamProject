@@ -13,23 +13,6 @@ const register = async (req, res) => {
   }
 };
 
-const login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ where: { email } });
-    if (!user) {
-      return res.status(401).json({ error: "Invalid email or password" });
-    }
-    if (user.password !== password) {
-      return res.status(401).json({ error: "Invalid email or password" });
-    }
-    res.status(200).json(user);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to login" });
-  }
-};
-
 const createAppointment = async (req, res) => {
   try {
     const { patientId, doctorId, date, time } = req.body;
@@ -41,4 +24,4 @@ const createAppointment = async (req, res) => {
   }
 };
 
-module.exports = { register, login, createAppointment };
+module.exports = { register, createAppointment };

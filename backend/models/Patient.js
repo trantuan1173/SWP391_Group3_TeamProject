@@ -11,18 +11,18 @@ const Patient = sequelize.define("Patient", {
       key: "id",
     },
   },
-  dateOfBirth: {
-    type: DataTypes.DATE,
-    allowNull: false,
-  },
-  gender: {
-    type: DataTypes.ENUM("male", "female"),
-    allowNull: false,
-  },
-  address: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
+  // dateOfBirth: {
+  //   type: DataTypes.DATE,
+  //   allowNull: false,
+  // },
+  // gender: {
+  //   type: DataTypes.ENUM("male", "female"),
+  //   allowNull: false,
+  // },
+  // address: {
+  //   type: DataTypes.STRING,
+  //   allowNull: false,
+  // },
   createdAt: {
     type: DataTypes.DATE,
     allowNull: false,

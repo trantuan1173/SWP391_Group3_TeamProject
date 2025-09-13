@@ -22,7 +22,7 @@ app.use(express.json());
 
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-  const PORT = process.env.PORT || 5000;
+  const PORT = process.env.PORT || 1118;
   app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
   });
