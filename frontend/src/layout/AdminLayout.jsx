@@ -30,7 +30,7 @@ const navigationItems = [
   },
   {
     title: "Users",
-    url: "/admin/users",
+    url: "/admin/user",
     icon: Users,
   },
   {
@@ -106,7 +106,7 @@ export default function AdminLayout({ children }) {
           </header>
 
           {/* Main content */}
-          <main className="flex-1 p-6 bg-gray-50">{children}</main>
+          <main className="flex-1 p-10 bg-gray-50">{children}</main>
         </SidebarInset>
       </div>
     </SidebarProvider>
