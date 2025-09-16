@@ -21,6 +21,8 @@ import {
   ShoppingCart,
   FlaskConical,
 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { Button } from "@/components/ui/button";
 
 const navigationItems = [
   {
@@ -47,7 +49,9 @@ const navigationItems = [
 
 export default function AdminLayout({ children }) {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
+  console.log("Authenticated user in AdminLayout:", user);
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
@@ -84,17 +88,31 @@ export default function AdminLayout({ children }) {
           </SidebarContent>
 
           <SidebarFooter className="border-t border-green-500 p-4 bg-[#00A646] md:rounded-br-[50px]">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-green-300 to-green-100 rounded-lg flex items-center justify-center">
-                <span className="text-green-800 font-bold text-sm">H</span>
+            {user ? (
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-gradient-to-br from-green-300 to-green-100 rounded-lg flex items-center justify-center">
+                    <span className="text-green-800 font-bold text-sm">
+                      {user.name?.charAt(0).toUpperCase() || "U"}
+                    </span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-sm text-white">
+                      {user.name}
+                    </span>
+                    <span className="text-xs text-green-200">{user.role}</span>
+                  </div>
+                </div>
+                <Button
+                  onClick={logout}
+                  className="text-white !rounded-md !text-sm bg-red-400 hover:!bg-red-500"
+                >
+                  Logout
+                </Button>
               </div>
-              <div className="flex flex-col">
-                <span className="font-semibold text-sm text-white">
-                  HEALTHY
-                </span>
-                <span className="text-xs text-green-200">PEOPLE</span>
-              </div>
-            </div>
+            ) : (
+              <div className="text-white text-sm">Not logged in</div>
+            )}
           </SidebarFooter>
         </Sidebar>
 

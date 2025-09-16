@@ -13,8 +13,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     localStorage.removeItem("token");
   };
-    
-    
+
   useEffect(() => {
     const fetchUser = async () => {
       const token = localStorage.getItem("token");
@@ -27,7 +26,7 @@ export const AuthProvider = ({ children }) => {
         const res = await axios.get(API_ENDPOINTS.AUTH_PROFILE, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setUser(res.data.data);
+        setUser(res.data.user);
       } catch (error) {
         localStorage.removeItem("token");
       } finally {
