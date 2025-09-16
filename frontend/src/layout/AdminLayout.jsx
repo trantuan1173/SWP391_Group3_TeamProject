@@ -70,7 +70,7 @@ export default function AdminLayout({ children }) {
                       <SidebarMenuButton variant="admin" asChild>
                         <button
                           onClick={() => navigate(item.url)}
-                          className="flex w-full items-center !p-6 !rounded-md text-black hover:bg-purple-500 hover:text-white transition-colors font-bold"
+                          className="flex w-full items-center !p-6 !rounded-md hover:!text-white text-black transition-colors font-bold"
                         >
                           <item.icon className="h-4 w-4" />
                           <span>{item.title}</span>
@@ -106,7 +106,7 @@ export default function AdminLayout({ children }) {
           </header>
 
           {/* Main content */}
-          <main className="flex-1 p-10 bg-gray-50">{children}</main>
+          <main className="flex-1 p-2 bg-gray-50">{children}</main>
         </SidebarInset>
       </div>
     </SidebarProvider>

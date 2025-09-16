@@ -30,7 +30,7 @@ const createUser = async (req, res) => {
 const getUsers = async (req, res) => {
   try {
     const users = await User.findAll({
-      attributes: ["id", "name", "email", "role", "isActive"],
+      attributes: ["id", "name", "email", "role", "isActive", "phoneNumber"],
       include: [Doctor, Patient, Staff, Admin],
     });
     res.json(users);
