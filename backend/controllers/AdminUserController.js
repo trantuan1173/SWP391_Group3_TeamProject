@@ -3,6 +3,7 @@ const Doctor = require("../models/Doctor");
 const Patient = require("../models/Patient");
 const Admin = require("../models/Admin");
 const { Staff } = require("../models");
+const { Op } = require("sequelize");
 
 const createUser = async (req, res) => {
   try {
@@ -53,10 +54,17 @@ const getUsers = async (req, res) => {
         "address",
         "identityNumber",
       ],
-      include: [Doctor, Patient, Staff, Admin],
+      include: [Doctor, Patient, Staff], // bỏ Admin nếu không cần
+      where: {
+        role: {
+          [Op.ne]: "admin", // not equal admin
+        },
+      },
     });
+
     res.json(users);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Failed to fetch users" });
   }
 };

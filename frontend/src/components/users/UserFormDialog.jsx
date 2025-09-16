@@ -33,10 +33,21 @@ const schema = z.object({
   password: z.string().min(6, "Password must be at least 6 chars"),
   identityNumber: z.string().min(9, "Identity number required"),
   phoneNumber: z.string().min(9, "Phone number required"),
-  dateOfBirth: z.string(),
+  dateOfBirth: z.string().refine((val) => {
+    const dob = new Date(val);
+    if (isNaN(dob.getTime())) return false; // không phải date hợp lệ
+    const today = new Date();
+    const age =
+      today.getFullYear() -
+      dob.getFullYear() -
+      (today < new Date(today.getFullYear(), dob.getMonth(), dob.getDate())
+        ? 1
+        : 0);
+    return age >= 18 && age <= 150;
+  }, "Age must be between 18 and 150"),
   gender: z.enum(["male", "female", "other"]),
   role: z.enum(["doctor", "patient", "admin"]),
-  address: z.string().min(10, "Address must be at least 10 characters"), // Thêm validation cho address
+  address: z.string().min(10, "Address must be at least 10 characters"),
   avatar: z.any().optional(),
 });
 
@@ -211,7 +222,6 @@ export default function UserFormDialog({ open, setOpen, onSubmit }) {
                       <SelectContent>
                         <SelectItem value="male">Male</SelectItem>
                         <SelectItem value="female">Female</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -237,7 +247,6 @@ export default function UserFormDialog({ open, setOpen, onSubmit }) {
                       <SelectContent>
                         <SelectItem value="doctor">Doctor</SelectItem>
                         <SelectItem value="patient">Patient</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

@@ -329,7 +329,6 @@ export default function UserEditDialog({ open, setOpen, user, onSubmit }) {
                       <SelectContent>
                         <SelectItem value="male">Male</SelectItem>
                         <SelectItem value="female">Female</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -355,7 +354,6 @@ export default function UserEditDialog({ open, setOpen, user, onSubmit }) {
                       <SelectContent>
                         <SelectItem value="doctor">Doctor</SelectItem>
                         <SelectItem value="patient">Patient</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

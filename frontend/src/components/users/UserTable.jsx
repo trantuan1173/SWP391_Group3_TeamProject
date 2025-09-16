@@ -9,8 +9,11 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { use } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function UserTable({ users, onDelete, onEdit, onDetail }) {
+  const navigate = useNavigate();
   return (
     <Table>
       <TableCaption>User List</TableCaption>
@@ -53,7 +56,8 @@ export default function UserTable({ users, onDelete, onEdit, onDetail }) {
                 Edit
               </Button>
               <Button
-                onClick={() => onDetail(user)}
+                // onClick={() => onDetail(user)}
+                onClick={() => navigate(`/admin/user/${user.id}`)}
                 className="bg-green-500 hover:!bg-green-600 text-white !rounded-md !mr-2"
               >
                 Details
