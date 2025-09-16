@@ -45,8 +45,24 @@ export default function UserTable({ users, onDelete, onEdit, onDetail }) {
             </TableCell>
             <TableCell>{user.name}</TableCell>
             <TableCell>{user.email}</TableCell>
-            <TableCell>{user.role}</TableCell>
-            <TableCell>{user.isActive ? "Active" : "Inactive"}</TableCell>
+            <TableCell>
+              <div
+                className={`text-white font-bold capitalize rounded-3xl w-20 py-1 text-center ${
+                  user.role === "patient" ? "bg-blue-500" : "bg-green-500"
+                }`}
+              >
+                {user.role}
+              </div>
+            </TableCell>
+            <TableCell>
+              <div
+                className={`text-white font-bold capitalize rounded-3xl w-20 py-1 text-center ${
+                  user.isActive ? "bg-green-400" : "bg-red-700"
+                }`}
+              >
+                {user.isActive ? "Active" : "Inactive"}
+              </div>
+            </TableCell>
             <TableCell>
               <Button
                 onClick={() => onEdit(user)}
