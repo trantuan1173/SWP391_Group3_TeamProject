@@ -11,4 +11,8 @@ export const API_ENDPOINTS = {
   AUTH_PROFILE: `${baseUrl}/api/users/profile`,
   VERIFY: `${baseUrl}/api/users/verify`,
   GET_ALL_USERS: `${baseUrl}/api/admin/users`,
+  GET_USER_BY_ID: (userId) => `${baseUrl}/api/admin/users/${userId}`,
+  DELETE_USER: (userId) => `${baseUrl}/api/admin/users/${userId}`,
+  UPDATE_USER: (userId) => `${baseUrl}/api/admin/users/${userId}`,
+  CREATE_USER: `${baseUrl}/api/admin/create-user`,
 };

@@ -53,11 +53,11 @@ export default function AdminLayout({ children }) {
       <div className="flex min-h-screen w-full">
         {/* Sidebar với background xanh lá */}
         <Sidebar className={"border-0 h-screen bg-[#00A646]"}>
-          <SidebarHeader className="border-b border-green-500 p-4 bg-[#00A646] md:rounded-tr-[50px]">
+          <SidebarHeader className="border-b border-green-500 p-4 bg-[#00A646]">
             <img
-              src="/icon/logo.svg"
+              src="/icon/logo.png"
               alt="Healthy People Logo"
-              className="h-100 w-auto filter"
+              className="!w-[150px] ml-auto mr-auto filter"
             />
           </SidebarHeader>
 
@@ -70,7 +70,7 @@ export default function AdminLayout({ children }) {
                       <SidebarMenuButton variant="admin" asChild>
                         <button
                           onClick={() => navigate(item.url)}
-                          className="flex w-full items-center !p-6 !rounded-md hover:!text-white text-black transition-colors font-bold"
+                          className="flex w-full items-center !p-6 !rounded-md hover:!text-white active:!bg-purple-800 text-black transition-colors font-bold"
                         >
                           <item.icon className="h-4 w-4" />
                           <span>{item.title}</span>
@@ -106,7 +106,7 @@ export default function AdminLayout({ children }) {
           </header>
 
           {/* Main content */}
-          <main className="flex-1 p-2 bg-gray-50">{children}</main>
+          <main className="flex-1 p-4 bg-gray-50">{children}</main>
         </SidebarInset>
       </div>
     </SidebarProvider>

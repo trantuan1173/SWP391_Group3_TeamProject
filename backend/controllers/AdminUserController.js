@@ -8,6 +8,16 @@ const createUser = async (req, res) => {
   try {
     const { role, ...userData } = req.body;
 
+    if (req.file) {
+      userData.avatar = `/uploads/avatars/${req.file.filename}`;
+    }
+
+    if (!userData.name || !userData.email || !userData.password) {
+      return res
+        .status(400)
+        .json({ error: "Name, email and password are required" });
+    }
+
     const user = await User.create({ ...userData, role });
     if (role === "doctor") {
       await Doctor.create({
@@ -30,7 +40,19 @@ const createUser = async (req, res) => {
 const getUsers = async (req, res) => {
   try {
     const users = await User.findAll({
-      attributes: ["id", "name", "email", "role", "isActive", "phoneNumber"],
+      attributes: [
+        "id",
+        "name",
+        "email",
+        "role",
+        "isActive",
+        "phoneNumber",
+        "avatar",
+        "dateOfBirth",
+        "gender",
+        "address",
+        "identityNumber",
+      ],
       include: [Doctor, Patient, Staff, Admin],
     });
     res.json(users);
@@ -71,13 +93,46 @@ const getUserById = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const [updated] = await User.update(req.body, { where: { id } });
-    if (!updated) return res.status(404).json({ error: "User not found" });
+    const existingUser = await User.findByPk(id);
+    if (!existingUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const updateData = { ...req.body };
 
-    const updatedUser = await User.findByPk(id);
-    res.json({ message: "User updated", updatedUser });
+    if (req.file) {
+      updateData.avatar = `/uploads/avatars/${req.file.filename}`;
+    }
+    if (!updateData.password || updateData.password.trim() === "") {
+      delete updateData.password;
+    } else {
+      const bcrypt = require("bcrypt");
+      updateData.password = await bcrypt.hash(updateData.password, 10);
+    }
+
+    const [updated] = await User.update(updateData, {
+      where: { id },
+      individualHooks: true,
+    });
+
+    if (!updated) {
+      return res.status(400).json({ error: "Failed to update user" });
+    }
+
+    // Lấy user đã update (không trả về password)
+    const updatedUser = await User.findByPk(id, {
+      attributes: { exclude: ["password"] },
+    });
+
+    res.json({
+      message: "User updated successfully",
+      user: updatedUser,
+    });
   } catch (err) {
-    res.status(500).json({ error: "Failed to update user" });
+    console.error("Update user error:", err);
+    res.status(500).json({
+      error: "Failed to update user",
+      details: err.message,
+    });
   }
 };
 
