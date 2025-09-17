@@ -1,7 +1,7 @@
 import React from "react";
 import { Home, Calendar, Users, ShoppingCart, FlaskConical } from "lucide-react";
 
-export default function Sidebar() {
+export default function Sidebar({ patient }) {
   const sidebarItems = [
     { icon: <Home size={20} />, label: "Dashboard" },
     { icon: <Calendar size={20} />, label: "Schedule" },
@@ -9,6 +9,13 @@ export default function Sidebar() {
     { icon: <ShoppingCart size={20} />, label: "Orders" },
     { icon: <FlaskConical size={20} />, label: "Laboratory" },
   ];
+
+  // Lấy thông tin user từ patient (nếu có)
+  const user = patient?.user || {};
+  const name = user.name || patient?.name || "Tên bệnh nhân";
+  const email = user.email || patient?.email || "Email";
+  const avatar = user.avatar ;
+  const address = user.address || patient?.address || "Chưa có địa chỉ";
 
   return (
     <div
@@ -48,14 +55,13 @@ export default function Sidebar() {
       <div className="p-4 border-t border-[#00923F]">
         <div className="flex flex-col items-center text-center">
           <img
-            src="/icon/Amily.jpg"
-            alt="Amily"
+            src={avatar}
+            alt={name}
             className="w-12 h-12 rounded-full object-cover mb-2"
           />
-          <div className="text-sm font-semibold">Amily</div>
-          <div className="text-[11px] text-green-100">
-            Amily@Healthypeople.com
-          </div>
+          <div className="text-sm font-semibold">{name}</div>
+          <div className="text-[11px] text-green-100 mb-1">{email}</div>
+          <div className="text-[11px] text-green-100">{address}</div>
         </div>
       </div>
     </div>

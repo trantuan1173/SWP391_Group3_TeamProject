@@ -13,8 +13,11 @@ export default function Documents({ data }) {
       <tbody>
         {data.map((d, i) => (
           <tr key={i} className="border-b">
-            <td className="p-3">{d.date} {d.time}</td>
-            <td className="p-3">{d.treatment}</td>
+            <td className="p-3">
+              {d.createdAt ? d.createdAt.slice(0, 10) : ""} {/* Ngày */}
+              {d.createdAt ? " " + (d.createdAt.slice(11, 19)) : ""} {/* Giờ */}
+            </td>
+            <td className="p-3">{d.treatment || d.diagnosis || "No details"}</td>
             <td className="p-3">
               <button className="text-green-600 hover:underline">⬇ Download</button>
             </td>
