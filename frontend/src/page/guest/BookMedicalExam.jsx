@@ -1,18 +1,6 @@
 import React, { useState } from "react";
 import Header from "../../components/Header"; // Đường dẫn tới Header.jsx
 
-const dates = [
-  { label: "16/09", sub: "Thứ 3", active: true },
-  { label: "17/09", sub: "Thứ 4" },
-  { label: "18/09", sub: "Thứ 5" },
-  { label: "Ngày khác", icon: true },
-];
-
-const times = [
-  "07:00", "08:00", "09:00", "10:00", "11:00",
-  "13:30", "14:30", "15:30", "16:30"
-];
-
 export default function BookMedicalExam() {
   const [selectedDate, setSelectedDate] = useState(0);
   const [selectedTime, setSelectedTime] = useState(1);
@@ -21,106 +9,116 @@ export default function BookMedicalExam() {
     <>
       <Header />
       <div className="min-h-screen bg-[#f6fff4] pt-8">
-        <div className="w-[80%] mx-auto border border-gray-200 rounded-xl bg-[#f6fff4] p-8 mt-[50px]">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Left Form */}
-            <div className="flex flex-col gap-[10px]">
-              <input
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400"
-                placeholder="Họ và tên (*)"
-                type="text"
-              />
-              <input
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400"
-                placeholder="Ngày sinh (d/m/Y)"
-                type="text"
-              />
-              <select className="w-full border border-gray-300 rounded px-3 py-2">
-                <option>Giới tính</option>
-                <option>Nam</option>
-                <option>Nữ</option>
-                <option>Khác</option>
-              </select>
-              <input
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400"
-                placeholder="Số điện thoại (*)"
-                type="text"
-              />
-              <div className="flex gap-2">
-                <select className="w-1/2 border border-gray-300 rounded px-3 py-2">
-                  <option>Tỉnh thành</option>
-                </select>
-                <select className="w-1/2 border border-gray-300 rounded px-3 py-2">
-                  <option>Phường xã</option>
-                </select>
-              </div>
-              <textarea
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400"
-                rows={3}
-                placeholder="Mô tả triệu chứng (*)"
-                style={{ height: "120px" }}
-              />
-            </div>
-            {/* Right Booking */}
-            <div className="bg-white rounded-md border border-gray-200 p-4 flex flex-col gap-4">
+        <h1 className="text-center text-[40px] font-bold mb-8">ĐĂNG KÍ KHÁM BỆNH</h1>
+        <div className="w-[70%] mx-auto rounded-xl bg-[#f6fff4] p-8 mt-[50px]">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+            {/* Left Form: 6 cột */}
+            <form className="md:col-span-6 flex flex-col justify-center gap-6">
               <div>
-                <label className="font-semibold text-gray-700">Ngày khám <span className="text-red-500">*</span></label>
-                <div className="flex gap-[15px] mt-2 ">
-                  {dates.map((d, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setSelectedDate(i)}
-                      className={`px-4 py-2 rounded-md border text-sm flex flex-col items-center gap-1 min-w-[80px]
-                        ${selectedDate === i
-                          ? "bg-green-50 border-green-500 text-green-700 font-bold"
-                          : "bg-white border-gray-300 text-gray-700"}
-                      `}
-                      style={{ borderRadius: "10px" }}
-                    >
-                      <span>{d.label}</span>
-                      {d.icon && (
-                        <svg className="w-4 h-4 text-gray-500 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10m-5 4h.01M21 21V7a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2z" />
-                        </svg>
-                      )}
-                      <span className="text-xs text-gray-500">{d.sub}</span>
-                    </button>
-                  ))}
-                </div>
+                <label className="block mb-2 text-base font-medium text-gray-800">Họ và tên</label>
+                <input
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-green-400"
+                  placeholder="Value"
+                  type="text"
+                />
               </div>
               <div>
-                <label className="font-semibold text-gray-700">Giờ khám <span className="text-red-500">*</span></label>
-                <div className="grid grid-cols-5 gap-[15px] mt-2">
-                  {times.map((t, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setSelectedTime(i)}
-                      className={`px-2 py-2 border-[1px] text-sm font-medium w-full`
-                        + ` ${selectedTime === i
-                          ? "bg-green-50 border-green-500 text-green-700 font-bold"
-                          : "bg-white border-gray-300 text-gray-700"}`
-                      }
-                      style={{ height: "65px", borderRadius: "10px" }}
-                    >
-                      {t}
+                <label className="block mb-2 text-base font-medium text-gray-800">CCCD</label>
+                <input
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-green-400"
+                  placeholder="Value"
+                  type="text"
+                />
+              </div>
+              <div>
+                <label className="block mb-2 text-base font-medium text-gray-800">Số điện thoại</label>
+                <input
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-green-400"
+                  placeholder="Value"
+                  type="text"
+                />
+              </div>
+              <div>
+                <label className="block mb-2 text-base font-medium text-gray-800">Ngày sinh</label>
+                <input
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-green-400"
+                  placeholder="Value"
+                  type="text"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-[60%] mx-auto bg-green-900 text-white font-bold py-3 rounded-[999px] text-base hover:bg-green-800 transition"
+                style={{borderRadius: "10px"}}
+              >
+                ĐĂNG KÍ KHÁM BỆNH
+              </button>
+              
+            </form>
+            {/* Khoảng trống giữa: 2 cột */}
+            <div className="md:col-span-2"></div>
+            {/* Right Form: 4 cột */}
+            <div className="md:col-span-4 flex flex-col gap-8 items-center">
+              {/* Date Picker */}
+              <div className="w-full bg-[#ede9fe] rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-2xl font-semibold text-gray-800">Enter date</span>
+                  <span>
+                    <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="4" width="18" height="18" rx="4" />
+                      <path d="M16 2v4M8 2v4M3 10h18" />
+                    </svg>
+                  </span>
+                </div>
+                <div className="mt-4">
+                  <label className="block text-gray-700 text-base mb-1">Date</label>
+                  <input
+                    type="text"
+                    placeholder="mm/dd/yyyy"
+                    className="w-full border-2 border-purple-400 rounded-lg px-4 py-2 text-lg focus:outline-none"
+                  />
+                </div>
+              </div>
+              {/* Time Picker */}
+              <div className="w-full bg-[#ede9fe] rounded-2xl p-6 mt-2">
+                <div className="text-2xl font-semibold text-gray-800 mb-2">Enter time</div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    maxLength={2}
+                    className="w-16 border-2 border-purple-400 rounded-lg px-2 py-2 text-2xl text-center focus:outline-none"
+                    placeholder="20"
+                  />
+                  
+                  <span className="text-2xl font-bold">:</span>
+                  <input
+                    type="text"
+                    maxLength={2}
+                    className="w-16 border-2 border-purple-400 rounded-lg px-2 py-2 text-2xl text-center focus:outline-none"
+                    placeholder="00"
+                  />
+                  <div className="flex flex-col gap-1 ml-4">
+                    <button className="bg-pink-200 text-gray-800 px-3 py-1 font-semibold" style={{ borderRadius: "10px" }}>
+                      AM
                     </button>
-                  ))}
+                    <button className="bg-pink-200 text-gray-800 px-3 py-1 font-semibold" style={{ borderRadius: "10px" }}>
+                      PM
+                    </button>
+                  </div>
                 </div>
+                <div className="flex items-center justify-between mt-4">
+                  
+                  <div className="flex gap-4">
+                    <button className="text-purple-500 font-semibold">Cancel</button>
+                    <button className="text-purple-500 font-semibold">OK</button>
+                  </div>
                 </div>
-                <div className="text-xs text-gray-700 mt-2">
-                    <b>Lưu ý:</b> Thời gian khám trên chỉ là thời gian dự kiến, tổng đài sẽ liên hệ xác nhận thời gian khám chính xác tới quý khách sau khi quý khách đặt hẹn
-                </div>
-                <div className="flex justify-end mt-8">
-                <button className="bg-green-500 text-white font-bold py-3 rounded text-lg hover:bg-green-600 transition"
-              style={{ width: "100%" }}>
-              Đặt lịch
-            </button>
-          </div>
+              </div>
             </div>
-            
           </div>
-          
-          
+            <div className="text-center text-gray-600 text-sm mt-[25px]">
+                *Vui lòng đăng kí lịch khám mong muốn và điền chính xác thông tin, chúng tôi sẽ kiểm tra và liên hệ để xác nhận với quý khách
+            </div>
         </div>
       </div>
     </>

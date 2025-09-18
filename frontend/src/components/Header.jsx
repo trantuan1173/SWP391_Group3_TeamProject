@@ -17,8 +17,8 @@ export default function Header() {
         </div>
         {/* Menu */}
         <nav className="flex items-center" style={{ gap: "50px" }}>
-          <a href="#" className="text-black font-medium no-underline">Bác Sĩ</a>
-          <a href="#" className="text-black font-medium no-underline">Đặt lịch khám</a>
+          <a href="#" className="text-black font-medium no-underline mx-[50px]">Bác Sĩ</a>
+          <a href="#" className="text-black font-medium no-underline mx-[50px]">Đặt lịch khám</a>
           <button className="border border-gray-300 rounded px-3 py-1 text-gray-700 bg-gray-100 hover:bg-gray-200 transition text-sm font-medium">
             Blog
           </button>
@@ -27,11 +27,11 @@ export default function Header() {
         <div className="flex items-center gap-4">
           <button className="bg-green-900 text-white rounded-full px-6 py-2 font-bold text-sm hover:bg-green-800 transition"
             style={{ borderRadius: "999px" }}>
-            Log-In
+            Đăng nhập
           </button>
           <button className="bg-red-700 text-white rounded-full px-6 py-2 font-bold text-sm hover:bg-red-800 transition"
             style={{ borderRadius: "999px" }}>
-            Sign-Up
+            Đăng kí
           </button>
         </div>
       </div>
