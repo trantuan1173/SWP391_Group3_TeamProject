@@ -75,7 +75,7 @@ export default function UserFormDialog({ open, setOpen, onSubmit }) {
           Create User
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-lg w-full max-h-[90vh] overflow-y-auto rounded-lg">
         <DialogHeader>
           <DialogTitle>Create New User</DialogTitle>
         </DialogHeader>
