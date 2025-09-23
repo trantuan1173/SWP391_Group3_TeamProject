@@ -6,6 +6,8 @@ import VerifyPage from "./page/Auth/VerifyPage";
 import UserManagement from "./page/AdminUserManager/UserManagement";
 import AdminDashboard from "./page/AdminDashboard/AdminDashboard";
 import UserDetailManagement from "./page/AdminUserManager/UserDetailManagement";
+import BookMedicalExam from "./page/guest/BookMedicalExam";
+import ListDoctor from "./page/doctor/ListDoctor";
 
 function App() {
   return (
@@ -14,6 +16,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verify" element={<VerifyPage />} />
+        <Route path="/book" element={<BookMedicalExam />} />
+        <Route path="/doctor" element={<ListDoctor />} />
         <Route path="/admin/user" element={<UserManagement />}></Route>
         <Route
           path="/admin/user/:id"
