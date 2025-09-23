@@ -175,7 +175,6 @@ const updateUser = async (req, res) => {
       }
     }
 
-    // Trả về user đã update (ẩn password)
     const updatedUser = await User.findByPk(id, {
       attributes: { exclude: ["password"] },
     });
