@@ -84,20 +84,19 @@ export default function UserTable({
                   {user.role}
                 </div>
               </TableCell>
-              <TableCell>
+              <TableCell className="align-middle">
                 <div className="flex items-center gap-2">
                   <Switch
                     checked={user.isActive}
                     onCheckedChange={(checked) => onToggleActive(user, checked)}
-                    className="!rounded-full bg-gray-200 data-[state=checked]:bg-green-500"
+                    className="bg-gray-200 data-[state=checked]:bg-green-500 w-12 h-6"
                   />
-
                   <span className="text-sm">
                     {user.isActive ? "Active" : "Inactive"}
                   </span>
                 </div>
               </TableCell>
-              <TableCell>
+              <TableCell className="flex items-center">
                 <Button
                   onClick={() => onEdit(user)}
                   variant="outline"
