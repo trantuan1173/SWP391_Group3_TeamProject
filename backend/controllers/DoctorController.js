@@ -34,10 +34,19 @@ const register = async (req, res) => {
   }
 };
 
+
 const getDoctor = async (req, res) => {
   try {
-    const doctor = await Doctor.findAll();
-    res.status(200).json(doctor);
+    const doctors = await Doctor.findAll({
+      include: [
+        {
+          model: User,
+          attributes: ["id", "name", "email", "phoneNumber", "avatar"],
+        },
+      ],
+    });
+
+    res.status(200).json(doctors);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to get doctor" });

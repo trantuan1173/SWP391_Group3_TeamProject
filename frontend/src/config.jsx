@@ -11,5 +11,6 @@ export const API_ENDPOINTS = {
   REGISTER: `${baseUrl}/api/users/register`,
   AUTH_PROFILE: `${baseUrl}/api/users/profile`,
   VERIFY: `${baseUrl}/api/users/verify`,
-
+  DOCTOR_LIST: `${baseUrl}/api/doctors`,
+  USER_LIST: `${baseUrl}/api/users`,
 };

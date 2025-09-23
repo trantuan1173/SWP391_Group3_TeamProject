@@ -26,8 +26,7 @@ const { protect, authorize } = require("../middleware/authMiddleware.js");
  *               items:
  *                 $ref: '#/components/schemas/Doctor'
  */
-router.get("/", protect, authorize("admin"), getDoctor);
-
+router.get("/", getDoctor);
 /**
  * @swagger
  * /doctors/{id}:
