@@ -1,6 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const { register} = require("../controllers/PatientController");
+const {
+  register,
+  createAppointment,
+  getPrescriptions,
+  getCheckups,
+  getDocuments,
+  getPatientById,
+} = require("../controllers/PatientController");
 
 /**
  * @swagger
@@ -45,6 +52,12 @@ const { register} = require("../controllers/PatientController");
  *         description: Failed to register patient
  */
 router.post("/register", register);
+router.post("/appointments", createAppointment);
+router.get("/prescriptions/:patientId", getPrescriptions);
+router.get("/checkups/:patientId", getCheckups);
+router.get("/documents/:patientId", getDocuments);
 
+// 👇 thêm cái này cho lấy chi tiết bệnh nhân
+router.get("/:id", getPatientById);
 
 module.exports = router;
