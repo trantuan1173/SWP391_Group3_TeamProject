@@ -49,3 +49,13 @@ export const updateUser = async (userId, data) => {
   });
   return res.data.updatedUser;
 };
+
+export const updateUserStatus = async (id, isActive) => {
+  const res = await axios.put(
+    `http://localhost:1118/api/users/update-status/${id}`,
+    {
+      isActive,
+    }
+  );
+  return res.data;
+};

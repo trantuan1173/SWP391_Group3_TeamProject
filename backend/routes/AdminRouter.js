@@ -10,6 +10,7 @@ const {
   deleteUser,
   updateUser,
   getUserById,
+  updateActiveStatus,
 } = require("../controllers/AdminUserController.js");
 
 // ================== Multer config ==================
@@ -37,6 +38,12 @@ router.post(
 router.get("/users", protect, authorize("admin"), getUsers);
 router.get("/users/:id", protect, authorize("admin"), getUserById);
 router.delete("/users/:id", protect, authorize("admin"), deleteUser);
+router.put(
+  "/users/update-status/:id",
+  protect,
+  authorize("admin"),
+  updateActiveStatus
+);
 router.put(
   "/users/:id",
   protect,

@@ -84,6 +84,28 @@ export default function UserManagement() {
       toast.error("Failed to update user", { id: toastId });
     }
   };
+
+  // toggle active
+  const handleToggleActive = async (user, checked) => {
+    const toastId = toast.loading("Updating status...");
+    try {
+      await updateUser(user.id, { ...user, isActive: checked });
+
+      // Cập nhật trực tiếp state local (đỡ fetch lại cả list)
+      setUsers((prev) =>
+        prev.map((u) => (u.id === user.id ? { ...u, isActive: checked } : u))
+      );
+
+      toast.success(
+        `User ${user.name} is now ${checked ? "Active" : "Inactive"}`,
+        { id: toastId }
+      );
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to update status", { id: toastId });
+    }
+  };
+
   const confirmDelete = async () => {
     if (!selectedUser) return;
     const toastId = toast.loading("Deleting user...");
@@ -122,6 +144,7 @@ export default function UserManagement() {
           onDelete={handleDeleteUser}
           onDetail={handleDetailUser}
           onEdit={handleEditUser}
+          onToggleActive={handleToggleActive}
         />
 
         <UserDetailDialog

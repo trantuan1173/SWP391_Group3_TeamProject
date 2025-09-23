@@ -10,10 +10,18 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input"; // input từ shadcn/ui
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch"; // thêm Switch
 import { useNavigate } from "react-router-dom";
+import { Search } from "lucide-react";
 
-export default function UserTable({ users, onDelete, onEdit, onDetail }) {
+export default function UserTable({
+  users,
+  onDelete,
+  onEdit,
+  onDetail,
+  onToggleActive,
+}) {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
 
@@ -77,12 +85,16 @@ export default function UserTable({ users, onDelete, onEdit, onDetail }) {
                 </div>
               </TableCell>
               <TableCell>
-                <div
-                  className={`text-white font-bold capitalize rounded-3xl w-20 py-1 text-center ${
-                    user.isActive ? "bg-green-400" : "bg-red-700"
-                  }`}
-                >
-                  {user.isActive ? "Active" : "Inactive"}
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={user.isActive}
+                    onCheckedChange={(checked) => onToggleActive(user, checked)}
+                    className="!rounded-full bg-gray-200 data-[state=checked]:bg-green-500"
+                  />
+
+                  <span className="text-sm">
+                    {user.isActive ? "Active" : "Inactive"}
+                  </span>
                 </div>
               </TableCell>
               <TableCell>

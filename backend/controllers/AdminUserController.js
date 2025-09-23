@@ -98,6 +98,30 @@ const getUserById = async (req, res) => {
   }
 };
 
+const updateActiveStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isActive } = req.body;
+
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Ép kiểu boolean
+    user.isActive = isActive === true || isActive === "true";
+
+    await user.save();
+
+    res.json({ message: "User status updated", isActive: user.isActive });
+  } catch (err) {
+    console.error("Update active status error:", err);
+    res
+      .status(500)
+      .json({ error: "Failed to update user status", details: err.message });
+  }
+};
+
 const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -119,7 +143,6 @@ const updateUser = async (req, res) => {
 
     const [updated] = await User.update(updateData, {
       where: { id },
-      individualHooks: true,
     });
 
     if (!updated) {
@@ -145,6 +168,7 @@ const updateUser = async (req, res) => {
 };
 
 module.exports = {
+  updateActiveStatus,
   createUser,
   getUsers,
   deleteUser,
