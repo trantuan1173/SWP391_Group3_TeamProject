@@ -9,10 +9,13 @@ import UserDetailManagement from "./page/AdminUserManager/UserDetailManagement";
 import BookMedicalExam from "./page/guest/BookMedicalExam";
 import ListDoctor from "./page/doctor/ListDoctor";
 
+import PatientDashboard from "./page/Patient/PatientDashboard";
+
 function App() {
   return (
     <AuthProvider>
       <Routes>
+        {/* Auth routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verify" element={<VerifyPage />} />
@@ -24,6 +27,10 @@ function App() {
           element={<UserDetailManagement />}
         ></Route>
         <Route path="/admin/dashboard" element={<AdminDashboard />}></Route>
+
+        {/* Patient Dashboard routes */}
+        <Route path="/patient-dashboard" element={<PatientDashboard />} />
+        <Route path="/patient-dashboard/:id" element={<PatientDashboard />} />
       </Routes>
     </AuthProvider>
   );
