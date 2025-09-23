@@ -36,4 +36,7 @@ const Doctor = sequelize.define("Doctor", {
   },
 });
 
+Doctor.belongsTo(User, { foreignKey: "userId" });
+User.hasOne(Doctor, { foreignKey: "userId" });
+
 module.exports = Doctor;

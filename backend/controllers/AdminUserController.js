@@ -129,6 +129,10 @@ const updateUser = async (req, res) => {
     if (!existingUser) {
       return res.status(404).json({ error: "User not found" });
     }
+
+    const oldRole = existingUser.role;
+    const newRole = req.body.role;
+
     const updateData = { ...req.body };
 
     if (req.file) {
@@ -141,15 +145,36 @@ const updateUser = async (req, res) => {
       updateData.password = await bcrypt.hash(updateData.password, 10);
     }
 
-    const [updated] = await User.update(updateData, {
-      where: { id },
-    });
+    // Cập nhật bảng Users
+    const [updated] = await User.update(updateData, { where: { id } });
 
     if (!updated) {
       return res.status(400).json({ error: "Failed to update user" });
     }
 
-    // Lấy user đã update (không trả về password)
+    // Nếu role thay đổi → xử lý các bảng con
+    if (newRole && newRole !== oldRole) {
+      if (oldRole === "doctor") {
+        await Doctor.destroy({ where: { userId: id } });
+      } else if (oldRole === "patient") {
+        await Patient.destroy({ where: { userId: id } });
+      } else if (oldRole === "staff") {
+        await Staff.destroy({ where: { userId: id } });
+      } else if (oldRole === "admin") {
+        await Admin.destroy({ where: { userId: id } });
+      }
+
+      if (newRole === "doctor") {
+        await Doctor.create({ userId: id, speciality: "", isAvailable: true });
+      } else if (newRole === "patient") {
+        await Patient.create({ userId: id });
+      } else if (newRole === "staff") {
+        await Staff.create({ userId: id });
+      } else if (newRole === "admin") {
+        await Admin.create({ userId: id });
+      }
+    }
+
     const updatedUser = await User.findByPk(id, {
       attributes: { exclude: ["password"] },
     });
