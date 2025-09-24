@@ -89,7 +89,7 @@ export default function UserTable({
                   <Switch
                     checked={user.isActive}
                     onCheckedChange={(checked) => onToggleActive(user, checked)}
-                    className="bg-gray-200 data-[state=checked]:bg-green-500 w-12 h-6"
+                    className="bg-gray-200 data-[state=checked]:bg-green-500 !rounded-full"
                   />
                   <span className="text-sm">
                     {user.isActive ? "Active" : "Inactive"}
