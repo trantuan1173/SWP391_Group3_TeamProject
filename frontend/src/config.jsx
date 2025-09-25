@@ -11,5 +11,14 @@ export const API_ENDPOINTS = {
   REGISTER: `${baseUrl}/api/users/register`,
   AUTH_PROFILE: `${baseUrl}/api/users/profile`,
   VERIFY: `${baseUrl}/api/users/verify`,
-
+  DOCTOR_LIST: `${baseUrl}/api/doctors`,
+  USER_LIST: `${baseUrl}/api/users`,
+  GET_ALL_USERS: `${baseUrl}/api/admin/users`,
+  GET_USER_BY_ID: (userId) => `${baseUrl}/api/admin/users/${userId}`,
+  DELETE_USER: (userId) => `${baseUrl}/api/admin/users/${userId}`,
+  UPDATE_USER: (userId) => `${baseUrl}/api/admin/users/${userId}`,
+  CREATE_USER: `${baseUrl}/api/admin/create-user`,
+  CREATE_APPOINTMENT: `${baseUrl}/api/patients/appointments`,
+  CREATE_APPOINTMENT_WITHOUT_LOGIN: `${baseUrl}/api/patients/appointmentsWithoutLogin`,
+  CONFIRM_APPOINTMENT: `${baseUrl}/api/patients/confirmAppointment`,
 };

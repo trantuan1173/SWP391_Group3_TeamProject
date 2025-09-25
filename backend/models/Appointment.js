@@ -7,11 +7,13 @@ const User = require("./User");
 const Appointment = sequelize.define("Appointment", {
   doctorId: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true,
     references: {
       model: "Doctors",
       key: "id",
     },
+    onDelete: "SET NULL",
+    onUpdate: "CASCADE",
   },
   patientId: {
     type: DataTypes.INTEGER,
