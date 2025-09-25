@@ -25,6 +25,7 @@ function App() {
         {/* Patient Dashboard routes */}
         <Route path="/patient-dashboard" element={<PatientDashboard />} />
         <Route path="/patient-dashboard/:id" element={<PatientDashboard />} />
+        
         <Route path="/admin/user" element={<UserManagement />}></Route>
         <Route
           path="/admin/user/:id"

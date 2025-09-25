@@ -1,7 +1,9 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Header() {
-  return (
+  const navigate = useNavigate();
+    return (
     <header className="w-full bg-white shadow-sm">
       <div
         className="flex items-center justify-between px-6"
@@ -26,10 +28,12 @@ export default function Header() {
         {/* Auth Buttons */}
         <div className="flex items-center gap-4">
           <button className="bg-green-900 text-white rounded-full px-6 py-2 font-bold text-sm hover:bg-green-800 transition"
+          onClick={() => navigate('/login')}
             style={{ borderRadius: "999px" }}>
             Đăng nhập
           </button>
           <button className="bg-red-700 text-white rounded-full px-6 py-2 font-bold text-sm hover:bg-red-800 transition"
+          onClick={() => navigate('/register')}
             style={{ borderRadius: "999px" }}>
             Đăng kí
           </button>
