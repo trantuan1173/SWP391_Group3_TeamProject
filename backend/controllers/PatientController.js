@@ -109,7 +109,8 @@ const getPatientById = async (req, res) => {
       include: [
         {
           model: User,
-          attributes: ["id", "name", "email", "phoneNumber", "dateOfBirth", "gender", "address"],
+          as: 'user', // Đúng alias đã khai báo ở model
+          attributes: ["id", "name", "email", "phoneNumber", "dateOfBirth", "gender", "address", "avatar"],
         },
         {
           model: Appointment,
@@ -143,12 +144,7 @@ const getPatientById = async (req, res) => {
 
     res.json({
       id: patient.id,
-      name: patient.User?.name,
-      email: patient.User?.email,
-      phone: patient.User?.phoneNumber,
-      dateOfBirth: patient.User?.dateOfBirth,
-      gender: patient.User?.gender,
-      address: patient.User?.address,
+      user: patient.user, // Trả về cả object user
       prescriptions: patient.MedicalRecords || [],
       checkups: patient.Appointments || [],
       documents: patient.MedicalRecords || [],

@@ -54,11 +54,18 @@ export default function Sidebar({ patient }) {
       {/* Profile */}
       <div className="p-4 border-t border-[#00923F]">
         <div className="flex flex-col items-center text-center">
-          <img
-            src={avatar}
-            alt={name}
-            className="w-12 h-12 rounded-full object-cover mb-2"
-          />
+        <img
+      src={
+        avatar
+          ? avatar.startsWith("http")
+            ? avatar // Nếu avatar đã là đường dẫn đầy đủ
+            : `http://localhost:1118/uploads/avatars/${avatar.replace(/^\/uploads\/avatars\//, '')}` // Nếu avatar là tên file hoặc đường dẫn tương đối
+          : "https://via.placeholder.com/48" // Placeholder nếu avatar không tồn tại
+      }
+      alt={name || "User"}
+      className="w-12 h-12 rounded-full object-cover mb-2"
+      onError={(e) => console.error("Image load error:", e)} // Debug lỗi tải ảnh
+    />
           <div className="text-sm font-semibold">{name}</div>
           <div className="text-[11px] text-green-100 mb-1">{email}</div>
           <div className="text-[11px] text-green-100">{address}</div>
