@@ -54,6 +54,10 @@ const {
  *         description: Failed to register patient
  */
 router.post("/register", register);
+router.post("/appointments", createAppointment);
+router.get("/prescriptions/:patientId", getPrescriptions);
+router.get("/checkups/:patientId", getCheckups);
+router.get("/documents/:patientId", getDocuments);
 
 /**
  * @swagger

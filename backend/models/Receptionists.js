@@ -2,7 +2,7 @@ const { DataTypes } = require("sequelize");
 const { sequelize } = require("../config/db");
 const User = require("./User");
 
-const Staff = sequelize.define("Staff", {
+const Receptionist = sequelize.define("Receptionist", {
   userId: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -23,4 +23,4 @@ const Staff = sequelize.define("Staff", {
   },
 });
 
-module.exports = Staff;
+module.exports = Receptionist;

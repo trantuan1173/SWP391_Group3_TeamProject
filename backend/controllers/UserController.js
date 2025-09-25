@@ -5,17 +5,24 @@ const { sendVerifyEmail } = require("../service/sendVerifyEmail");
 // Generate JWT token
 function generateToken(id) {
   return jwt.sign({ id: id }, process.env.JWT_SECRET || "your_jwt_secret", {
-    expiresIn: "2h"
+    expiresIn: "2h",
   });
 }
 
-
 const register = async (req, res) => {
   try {
-    const {name,email,password,identityNumber,phoneNumber,dateOfBirth,gender,address} = req.body;
+    const {
+      name,
+      email,
+      password,
+      identityNumber,
+      phoneNumber,
+      dateOfBirth,
+      gender,
+      address,
+    } = req.body;
 
     let user = await User.findOne({ where: { identityNumber } });
-
 
     if (user && user.isActive === true) {
       return res
@@ -168,7 +175,7 @@ const authProfile = async (req, res) => {
   try {
     const token = req.headers.authorization.split(" ")[1];
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findByPk(decodedToken.id)
+    const user = await User.findByPk(decodedToken.id);
 
     if (!user) {
       return res.status(404).json({
@@ -187,4 +194,4 @@ const authProfile = async (req, res) => {
   }
 };
 
-module.exports = { register, login, verifyUser, authProfile};
+module.exports = { register, login, verifyUser, authProfile };

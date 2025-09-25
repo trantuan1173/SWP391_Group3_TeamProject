@@ -1,18 +1,32 @@
-const { Patient } = require("../models");
-const { User } = require("../models");
+const { User, Patient, Appointment, MedicalRecord, Doctor } = require("../models");
 
+// Register patient
 const register = async (req, res) => {
   try {
     const { name, email, identityNumber, phoneNumber, dateOfBirth, gender, address } = req.body;
-    const user = await User.create({ name, email, identityNumber, phoneNumber, role: "patient", password: "123456" });
-    const patient = await Patient.create({ userId: user.id, dateOfBirth, gender, address });
-    res.status(201).json(patient);
+
+    const user = await User.create({
+      name,
+      email,
+      identityNumber,
+      phoneNumber,
+      dateOfBirth,
+      gender,
+      address,
+      role: "patient",
+      password: "123456"
+    });
+
+    const patient = await Patient.create({ userId: user.id });
+
+    res.status(201).json({ user, patient });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to register patient" });
   }
 };
 
+// Create appointment
 const createAppointment = async (req, res) => {
   try {
     const { patientId, date, startTime, endTime } = req.body;

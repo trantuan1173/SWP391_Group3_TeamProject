@@ -4,7 +4,7 @@ const Patient = require("./Patient");
 const Admin = require("./Admin");
 const Appointment = require("./Appointment");
 const MedicalRecord = require("./MedicalRecord");
-const Staff = require("./Staff");
+const Receptionist = require("./Receptionists");
 const DoctorSchedule = require("./DoctorSchedule");
 const Room = require("./Room");
 
@@ -17,8 +17,8 @@ Patient.belongsTo(User, { foreignKey: "userId" });
 User.hasOne(Admin, { foreignKey: "userId" });
 Admin.belongsTo(User, { foreignKey: "userId" });
 
-User.hasOne(Staff, { foreignKey: "userId" });
-Staff.belongsTo(User, { foreignKey: "userId" });
+User.hasOne(Receptionist, { foreignKey: "userId" });
+Receptionist.belongsTo(User, { foreignKey: "userId" });
 
 User.hasMany(Appointment, { foreignKey: "createBy" });
 Appointment.belongsTo(User, { foreignKey: "createBy" });
@@ -52,7 +52,7 @@ module.exports = {
   Doctor,
   Patient,
   Admin,
-  Staff,
+  Receptionist,
   Appointment,
   MedicalRecord,
   DoctorSchedule,
