@@ -40,7 +40,28 @@ const createUser = async (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
-    const users = await User.findAll({
+    // Lấy query params từ request
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const search = req.query.search || "";
+
+    // Tính offset
+    const offset = (page - 1) * pageSize;
+
+    // Điều kiện where
+    const whereCondition = {
+      role: { [Op.ne]: "admin" }, // bỏ admin
+    };
+
+    if (search) {
+      whereCondition[Op.or] = [
+        { name: { [Op.like]: `%${search}%` } },
+        { email: { [Op.like]: `%${search}%` } },
+      ];
+    }
+
+    // Query bằng findAndCountAll để lấy cả dữ liệu + tổng số record
+    const { rows: users, count: total } = await User.findAndCountAll({
       attributes: [
         "id",
         "name",
@@ -54,15 +75,19 @@ const getUsers = async (req, res) => {
         "address",
         "identityNumber",
       ],
-      include: [Doctor, Patient], // bỏ Admin nếu không cần
-      where: {
-        role: {
-          [Op.ne]: "admin", // not equal admin
-        },
-      },
+      include: [Doctor, Patient],
+      where: whereCondition,
+      limit: pageSize,
+      offset,
+      order: [["createdAt", "DESC"]],
     });
 
-    res.json(users);
+    res.json({
+      users,
+      total,
+      totalPages: Math.ceil(total / pageSize),
+      currentPage: page,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch users" });
@@ -134,16 +159,32 @@ const updateUser = async (req, res) => {
     const newRole = req.body.role;
 
     const updateData = { ...req.body };
+    console.log("Update Data Before Processing:", updateData);
 
+    // ===== XỬ LÝ AVATAR =====
     if (req.file) {
+      // Nếu có file upload mới
       updateData.avatar = `/uploads/avatars/${req.file.filename}`;
+    } else {
+      // Nếu không có file mới, xóa avatar khỏi updateData
+      // để giữ nguyên avatar cũ trong database
+      delete updateData.avatar;
     }
+
+    // Hoặc nếu bạn muốn validate kỹ hơn:
+    // if (updateData.avatar && typeof updateData.avatar === 'object') {
+    //   delete updateData.avatar;
+    // }
+
+    // ===== XỬ LÝ PASSWORD =====
     if (!updateData.password || updateData.password.trim() === "") {
       delete updateData.password;
     } else {
       const bcrypt = require("bcrypt");
       updateData.password = await bcrypt.hash(updateData.password, 10);
     }
+
+    console.log("Update Data After Processing:", updateData);
 
     // Cập nhật bảng Users
     const [updated] = await User.update(updateData, { where: { id } });

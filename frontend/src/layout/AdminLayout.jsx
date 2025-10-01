@@ -50,8 +50,6 @@ const navigationItems = [
 export default function AdminLayout({ children }) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-
-  console.log("Authenticated user in AdminLayout:", user);
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
@@ -74,7 +72,7 @@ export default function AdminLayout({ children }) {
                       <SidebarMenuButton variant="admin" asChild>
                         <button
                           onClick={() => navigate(item.url)}
-                          className="flex w-full items-center !p-6 !rounded-md hover:!text-white active:!bg-purple-800 text-black transition-colors font-bold"
+                          className="flex w-full items-center !p-6 !rounded-md hover:!bg-purple-700 hover:!text-white active:!bg-purple-800 text-black transition-colors font-bold"
                         >
                           <item.icon className="h-4 w-4" />
                           <span>{item.title}</span>

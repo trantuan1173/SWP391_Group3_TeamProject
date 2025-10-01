@@ -9,62 +9,78 @@ import {
   PaginationNext,
 } from "@/components/ui/pagination";
 import { toast } from "sonner";
+
 import UserFormDialog from "@/components/users/UserFormDialog";
-import UserTable from "@/components/users/UserTable";
 import DeleteConfirmDialog from "@/components/users/DeleteConfirmDialog";
 import { fetchUsers, createUser, deleteUser, updateUser } from "@/api/userApi";
 import UserDetailDialog from "@/components/users/UserDetailDialog";
-import UserEditDialog from "@/components/users/UserEditDialog";
+
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { useNavigate } from "react-router-dom";
+
+// ✅ Import hook debounce
+import useDebounce from "@/hooks/useDebounce";
 
 export default function UserManagement() {
   const [users, setUsers] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
+
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const [searchInput, setSearchInput] = useState(""); // nhập vào input
+  const search = useDebounce(searchInput, 500); // debounce 500ms
+
   const pageSize = 5;
+  const navigate = useNavigate();
+
+  // ===== FETCH USERS =====
+  const loadUsers = async () => {
+    try {
+      const data = await fetchUsers(currentPage, pageSize, search);
+      setUsers(data.users);
+      setTotalPages(data.totalPages);
+    } catch {
+      toast.error("Failed to fetch users");
+    }
+  };
 
   useEffect(() => {
-    const loadUsers = async () => {
-      try {
-        const data = await fetchUsers();
-
-        setUsers(data || []);
-      } catch (err) {
-        toast.error("Failed to fetch users");
-      }
-    };
     loadUsers();
-  }, []);
+  }, [currentPage, search]);
 
+  // ===== CREATE USER =====
   const handleCreateUser = async (data) => {
     try {
-      const user = await createUser(data);
-      setUsers((prev) => [...prev, user]);
+      await createUser(data);
       setDialogOpen(false);
-      toast.success(`User ${user.name} created successfully!`);
+      toast.success(`User created successfully!`);
+      loadUsers();
     } catch {
       toast.error("Failed to create user");
     }
   };
 
-  const handleDeleteUser = (user) => {
-    setSelectedUser(user);
-    setDeleteDialogOpen(true);
-  };
-
-  // mở detail
-  const handleDetailUser = (user) => {
-    setSelectedUser(user);
-    setDetailDialogOpen(true);
-  };
-
-  // mở edit
+  // ===== EDIT / UPDATE =====
   const handleEditUser = (user) => {
-    console.log("Selected user for edit:", user);
-    setSelectedUser(user);
+    setSelectedUserId(user.id);
     setEditDialogOpen(true);
   };
 
@@ -72,38 +88,19 @@ export default function UserManagement() {
     const toastId = toast.loading("Updating user...");
     try {
       await updateUser(id, data);
-
-      // Fetch lại toàn bộ users từ server
-      const refreshedUsers = await fetchUsers();
-      setUsers(refreshedUsers || []);
-
       toast.success("User updated successfully", { id: toastId });
       setEditDialogOpen(false);
+      loadUsers();
     } catch (error) {
       console.error("Update error:", error);
       toast.error("Failed to update user", { id: toastId });
     }
   };
 
-  // toggle active
-  const handleToggleActive = async (user, checked) => {
-    const toastId = toast.loading("Updating status...");
-    try {
-      await updateUser(user.id, { ...user, isActive: checked });
-
-      // Cập nhật trực tiếp state local (đỡ fetch lại cả list)
-      setUsers((prev) =>
-        prev.map((u) => (u.id === user.id ? { ...u, isActive: checked } : u))
-      );
-
-      toast.success(
-        `User ${user.name} is now ${checked ? "Active" : "Inactive"}`,
-        { id: toastId }
-      );
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to update status", { id: toastId });
-    }
+  // ===== DELETE =====
+  const handleDeleteUser = (user) => {
+    setSelectedUser(user);
+    setDeleteDialogOpen(true);
   };
 
   const confirmDelete = async () => {
@@ -111,8 +108,8 @@ export default function UserManagement() {
     const toastId = toast.loading("Deleting user...");
     try {
       await deleteUser(selectedUser.id);
-      setUsers((prev) => prev.filter((u) => u.id !== selectedUser.id));
       toast.success("User deleted successfully", { id: toastId });
+      loadUsers();
     } catch {
       toast.error("Failed to delete user", { id: toastId });
     } finally {
@@ -121,44 +118,143 @@ export default function UserManagement() {
     }
   };
 
-  const totalPages = Math.ceil(users.length / pageSize);
-  const currentUsers = users.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
+  // ===== DETAIL =====
+  const handleDetailUser = (user) => {
+    setSelectedUser(user);
+    setDetailDialogOpen(true);
+  };
+
+  // ===== TOGGLE ACTIVE =====
+  const handleToggleActive = async (user, checked) => {
+    const toastId = toast.loading("Updating status...");
+    try {
+      await updateUser(user.id, { ...user, isActive: checked });
+      toast.success(
+        `User ${user.name} is now ${checked ? "Active" : "Inactive"}`,
+        { id: toastId }
+      );
+      loadUsers();
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to update status", { id: toastId });
+    }
+  };
 
   return (
     <AdminLayout>
       <div className="bg-white h-full p-5 rounded-lg shadow-md">
-        <div className="flex items-center justify-between">
-          <h4 className="text-xl font-bold mb-4">User Management</h4>
-          <UserFormDialog
-            open={dialogOpen}
-            setOpen={setDialogOpen}
-            onSubmit={handleCreateUser}
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <h4 className="text-xl font-bold">User Management</h4>
+          {/* Nút Create User */}
+          <Button
+            onClick={() => setDialogOpen(true)}
+            className="bg-green-500 text-white hover:bg-green-600 !rounded-md"
+          >
+            Create User
+          </Button>
+        </div>
+
+        {/* Search */}
+        <div className="mb-4">
+          <Input
+            type="text"
+            placeholder="Search by name or email..."
+            value={searchInput}
+            onChange={(e) => {
+              setSearchInput(e.target.value);
+              setCurrentPage(1); // reset về page 1 khi search
+            }}
+            className="max-w-sm"
           />
         </div>
 
-        <UserTable
-          users={currentUsers}
-          onDelete={handleDeleteUser}
-          onDetail={handleDetailUser}
-          onEdit={handleEditUser}
-          onToggleActive={handleToggleActive}
-        />
-
-        <UserDetailDialog
-          open={detailDialogOpen}
-          setOpen={setDetailDialogOpen}
-          user={selectedUser}
-        />
-
-        <UserEditDialog
-          open={editDialogOpen}
-          setOpen={setEditDialogOpen}
-          user={selectedUser}
-          onSubmit={handleUpdateUser}
-        />
+        {/* Table */}
+        <Table>
+          <TableCaption>User List</TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead>ID</TableHead>
+              <TableHead>Avatar</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {users.map((user) => (
+              <TableRow key={user.id}>
+                <TableCell>{user.id}</TableCell>
+                <TableCell>
+                  <Avatar className="h-10 w-10 rounded-2xl">
+                    <AvatarImage
+                      src={`http://localhost:1118${user.avatar}`}
+                      alt={user.name}
+                    />
+                    <AvatarFallback>
+                      {user.name?.charAt(0).toUpperCase() || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                </TableCell>
+                <TableCell>{user.name}</TableCell>
+                <TableCell>{user.email}</TableCell>
+                <TableCell>
+                  <div
+                    className={`text-white font-bold capitalize rounded-3xl w-20 py-1 text-center ${
+                      user.role === "patient" ? "bg-blue-500" : "bg-green-500"
+                    }`}
+                  >
+                    {user.role}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={user.isActive}
+                      onCheckedChange={(checked) =>
+                        handleToggleActive(user, checked)
+                      }
+                      className="bg-gray-200 data-[state=checked]:bg-green-500 !rounded-full"
+                    />
+                    <span className="text-sm">
+                      {user.isActive ? "Active" : "Inactive"}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell className="flex items-center">
+                  <Button
+                    onClick={() => handleEditUser(user)}
+                    variant="outline"
+                    className="!rounded-md !mr-2"
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    onClick={() => navigate(`/admin/user/${user.id}`)}
+                    className="bg-green-500 hover:!bg-green-600 text-white !rounded-md !mr-2"
+                  >
+                    Details
+                  </Button>
+                  <Button
+                    className="bg-red-400 text-white !rounded-md hover:bg-red-500"
+                    onClick={() => handleDeleteUser(user)}
+                  >
+                    Delete
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+            {users.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center text-gray-500">
+                  No users found
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
 
         {/* Pagination */}
         <div className="mt-4 flex justify-center">
@@ -191,6 +287,30 @@ export default function UserManagement() {
           </Pagination>
         </div>
 
+        {/* Dialogs */}
+        {/* Create */}
+        <UserFormDialog
+          open={dialogOpen}
+          setOpen={setDialogOpen}
+          onSubmit={handleCreateUser}
+        />
+
+        {/* Edit */}
+        <UserFormDialog
+          open={editDialogOpen}
+          setOpen={setEditDialogOpen}
+          userId={selectedUserId}
+          onSubmit={handleUpdateUser}
+        />
+
+        {/* Detail */}
+        <UserDetailDialog
+          open={detailDialogOpen}
+          setOpen={setDetailDialogOpen}
+          user={selectedUser}
+        />
+
+        {/* Delete */}
         <DeleteConfirmDialog
           open={deleteDialogOpen}
           setOpen={setDeleteDialogOpen}
