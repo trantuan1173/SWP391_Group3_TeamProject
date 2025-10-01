@@ -8,18 +8,57 @@ const { Op } = require("sequelize");
 const createUser = async (req, res) => {
   try {
     const { role, ...userData } = req.body;
-
+    const errors = [];
     if (req.file) {
       userData.avatar = `/uploads/avatars/${req.file.filename}`;
     }
 
-    if (!userData.name || !userData.email || !userData.password) {
+    // Validate
+    if (!userData.name || userData.name.trim().length < 3) {
+      errors.push("Name must be at least 3 characters");
+    }
+
+    if (!userData.email) {
+      errors.push("Email is required");
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.email)) {
+      errors.push("Invalid email format");
+    }
+
+    if (!userData.password || userData.password.length < 6) {
+      errors.push("Password must be at least 6 characters");
+    }
+
+    if (!userData.identityNumber || userData.identityNumber.length < 9) {
+      errors.push("Identity number must be at least 9 digits");
+    }
+
+    if (!userData.phoneNumber || !/^[0-9]{9,11}$/.test(userData.phoneNumber)) {
+      errors.push("Phone number must be 9–11 digits");
+    }
+
+    if (!userData.address || userData.address.length < 10) {
+      errors.push("Address must be at least 10 characters");
+    }
+
+    if (!role || !["doctor", "patient", "admin"].includes(role)) {
+      errors.push("Role must be doctor, patient or admin");
+    }
+
+    if (errors.length > 0) {
+      return res.status(400).json({ errors });
+    }
+
+    const identityExists = await User.findOne({
+      where: { identityNumber: userData.identityNumber },
+    });
+    if (identityExists) {
       return res
         .status(400)
-        .json({ error: "Name, email and password are required" });
+        .json({ errors: ["Identity number already exists"] });
     }
 
     const user = await User.create({ ...userData, role });
+
     if (role === "doctor") {
       await Doctor.create({
         userId: user.id,
@@ -31,8 +70,14 @@ const createUser = async (req, res) => {
     } else if (role === "admin") {
       await Admin.create({ userId: user.id });
     }
+
     res.status(201).json({ message: "User created", user });
   } catch (error) {
+    if (error.name === "SequelizeUniqueConstraintError") {
+      return res.status(400).json({
+        errors: error.errors.map((e) => `${e.path} already exists`),
+      });
+    }
     console.error(error);
     res.status(500).json({ error: "Failed to create user" });
   }
@@ -151,85 +196,121 @@ const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
     const existingUser = await User.findByPk(id);
+
     if (!existingUser) {
       return res.status(404).json({ error: "User not found" });
     }
 
     const oldRole = existingUser.role;
-    const newRole = req.body.role;
+    const { role, ...updateData } = req.body;
+    const errors = [];
 
-    const updateData = { ...req.body };
-    console.log("Update Data Before Processing:", updateData);
-
-    // ===== XỬ LÝ AVATAR =====
+    // ===== AVATAR =====
     if (req.file) {
-      // Nếu có file upload mới
       updateData.avatar = `/uploads/avatars/${req.file.filename}`;
     } else {
-      // Nếu không có file mới, xóa avatar khỏi updateData
-      // để giữ nguyên avatar cũ trong database
-      delete updateData.avatar;
+      delete updateData.avatar; // giữ avatar cũ
     }
 
-    // Hoặc nếu bạn muốn validate kỹ hơn:
-    // if (updateData.avatar && typeof updateData.avatar === 'object') {
-    //   delete updateData.avatar;
+    // ===== VALIDATE =====
+    if (updateData.name && updateData.name.trim().length < 3) {
+      errors.push("Name must be at least 3 characters");
+    }
+
+    if (updateData.email) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(updateData.email)) {
+        errors.push("Invalid email format");
+      } else {
+        const emailExists = await User.findOne({
+          where: { email: updateData.email },
+        });
+        if (emailExists && emailExists.id != id) {
+          errors.push("Email already exists");
+        }
+      }
+    }
+
+    if (updateData.password && updateData.password.length < 6) {
+      errors.push("Password must be at least 6 characters");
+    }
+
+    if (updateData.identityNumber) {
+      if (updateData.identityNumber.length < 9) {
+        errors.push("Identity number must be at least 9 digits");
+      } else {
+        const identityExists = await User.findOne({
+          where: { identityNumber: updateData.identityNumber },
+        });
+        if (identityExists && identityExists.id != id) {
+          errors.push("Identity number already exists");
+        }
+      }
+    }
+
+    // if (updateData.phoneNumber) {
+    //   if (!/^[0-9]{9,11}$/.test(updateData.phoneNumber)) {
+    //     errors.push("Phone number must be 9–11 digits");
+    //   } else {
+    //     const phoneExists = await User.findOne({
+    //       where: { phoneNumber: updateData.phoneNumber },
+    //     });
+    //     if (phoneExists && phoneExists.id != id) {
+    //       errors.push("Phone number already exists");
+    //     }
+    //   }
     // }
 
-    // ===== XỬ LÝ PASSWORD =====
+    if (updateData.address && updateData.address.length < 10) {
+      errors.push("Address must be at least 10 characters");
+    }
+
+    if (role && !["doctor", "patient", "admin", "staff"].includes(role)) {
+      errors.push("Role must be doctor, patient, staff or admin");
+    }
+
+    // Nếu có lỗi thì return luôn
+    if (errors.length > 0) {
+      return res.status(400).json({ errors });
+    }
+
+    // ===== PASSWORD =====
     if (!updateData.password || updateData.password.trim() === "") {
       delete updateData.password;
     } else {
-      const bcrypt = require("bcrypt");
       updateData.password = await bcrypt.hash(updateData.password, 10);
     }
 
-    console.log("Update Data After Processing:", updateData);
+    // ===== UPDATE USER =====
+    await User.update({ ...updateData, role }, { where: { id } });
 
-    // Cập nhật bảng Users
-    const [updated] = await User.update(updateData, { where: { id } });
-
-    if (!updated) {
-      return res.status(400).json({ error: "Failed to update user" });
-    }
-
-    // Nếu role thay đổi → xử lý các bảng con
-    if (newRole && newRole !== oldRole) {
-      if (oldRole === "doctor") {
-        await Doctor.destroy({ where: { userId: id } });
-      } else if (oldRole === "patient") {
+    // ===== ROLE CHANGE =====
+    if (role && role !== oldRole) {
+      if (oldRole === "doctor") await Doctor.destroy({ where: { userId: id } });
+      if (oldRole === "patient")
         await Patient.destroy({ where: { userId: id } });
-      } else if (oldRole === "staff") {
-        await Staff.destroy({ where: { userId: id } });
-      } else if (oldRole === "admin") {
-        await Admin.destroy({ where: { userId: id } });
-      }
+      if (oldRole === "staff") await Staff.destroy({ where: { userId: id } });
+      if (oldRole === "admin") await Admin.destroy({ where: { userId: id } });
 
-      if (newRole === "doctor") {
-        await Doctor.create({ userId: id, speciality: "", isAvailable: true });
-      } else if (newRole === "patient") {
-        await Patient.create({ userId: id });
-      } else if (newRole === "staff") {
-        await Staff.create({ userId: id });
-      } else if (newRole === "admin") {
-        await Admin.create({ userId: id });
-      }
+      if (role === "doctor")
+        await Doctor.create({ userId: id, speciality: "", workingHours: "" });
+      if (role === "patient") await Patient.create({ userId: id });
+      if (role === "staff") await Staff.create({ userId: id });
+      if (role === "admin") await Admin.create({ userId: id });
     }
 
     const updatedUser = await User.findByPk(id, {
       attributes: { exclude: ["password"] },
     });
 
-    res.json({
-      message: "User updated successfully",
-      user: updatedUser,
-    });
-  } catch (err) {
-    console.error("Update user error:", err);
-    res.status(500).json({
-      error: "Failed to update user",
-      details: err.message,
-    });
+    res.json({ message: "User updated successfully", user: updatedUser });
+  } catch (error) {
+    if (error.name === "SequelizeUniqueConstraintError") {
+      return res.status(400).json({
+        errors: error.errors.map((e) => `${e.path} already exists`),
+      });
+    }
+    console.error("Update user error:", error);
+    res.status(500).json({ error: "Failed to update user" });
   }
 };
 

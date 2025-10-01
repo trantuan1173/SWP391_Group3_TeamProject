@@ -73,8 +73,13 @@ export default function UserManagement() {
       setDialogOpen(false);
       toast.success(`User created successfully!`);
       loadUsers();
-    } catch {
-      toast.error("Failed to create user");
+    } catch (error) {
+      console.log("Create error:", error.response?.data?.errors);
+      if (error.response?.data?.errors) {
+        error.response.data.errors.forEach((err) => toast.error(err));
+      } else {
+        toast.error("Failed to create user");
+      }
     }
   };
 
@@ -92,8 +97,13 @@ export default function UserManagement() {
       setEditDialogOpen(false);
       loadUsers();
     } catch (error) {
-      console.error("Update error:", error);
-      toast.error("Failed to update user", { id: toastId });
+      if (error.response?.data?.errors) {
+        error.response.data.errors.forEach(
+          (err) => toast.error(err, { id: toastId }) // 🔥 gắn vào toastId
+        );
+      } else {
+        toast.error("Failed to update user", { id: toastId }); // 🔥 gắn vào toastId
+      }
     }
   };
 
