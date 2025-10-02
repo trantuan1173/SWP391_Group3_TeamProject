@@ -5,6 +5,7 @@ import { API_ENDPOINTS } from "../../config";
 
 export default function ListDoctor() {
   const [doctors, setDoctors] = useState([]);
+  const [specialties, setSpecialties] = useState([]); // Khai báo state cho chuyên khoa
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -14,23 +15,31 @@ export default function ListDoctor() {
         const doctorUrl = API_ENDPOINTS?.DOCTOR_LIST || "/api/doctor";
         const res = await axios.get(doctorUrl);
         console.log("doctor response:", res);
-        // hỗ trợ nhiều dạng response
-        const list =
-          Array.isArray(res.data) ||
-          Array.isArray(res.data?.doctors) ||
-          Array.isArray(res.data?.data)
-            ? res.data
-            : [];
+        const list = Array.isArray(res.data) ? res.data : [];
         setDoctors(list);
       } catch (err) {
         console.error("Fetch doctors error:", err);
-        setDoctors([]); // không hiển thị lỗi đỏ, chỉ để danh sách rỗng
+        setDoctors([]);
       } finally {
         setLoading(false);
       }
     };
 
+    const fetchSpecialties = async () => {
+      try {
+        const specialityUrl = API_ENDPOINTS?.SPECIALITY_LIST || "/api/specialties"; // Đường dẫn API cho chuyên khoa
+        const res = await axios.get(specialityUrl);
+        console.log("speciality response:", res);
+        const list = Array.isArray(res.data) ? res.data : [];
+        setSpecialties(list);
+      } catch (err) {
+        console.error("Fetch specialties error:", err);
+        setSpecialties([]);
+      }
+    };
+
     fetchDoctors();
+    fetchSpecialties(); // Gọi hàm để lấy chuyên khoa
   }, []);
 
   return (
@@ -49,11 +58,10 @@ export default function ListDoctor() {
               )}
 
               {doctors.map((doctor, idx) => {
-                // lấy thông tin từ chính object doctor
-                const user = doctor.User || {}; // Sửa lại để lấy thông tin từ User
-                const name = user.name || "Chưa có tên"; // Lấy tên từ đối tượng User
-                const avatar = user.avatar || "https://randomuser.me/api/portraits/men/32.jpg"; // Lấy avatar từ đối tượng User
-                const speciality = doctor.speciality || "Chưa có chuyên khoa"; // Lấy chuyên khoa
+                const user = doctor.User || {}; // lấy thông tin user bên trong doctor
+                const name = user.name || "Chưa có tên"; // lấy tên
+                const avatar = user.avatar || "https://randomuser.me/api/portraits/men/32.jpg"; // lấy avatar
+                const speciality = doctor.speciality || "Chưa có chuyên khoa"; // lấy tên chuyên khoa
 
                 return (
                   <React.Fragment key={doctor.id ?? idx}>
@@ -79,34 +87,12 @@ export default function ListDoctor() {
             <div className="bg-[#ffe3d1] rounded-xl shadow-md p-6">
               <div className="font-bold text-lg mb-4">Chuyên Khoa</div>
               <div className="space-y-3 text-gray-800 text-base">
-                <div className="flex justify-between">
-                  <span>Sản Phụ Khoa</span>
-                  <span>15 Bác Sĩ</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Mắt</span>
-                  <span>20 Bác Sĩ</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Tai - Mũi - Họng</span>
-                  <span>10 Bác Sĩ</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Nhi</span>
-                  <span>10 Bác Sĩ</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Cơ Xương Khớp</span>
-                  <span>10 Bác Sĩ</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Nội Tim Mạch</span>
-                  <span>10 Bác Sĩ</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Thần Kinh</span>
-                  <span>10 Bác Sĩ</span>
-                </div>
+                {specialties.map((speciality, index) => (
+                  <div className="flex justify-between" key={index}>
+                    <span>{speciality.name}</span>
+                    <span>{speciality.doctorCount || 0} Bác Sĩ</span> {/* Hiển thị số bác sĩ */}
+                  </div>
+                ))}
               </div>
             </div>
           </div>

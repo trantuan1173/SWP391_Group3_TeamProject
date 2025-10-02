@@ -1,7 +1,7 @@
 import { AuthProvider } from './context/AuthContext'
 import { Routes, Route } from 'react-router-dom'
 import BookMedicalExam from "./page/guest/BookMedicalExam";
-import ListDoctor from "./page/doctor/ListDoctor";
+import ListDoctor from "./page/guest/ListDoctor";
 import PatientDashboard from './page/Patient/PatientDashboard'
 import Login from "./page/Auth/Login";
 import Register from "./page/Auth/Register";
