@@ -14,7 +14,7 @@ export default function Documents({ data }) {
         {data.map((d, i) => (
           <tr key={i} className="border-b">
             <td className="p-3">
-              {d.createdAt ? d.createdAt.slice(0, 10) : ""} {/* Ngày */}
+              {d.createdAt ? new Date(d.createdAt).toLocaleDateString() : ""} {/* Ngày */}
               {d.createdAt ? " " + (d.createdAt.slice(11, 19)) : ""} {/* Giờ */}
             </td>
             <td className="p-3">{d.treatment || d.diagnosis || "No details"}</td>

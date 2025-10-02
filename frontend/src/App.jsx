@@ -10,6 +10,7 @@ import UserManagement from "./page/AdminUserManager/UserManagement";
 import AdminDashboard from "./page/AdminDashboard/AdminDashboard";
 import UserDetailManagement from "./page/AdminUserManager/UserDetailManagement";
 import RequireAuth from "./context/RequireAuth";
+import Appointment from './page/Patient/Appointment';
 
 function App() {
   return (
@@ -26,6 +27,8 @@ function App() {
         {/* Patient Dashboard routes */}
         <Route path="/patient-dashboard" element={<PatientDashboard />} />
         <Route path="/patient-dashboard/:id" element={<PatientDashboard />} />
+        <Route path="/appointments" element={<Appointment />} />
+        <Route path="/appointments/:id" element={<Appointment />} />
         <Route element={<RequireAuth allowedRoles={["admin"]} />}>
           <Route path="/admin/user" element={<UserManagement />}></Route>
           <Route

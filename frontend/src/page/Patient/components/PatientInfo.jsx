@@ -30,7 +30,7 @@ export default function PatientInfo({ patient }) {
       : "https://via.placeholder.com/260x158"
   }
   alt={patient.user.name}
-  className="w-full h-full object-cover"
+  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
 />
         </div>
 

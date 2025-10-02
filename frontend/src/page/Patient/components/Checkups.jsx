@@ -16,7 +16,7 @@ export default function Checkups({ data }) {
       <tbody>
         {data.map((c, i) => (
           <tr key={i} className="border-b">
-            <td className="p-3">{c.date}</td>
+            <td className="p-3">{new Date(c.date).toLocaleDateString()}</td>
             <td className="p-3">
               {c.startTime} - {c.endTime}
             </td>

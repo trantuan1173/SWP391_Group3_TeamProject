@@ -7,6 +7,7 @@ import Prescriptions from "./components/Prescriptions";
 import Checkups from "./components/Checkups";
 import Documents from "./components/Documents";
 import Payments from "./components/Payments";
+import { API_ENDPOINTS } from '../../config';
 
 
 export default function PatientDashboard() {
@@ -21,7 +22,7 @@ export default function PatientDashboard() {
     async function fetchData() {
       setLoading(true);
       try {
-        const res = await fetch(`http://localhost:1118/api/patients/${id}`, {
+        const res = await fetch(API_ENDPOINTS.GET_PATIENT_BY_ID(id), {
           headers: { Accept: "application/json" },
         });
         if (!res.ok) {

@@ -20,4 +20,6 @@ export const API_ENDPOINTS = {
   CREATE_APPOINTMENT: `${baseUrl}/api/patients/appointments`,
   CREATE_APPOINTMENT_WITHOUT_LOGIN: `${baseUrl}/api/patients/appointmentsWithoutLogin`,
   CONFIRM_APPOINTMENT: `${baseUrl}/api/patients/confirmAppointment`,
-};
+  PATIENT_LIST: `${baseUrl}/api/patients`,
+  GET_PATIENT_BY_ID: (id) => `${baseUrl}/api/patients/${id}`,
+ };

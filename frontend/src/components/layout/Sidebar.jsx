@@ -1,13 +1,16 @@
 import React from "react";
 import { Home, Calendar, Users, ShoppingCart, FlaskConical } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom"; // <-- Thêm dòng này
 
 export default function Sidebar({ patient }) {
+    const navigate = useNavigate();
+  const location = useLocation();
   const sidebarItems = [
-    { icon: <Home size={20} />, label: "Dashboard" },
-    { icon: <Calendar size={20} />, label: "Schedule" },
-    { icon: <Users size={20} />, label: "Patients", active: true },
-    { icon: <ShoppingCart size={20} />, label: "Orders" },
-    { icon: <FlaskConical size={20} />, label: "Laboratory" },
+    { icon: <Home size={20} />, label: "Dashboard", path: "/dashboard" },
+    { icon: <Calendar size={20} />, label: "Schedule", path: "/schedule" },
+    { icon: <Users size={20} />, label: "Patients", path: "/patient-dashboard" }, 
+    { icon: <ShoppingCart size={20} />, label: "Appointments", path: "/appointments" },
+    { icon: <FlaskConical size={20} />, label: "Laboratory", path: "/laboratory" },
   ];
 
   // Lấy thông tin user từ patient (nếu có)
@@ -25,7 +28,7 @@ export default function Sidebar({ patient }) {
       {/* Logo */}
       <div className="flex flex-col items-center p-4">
         <img
-          src="/icon/logo2.png"
+          src="/icon/logo.png"
           alt="Healthy Logo"
           className="rounded-lg mb-6"
           style={{ width: "209px", height: "210px" }}
@@ -33,22 +36,26 @@ export default function Sidebar({ patient }) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 space-y-2">
-        {sidebarItems.map((item, index) => (
-          <div
-            key={index}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer font-medium transition-all ${
-              item.active ? "shadow" : "hover:bg-[#00923F]"
-            }`}
-            style={{
-              backgroundColor: item.active ? "#874C96" : "transparent",
-              color: "white",
-            }}
-          >
-            {item.icon}
-            <span className="truncate text-sm">{item.label}</span>
-          </div>
-        ))}
+  <nav className="flex-1 px-3 space-y-2">
+        {sidebarItems.map((item, index) => {
+          const isActive = location.pathname.startsWith(item.path);
+          return (
+            <div
+              key={index}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer font-medium transition-all ${
+                isActive ? "shadow" : "hover:bg-[#00923F]"
+              }`}
+              style={{
+                backgroundColor: isActive ? "#874C96" : "transparent",
+                color: "white",
+              }}
+              onClick={() => navigate(item.path)}
+            >
+              {item.icon}
+              <span className="truncate text-sm">{item.label}</span>
+            </div>
+          );
+        })}
       </nav>
 
       {/* Profile */}
@@ -63,7 +70,7 @@ export default function Sidebar({ patient }) {
           : "https://via.placeholder.com/48" // Placeholder nếu avatar không tồn tại
       }
       alt={name || "User"}
-      className="w-12 h-12 rounded-full object-cover mb-2"
+      className="w-12 h-12 rounded-full object-cover mb-2 hover:scale-105 transition-transform duration-300"
       onError={(e) => console.error("Image load error:", e)} // Debug lỗi tải ảnh
     />
           <div className="text-sm font-semibold">{name}</div>

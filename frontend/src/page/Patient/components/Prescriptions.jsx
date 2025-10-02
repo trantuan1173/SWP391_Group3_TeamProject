@@ -2,6 +2,11 @@ import React from "react";
 
 export default function Prescriptions({ data }) {
   if (!data.length) return <p>No prescriptions found.</p>;
+  const formatDate = (dateStr) => {
+    const date = new Date(dateStr);
+    const month = date.getMonth() + 1;
+    return date.toLocaleDateString();
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
