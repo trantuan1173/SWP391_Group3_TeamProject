@@ -206,4 +206,7 @@ router.post("/register", register);
  *                 $ref: '#/components/schemas/Doctor'
  */
 router.post("/available", getDoctorAvailable);
+
+router.get('/doctors/:doctorId/schedules', getDoctorSchedule);
+const { getDoctorSchedule } = require('../controllers/DoctorController');
 module.exports = router;

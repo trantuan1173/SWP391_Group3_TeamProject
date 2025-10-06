@@ -2,6 +2,7 @@ import { AuthProvider } from './context/AuthContext'
 import { Routes, Route } from 'react-router-dom'
 import BookMedicalExam from "./page/guest/BookMedicalExam";
 import ListDoctor from "./page/guest/ListDoctor";
+import DoctorSchedule from "./page/doctor/DoctorSchedule";
 import PatientDashboard from './page/Patient/PatientDashboard'
 import Login from "./page/Auth/Login";
 import Register from "./page/Auth/Register";
@@ -25,6 +26,9 @@ function App() {
         {/* Patient Dashboard routes */}
         <Route path="/patient-dashboard" element={<PatientDashboard />} />
         <Route path="/patient-dashboard/:id" element={<PatientDashboard />} />
+
+        {/* Doctor Schedule routes */}
+        <Route path="/doctor/:doctorId/schedule" element={<DoctorSchedule />} />
         
         <Route path="/admin/user" element={<UserManagement />}></Route>
         <Route

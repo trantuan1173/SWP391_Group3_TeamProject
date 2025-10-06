@@ -126,4 +126,26 @@ const getDoctorAvailable = async (req, res) => {
   }
 };
 
+const getDoctorSchedule = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+
+    const schedules = await DoctorSchedule.findAll({
+      where: {
+        doctorId: doctorId
+      },
+      order: [
+        ['date', 'ASC'],
+        ['startTime', 'ASC']
+      ]
+    });
+
+    res.status(200).json(schedules);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to get doctor schedule" });
+  }
+};
+
+
 module.exports = { register, getDoctor, getDoctorById, updateDoctor, deleteDoctor, getDoctorAvailable };
