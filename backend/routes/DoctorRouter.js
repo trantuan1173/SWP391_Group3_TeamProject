@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { register, getDoctor, getDoctorById, updateDoctor, deleteDoctor, getDoctorAvailable } = require("../controllers/DoctorController");
+const { register, getDoctor, getDoctorById, updateDoctor, deleteDoctor, getDoctorAvailable, getDoctorSchedule } = require("../controllers/DoctorController");
 const { protect, authorize } = require("../middleware/authMiddleware.js");
 
 /**
@@ -207,6 +207,6 @@ router.post("/register", register);
  */
 router.post("/available", getDoctorAvailable);
 
-router.get('/doctors/:doctorId/schedules', getDoctorSchedule);
-const { getDoctorSchedule } = require('../controllers/DoctorController');
+router.get("/doctors/:doctorId/schedules", getDoctorSchedule);
+
 module.exports = router;

@@ -28,8 +28,9 @@ function App() {
         <Route path="/patient-dashboard/:id" element={<PatientDashboard />} />
 
         {/* Doctor Schedule routes */}
-        <Route path="/doctor/:doctorId/schedule" element={<DoctorSchedule />} />
-        
+        <Route path="/doctor/:doctorId/schedule" element={<DoctorSchedule />} />  
+
+        {/* Admin routes */}      
         <Route path="/admin/user" element={<UserManagement />}></Route>
         <Route
           path="/admin/user/:id"

@@ -148,4 +148,4 @@ const getDoctorSchedule = async (req, res) => {
 };
 
 
-module.exports = { register, getDoctor, getDoctorById, updateDoctor, deleteDoctor, getDoctorAvailable };
+module.exports = { register, getDoctor, getDoctorById, updateDoctor, deleteDoctor, getDoctorAvailable, getDoctorSchedule };
