@@ -31,6 +31,7 @@ import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
 
 import useDebounce from "@/hooks/useDebounce";
+import { Icon, Search } from "lucide-react";
 
 export default function UserManagement() {
   const [users, setUsers] = useState([]);
@@ -97,11 +98,11 @@ export default function UserManagement() {
       loadUsers();
     } catch (error) {
       if (error.response?.data?.errors) {
-        error.response.data.errors.forEach(
-          (err) => toast.error(err, { id: toastId }) // 🔥 gắn vào toastId
+        error.response.data.errors.forEach((err) =>
+          toast.error(err, { id: toastId })
         );
       } else {
-        toast.error("Failed to update user", { id: toastId }); // 🔥 gắn vào toastId
+        toast.error("Failed to update user", { id: toastId });
       }
     }
   };
