@@ -2,7 +2,7 @@ const { DataTypes } = require("sequelize");
 const { sequelize } = require("../config/db");
 const bcrypt = require("bcrypt");
 
-const User = sequelize.define("User", {
+const Employee = sequelize.define("Employee", {
   name: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -36,11 +36,6 @@ const User = sequelize.define("User", {
     type: DataTypes.ENUM("male", "female"),
     allowNull: true,
   },
-  role: {
-    type: DataTypes.ENUM("admin", "doctor", "staff", "patient"),
-    allowNull: false,
-    defaultValue: "patient",
-  },
   avatar: {
     type: DataTypes.STRING,
     allowNull: true,
@@ -71,23 +66,23 @@ const User = sequelize.define("User", {
 });
 
 // Hash password before saving
-User.beforeCreate(async (user, options) => {
-  if (user.password) {
+Employee.beforeCreate(async (employee, options) => {
+  if (employee.password) {
     const salt = await bcrypt.genSalt(10)
-    user.password = await bcrypt.hash(user.password, salt)
+    employee.password = await bcrypt.hash(employee.password, salt)
   }
 });
 
-User.beforeUpdate(async (user, options) => {
-  if (user.changed("password")) {
+Employee.beforeUpdate(async (employee, options) => {
+  if (employee.changed("password")) {
     const salt = await bcrypt.genSalt(10)
-    user.password = await bcrypt.hash(user.password, salt)
+    employee.password = await bcrypt.hash(employee.password, salt)
   }
 });
 
 // Method to compare passwords
-User.prototype.comparePassword = async function (candidatePassword) {
+Employee.prototype.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password)
 }
 
-module.exports = User;
+module.exports = Employee;
