@@ -23,6 +23,13 @@ export const fetchUserById = async (userId) => {
   return res.data;
 };
 
+export const fetchRoles = async () => {
+  const res = await axios.get(API_ENDPOINTS.GET_ROLES, {
+    headers: getAuthHeaders(),
+  });
+  return res.data; // [{ id: 1, name: "admin" }, ...]
+};
+
 export const createUser = async (data) => {
   const formData = new FormData();
   Object.keys(data).forEach((key) => {
@@ -66,8 +73,9 @@ export const updateUser = async (userId, data) => {
 };
 
 export const updateUserStatus = async (id, isActive) => {
+  console.log("api:", id, isActive);
   const res = await axios.put(
-    `http://localhost:1118/api/users/update-status/${id}`,
+    `http://localhost:1118/api/admin/employees/update-status/${id}`,
     {
       isActive,
     }

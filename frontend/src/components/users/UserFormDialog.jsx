@@ -27,7 +27,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { fetchUserById } from "@/api/userApi";
+import { fetchRoles, fetchUserById } from "@/api/userApi";
 
 // ===== Schema cho CREATE =====
 const createSchema = z.object({
@@ -38,7 +38,7 @@ const createSchema = z.object({
   phoneNumber: z.string().min(9, "Phone number required"),
   dateOfBirth: z.string().optional(),
   gender: z.enum(["male", "female", "other"]),
-  role: z.enum(["doctor", "patient", "admin"]),
+  role: z.string().min(1, "Role is required"),
   address: z.string().min(10, "Address must be at least 10 characters"),
   avatar: z.any().optional(),
 });
@@ -57,7 +57,7 @@ const editSchema = z.object({
   phoneNumber: z.string().min(9, "Phone number required"),
   dateOfBirth: z.string().optional(),
   gender: z.enum(["male", "female", "other"]),
-  role: z.enum(["doctor", "patient", "admin"]),
+  role: z.string().min(1, "Role is required"),
   address: z.string().min(10, "Address must be at least 10 characters"),
   avatar: z.any().optional(),
 });
@@ -65,6 +65,7 @@ const editSchema = z.object({
 export default function UserFormDialog({ open, setOpen, onSubmit, userId }) {
   const isEdit = Boolean(userId); // check mode
   const [loading, setLoading] = useState(false);
+  const [roles, setRoles] = useState([]);
 
   const form = useForm({
     resolver: zodResolver(isEdit ? editSchema : createSchema),
@@ -82,8 +83,13 @@ export default function UserFormDialog({ open, setOpen, onSubmit, userId }) {
     },
   });
 
-  // Fetch detail khi Edit
   useEffect(() => {
+    if (open) {
+      fetchRoles()
+        .then(setRoles)
+        .catch((err) => console.error("Failed to load roles", err));
+    }
+
     if (open && isEdit && userId) {
       setLoading(true);
       fetchUserById(userId)
@@ -91,8 +97,9 @@ export default function UserFormDialog({ open, setOpen, onSubmit, userId }) {
           form.reset({
             ...data,
             password: "",
+            role: data.Roles?.[0]?.name || "doctor",
             dateOfBirth: data.dateOfBirth
-              ? new Date(data.dateOfBirth).toISOString().split("T")[0] // 🔥 format yyyy-MM-dd
+              ? new Date(data.dateOfBirth).toISOString().split("T")[0]
               : "",
           });
         })
@@ -276,7 +283,6 @@ export default function UserFormDialog({ open, setOpen, onSubmit, userId }) {
                         <SelectContent>
                           <SelectItem value="male">Male</SelectItem>
                           <SelectItem value="female">Female</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -300,9 +306,11 @@ export default function UserFormDialog({ open, setOpen, onSubmit, userId }) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="doctor">Doctor</SelectItem>
-                          <SelectItem value="patient">Patient</SelectItem>
-                          <SelectItem value="admin">Admin</SelectItem>
+                          {roles.map((r) => (
+                            <SelectItem key={r.id} value={r.name}>
+                              {r.name.charAt(0).toUpperCase() + r.name.slice(1)}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />

@@ -12,7 +12,13 @@ import { toast } from "sonner";
 
 import UserFormDialog from "@/components/users/UserFormDialog";
 import DeleteConfirmDialog from "@/components/users/DeleteConfirmDialog";
-import { fetchUsers, createUser, deleteUser, updateUser } from "@/api/userApi";
+import {
+  fetchUsers,
+  createUser,
+  deleteUser,
+  updateUser,
+  updateUserStatus,
+} from "@/api/userApi";
 import UserDetailDialog from "@/components/users/UserDetailDialog";
 
 import {
@@ -55,7 +61,8 @@ export default function UserManagement() {
   const loadUsers = async () => {
     try {
       const data = await fetchUsers(currentPage, pageSize, search);
-      setUsers(data.users);
+      console.log(data.employees);
+      setUsers(data.employees);
       setTotalPages(data.totalPages);
     } catch {
       toast.error("Failed to fetch users");
@@ -68,17 +75,23 @@ export default function UserManagement() {
 
   // ===== CREATE USER =====
   const handleCreateUser = async (data) => {
+    const toastId = toast.loading("Creating user...");
     try {
       await createUser(data);
+      toast.success("User created successfully!", { id: toastId });
       setDialogOpen(false);
-      toast.success(`User created successfully!`);
       loadUsers();
     } catch (error) {
-      console.log("Create error:", error.response?.data?.errors);
-      if (error.response?.data?.errors) {
-        error.response.data.errors.forEach((err) => toast.error(err));
+      const errData = error.response?.data;
+
+      if (Array.isArray(errData?.errors)) {
+        // Nếu backend trả về dạng { errors: ["Email exists", ...] }
+        errData.errors.forEach((err) => toast.error(err, { id: toastId }));
+      } else if (errData?.error) {
+        // Nếu backend trả về dạng { error: "Email exists" }
+        toast.error(errData.error, { id: toastId });
       } else {
-        toast.error("Failed to create user");
+        toast.error("Failed to create user", { id: toastId });
       }
     }
   };
@@ -97,10 +110,12 @@ export default function UserManagement() {
       setEditDialogOpen(false);
       loadUsers();
     } catch (error) {
-      if (error.response?.data?.errors) {
-        error.response.data.errors.forEach((err) =>
-          toast.error(err, { id: toastId })
-        );
+      const errData = error.response?.data;
+
+      if (Array.isArray(errData?.errors)) {
+        errData.errors.forEach((err) => toast.error(err, { id: toastId }));
+      } else if (errData?.error) {
+        toast.error(errData.error, { id: toastId });
       } else {
         toast.error("Failed to update user", { id: toastId });
       }
@@ -138,7 +153,7 @@ export default function UserManagement() {
   const handleToggleActive = async (user, checked) => {
     const toastId = toast.loading("Updating status...");
     try {
-      await updateUser(user.id, { ...user, isActive: checked });
+      await updateUserStatus(user.id, checked);
       toast.success(
         `User ${user.name} is now ${checked ? "Active" : "Inactive"}`,
         { id: toastId }
@@ -211,14 +226,21 @@ export default function UserManagement() {
                 <TableCell>{user.name}</TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>
-                  <div
-                    className={`text-white font-bold capitalize rounded-3xl w-20 py-1 text-center ${
-                      user.role === "patient" ? "bg-blue-500" : "bg-green-500"
-                    }`}
-                  >
-                    {user.role}
-                  </div>
+                  {user.Roles && user.Roles.length > 0 ? (
+                    <div
+                      className={`text-white text-[13px] font-bold capitalize rounded-3xl w-20 py-1 text-center ${
+                        user.Roles[0].name === "employee"
+                          ? "bg-blue-500"
+                          : "bg-green-500"
+                      }`}
+                    >
+                      {user.Roles[0].name}
+                    </div>
+                  ) : (
+                    <span className="text-gray-400">No role</span>
+                  )}
                 </TableCell>
+
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <Switch

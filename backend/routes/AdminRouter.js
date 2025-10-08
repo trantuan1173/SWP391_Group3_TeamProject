@@ -11,6 +11,10 @@ const {
   deleteRole,
   createEmployee,
   getEmployees,
+  deleteEmployee,
+  updateActiveStatus,
+  getEmployeeById,
+  updateEmployee,
 } = require("../controllers/AdminUserController.js");
 
 // ================== Multer config ==================
@@ -194,6 +198,14 @@ router.delete("/roles/:id", deleteRole);
  *         description: Failed to get employees
  */
 router.get("/employees", getEmployees);
+router.delete("/employees/:id", deleteEmployee);
+router.put("/employees/update-status/:id", updateActiveStatus);
+router.get("/employees/:id", getEmployeeById);
+router.put(
+  "/employees/:id",
+  upload.single("avatar"), // middleware multer xử lý file
+  updateEmployee
+);
 // router.get("/users/:id", protect, authorize("admin"), getUserById);
 // router.delete("/users/:id", protect, authorize("admin"), deleteUser);
 // router.put(

@@ -76,13 +76,21 @@ const createEmployee = async (req, res) => {
   try {
     const { role, ...userData } = req.body;
 
-    const existingIdentityNumber = await Employee.findOne({ where: { identityNumber: userData.identityNumber } });
-    const existingMail = await Employee.findOne({ where: { email: userData.email } });
-    const existingPhone = await Employee.findOne({ where: { phoneNumber: userData.phoneNumber } });
+    const existingIdentityNumber = await Employee.findOne({
+      where: { identityNumber: userData.identityNumber },
+    });
+    const existingMail = await Employee.findOne({
+      where: { email: userData.email },
+    });
+    const existingPhone = await Employee.findOne({
+      where: { phoneNumber: userData.phoneNumber },
+    });
 
     if (existingIdentityNumber || existingMail || existingPhone) {
       if (existingIdentityNumber)
-        return res.status(409).json({ error: "Identity number already exists" });
+        return res
+          .status(409)
+          .json({ error: "Identity number already exists" });
       if (existingMail)
         return res.status(409).json({ error: "Email already exists" });
       if (existingPhone)
@@ -93,14 +101,15 @@ const createEmployee = async (req, res) => {
       userData.avatar = `/uploads/avatars/${req.file.filename}`;
     }
     if (!userData.name || !userData.email || !userData.password) {
-      return res.status(400).json({ error: "Name, email and password are required" });
+      return res
+        .status(400)
+        .json({ error: "Name, email and password are required" });
     }
 
     const employee = await Employee.create({ ...userData });
-
     if (role === "doctor") {
       await Doctor.create({
-        userId: employee.id,
+        employeeId: employee.id,
         speciality: "",
         workingHours: "",
       });
@@ -153,7 +162,27 @@ const createEmployee = async (req, res) => {
 //Get all employees with role
 const getEmployees = async (req, res) => {
   try {
-    const employees = await Employee.findAll({
+    // Lấy query params
+    const page = parseInt(req.query.page) || 1; // trang hiện tại
+    const pageSize = parseInt(req.query.pageSize) || 10; // số record mỗi trang
+    const search = req.query.search ? req.query.search.trim() : ""; // từ khóa tìm kiếm
+
+    const offset = (page - 1) * pageSize;
+
+    // Điều kiện where cho search
+    const whereCondition = {};
+
+    if (search) {
+      whereCondition[Op.or] = [
+        { name: { [Op.like]: `%${search}%` } },
+        { email: { [Op.like]: `%${search}%` } },
+        { phoneNumber: { [Op.like]: `%${search}%` } },
+        { identityNumber: { [Op.like]: `%${search}%` } },
+      ];
+    }
+
+    // Query với phân trang + count tổng
+    const { rows: employees, count: total } = await Employee.findAndCountAll({
       attributes: [
         "id",
         "name",
@@ -167,12 +196,22 @@ const getEmployees = async (req, res) => {
         "identityNumber",
       ],
       include: [{ model: Role }],
+      where: whereCondition,
+      limit: pageSize,
+      offset,
+      order: [["createdAt", "DESC"]],
+      subQuery: false,
     });
 
-    res.json(employees);
+    res.json({
+      employees,
+      total,
+      totalPages: Math.ceil(total / pageSize),
+      currentPage: page,
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to fetch users" });
+    console.error("getEmployees error:", err);
+    res.status(500).json({ error: "Failed to fetch employees" });
   }
 };
 
@@ -180,11 +219,15 @@ const getEmployees = async (req, res) => {
 const deleteEmployee = async (req, res) => {
   try {
     const { id } = req.params;
+    await EmployeeRole.destroy({ where: { employeeId: id } });
+    await Doctor.destroy({ where: { employeeId: id } });
+    await Patient.destroy({ where: { employeeId: id } });
     const deleted = await Employee.destroy({ where: { id } });
     if (!deleted) return res.status(404).json({ error: "Employee not found" });
 
-    res.json({ message: "Employee deleted" });
+    res.json({ message: "Employee deleted successfully" });
   } catch (err) {
+    console.error("Delete employee error:", err);
     res.status(500).json({ error: "Failed to delete employee" });
   }
 };
@@ -202,99 +245,144 @@ const getEmployeeById = async (req, res) => {
   }
 };
 
-// const updateActiveStatus = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const { isActive } = req.body;
+const updateActiveStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isActive } = req.body;
 
-//     const user = await Employee.findByPk(id);
-//     if (!user) {
-//       return res.status(404).json({ error: "User not found" });
-//     }
+    const user = await Employee.findByPk(id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
-//     // Ép kiểu boolean
-//     user.isActive = isActive === true || isActive === "true";
+    // Ép kiểu boolean
+    user.isActive = isActive === true || isActive === "true";
 
-//     await user.save();
+    await user.save();
 
-//     res.json({ message: "User status updated", isActive: user.isActive });
-//   } catch (err) {
-//     console.error("Update active status error:", err);
-//     res
-//       .status(500)
-//       .json({ error: "Failed to update user status", details: err.message });
-//   }
-// };
+    res.json({ message: "User status updated", isActive: user.isActive });
+  } catch (err) {
+    console.error("Update active status error:", err);
+    res
+      .status(500)
+      .json({ error: "Failed to update user status", details: err.message });
+  }
+};
 
-// const updateEmployee = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const existingUser = await Employee.findOne({ where: { id } }, { include: [{ model: Role }] });
-//     if (!existingUser) {
-//       return res.status(404).json({ error: "Employee not found" });
-//     }
+const updateEmployee = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { role, ...updateData } = req.body;
 
-//     const oldRole = existingUser.role.name;
-//     const newRole = req.body.role;
+    // Tìm nhân viên hiện tại
+    const existingUser = await Employee.findOne({
+      where: { id },
+      include: [{ model: Role }],
+    });
 
-//     const updateData = { ...req.body };
+    if (!existingUser) {
+      return res.status(404).json({ error: "Employee not found" });
+    }
 
-//     if (req.file) {
-//       updateData.avatar = `/uploads/avatars/${req.file.filename}`;
-//     }
-//     if (!updateData.password || updateData.password.trim() === "") {
-//       delete updateData.password;
-//     } else {
-//       const bcrypt = require("bcrypt");
-//       updateData.password = await bcrypt.hash(updateData.password, 10);
-//     }
+    // ==== VALIDATE TRÙNG LẶP ====
+    const existingIdentityNumber = await Employee.findOne({
+      where: {
+        identityNumber: updateData.identityNumber,
+      },
+    });
 
-//     // Cập nhật bảng Users
-//     const [updated] = await Employee.update(updateData, { where: { id } });
+    const existingMail = await Employee.findOne({
+      where: {
+        email: updateData.email,
+      },
+    });
 
-//     if (!updated) {
-//       return res.status(400).json({ error: "Failed to update user" });
-//     }
+    const existingPhone = await Employee.findOne({
+      where: {
+        phoneNumber: updateData.phoneNumber,
+      },
+    });
 
-//     // Nếu role thay đổi → xử lý các bảng con
-//     if (newRole && newRole !== oldRole) {
-//       if (oldRole === "doctor") {
-//         await Doctor.destroy({ where: { userId: id } });
-//       } else if (oldRole === "patient") {
-//         await Patient.destroy({ where: { userId: id } });
-//       } else if (oldRole === "staff") {
-//         await Staff.destroy({ where: { userId: id } });
-//       } else if (oldRole === "admin") {
-//         await Admin.destroy({ where: { userId: id } });
-//       }
+    if (
+      (existingIdentityNumber && existingIdentityNumber.id !== parseInt(id)) ||
+      (existingMail && existingMail.id !== parseInt(id)) ||
+      (existingPhone && existingPhone.id !== parseInt(id))
+    ) {
+      if (existingIdentityNumber && existingIdentityNumber.id !== parseInt(id))
+        return res
+          .status(409)
+          .json({ error: "Identity number already exists" });
+      if (existingMail && existingMail.id !== parseInt(id))
+        return res.status(409).json({ error: "Email already exists" });
+      if (existingPhone && existingPhone.id !== parseInt(id))
+        return res.status(409).json({ error: "Phone number already exists" });
+    }
 
-//       if (newRole === "doctor") {
-//         await Doctor.create({ userId: id, speciality: "", isAvailable: true });
-//       } else if (newRole === "patient") {
-//         await Patient.create({ userId: id });
-//       } else if (newRole === "staff") {
-//         await Staff.create({ userId: id });
-//       } else if (newRole === "admin") {
-//         await Admin.create({ userId: id });
-//       }
-//     }
+    // ==== VALIDATE BẮT BUỘC ====
+    if (!updateData.name || !updateData.email) {
+      return res.status(400).json({ error: "Name and email are required" });
+    }
 
-//     const updatedUser = await Employee.findByPk(id, {
-//       attributes: { exclude: ["password"] },
-//     });
+    // ==== Xử lý avatar ====
+    if (req.file) {
+      updateData.avatar = `/uploads/avatars/${req.file.filename}`;
+    }
 
-//     res.json({
-//       message: "User updated successfully",
-//       user: updatedUser,
-//     });
-//   } catch (err) {
-//     console.error("Update user error:", err);
-//     res.status(500).json({
-//       error: "Failed to update user",
-//       details: err.message,
-//     });
-//   }
-// };
+    // ==== Xử lý password ====
+    if (!updateData.password || updateData.password.trim() === "") {
+      delete updateData.password;
+    } else {
+      updateData.password = await bcrypt.hash(updateData.password, 10);
+    }
+
+    // ==== Cập nhật thông tin cơ bản ====
+    await Employee.update(updateData, { where: { id } });
+
+    // ==== Kiểm tra role thay đổi ====
+    const oldRole = existingUser.Roles?.[0]?.name;
+    const newRole = role;
+
+    if (newRole && newRole !== oldRole) {
+      await EmployeeRole.destroy({ where: { employeeId: id } });
+      const roleRecord = await Role.findOne({ where: { name: newRole } });
+      if (!roleRecord) {
+        return res.status(404).json({ error: `Role '${newRole}' not found` });
+      }
+      await EmployeeRole.create({
+        employeeId: id,
+        roleId: roleRecord.id,
+      });
+
+      if (oldRole === "doctor" && newRole !== "doctor") {
+        await Doctor.destroy({ where: { employeeId: id } });
+      }
+      if (newRole === "doctor" && oldRole !== "doctor") {
+        await Doctor.create({
+          employeeId: id,
+          speciality: "",
+          workingHours: "",
+        });
+      }
+    }
+
+    // ==== Lấy lại dữ liệu đã cập nhật ====
+    const updatedUser = await Employee.findByPk(id, {
+      include: [{ model: Role }],
+      attributes: { exclude: ["password"] },
+    });
+
+    res.json({
+      message: "Employee updated successfully",
+      user: updatedUser,
+    });
+  } catch (err) {
+    console.error("Update employee error:", err);
+    res.status(500).json({
+      error: "Failed to update employee",
+      details: err.message,
+    });
+  }
+};
 
 module.exports = {
   createRole,
@@ -305,4 +393,6 @@ module.exports = {
   getEmployees,
   deleteEmployee,
   getEmployeeById,
+  updateActiveStatus,
+  updateEmployee,
 };

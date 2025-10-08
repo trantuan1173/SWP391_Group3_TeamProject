@@ -1,8 +1,8 @@
-import { AuthProvider } from './context/AuthContext'
-import { Routes, Route } from 'react-router-dom'
+import { AuthProvider } from "./context/AuthContext";
+import { Routes, Route } from "react-router-dom";
 import BookMedicalExam from "./page/guest/BookMedicalExam";
 import ListDoctor from "./page/doctor/ListDoctor";
-import PatientDashboard from './page/Patient/PatientDashboard'
+import PatientDashboard from "./page/Patient/PatientDashboard";
 import Login from "./page/Auth/Login";
 import Register from "./page/Auth/Register";
 import VerifyPage from "./page/Auth/VerifyPage";
@@ -26,7 +26,7 @@ function App() {
         {/* Patient Dashboard routes */}
         <Route path="/patient-dashboard" element={<PatientDashboard />} />
         <Route path="/patient-dashboard/:id" element={<PatientDashboard />} />
-        <Route element={<RequireAuth allowedRoles={["admin"]} />}>
+        <Route>
           <Route path="/admin/user" element={<UserManagement />}></Route>
           <Route
             path="/admin/user/:id"

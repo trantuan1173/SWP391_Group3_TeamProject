@@ -71,10 +71,13 @@ export default function UserDetailManagement() {
 
             <div
               className={`px-4 py-2 rounded-full mt-2 ${getRoleStyles(
-                user.role
+                user.Roles[0].name
               )}`}
             >
-              <p className="text-sm m-0 font-bold">{user.role}</p>
+              <p className="text-sm m-0 font-bold">
+                {" "}
+                {user.Roles?.[0]?.name.toUpperCase() || "No role"}
+              </p>
             </div>
           </Card>
 

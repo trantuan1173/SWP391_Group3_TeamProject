@@ -7,10 +7,10 @@ const Patient = sequelize.define("Patient", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  email:{
+  email: {
     type: DataTypes.STRING,
     allowNull: true,
-    unique: true
+    // unique: true,
   },
   password: {
     type: DataTypes.STRING,
@@ -64,21 +64,21 @@ const Patient = sequelize.define("Patient", {
 // Hash password before saving
 Patient.beforeCreate(async (patient, options) => {
   if (patient.password) {
-    const salt = await bcrypt.genSalt(10)
-    patient.password = await bcrypt.hash(patient.password, salt)
+    const salt = await bcrypt.genSalt(10);
+    patient.password = await bcrypt.hash(patient.password, salt);
   }
 });
 
 Patient.beforeUpdate(async (patient, options) => {
   if (patient.changed("password")) {
-    const salt = await bcrypt.genSalt(10)
-    patient.password = await bcrypt.hash(patient.password, salt)
+    const salt = await bcrypt.genSalt(10);
+    patient.password = await bcrypt.hash(patient.password, salt);
   }
 });
 
 // Method to compare passwords
 Patient.prototype.comparePassword = async function (candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password)
-}
+  return await bcrypt.compare(candidatePassword, this.password);
+};
 
 module.exports = Patient;
