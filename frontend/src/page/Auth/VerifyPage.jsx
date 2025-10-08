@@ -25,6 +25,9 @@ const VerifyPage = () => {
     try {
       const res = await axios.post(API_ENDPOINTS.VERIFY, formData);
       setMessage(res.data.message || "Xác minh thành công!");
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
       setError("");
     } catch (err) {
       setMessage("Xác minh thất bại hoặc token không hợp lệ. Vui lòng nhập email để gửi lại mã xác minh");

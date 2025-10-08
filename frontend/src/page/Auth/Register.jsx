@@ -36,6 +36,8 @@ const Register = () => {
     try {
       const response = await axios.post(`${API_ENDPOINTS.REGISTER}`, formData);
       if (response.status === 201) setShowVerifyMsg(true);
+      //href to reload
+      window.location.reload();
       navigate(`/verify?email=${formData.email}`);
     } catch {
       alert('Registration failed');
