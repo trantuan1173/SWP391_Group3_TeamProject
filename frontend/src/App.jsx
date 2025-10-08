@@ -1,6 +1,7 @@
 import { AuthProvider } from './context/AuthContext'
 import { Routes, Route } from 'react-router-dom'
 import BookMedicalExam from "./page/guest/BookMedicalExam";
+import QuickBook from "./page/Patient/QuickBook";
 import ListDoctor from "./page/doctor/ListDoctor";
 import PatientDashboard from './page/Patient/PatientDashboard'
 import Login from "./page/Auth/Login";
@@ -21,6 +22,7 @@ function App() {
         <Route path="/verify" element={<VerifyPage />} />
         <Route path="/" element={<BookMedicalExam />} />
         <Route path="/book" element={<BookMedicalExam />} />
+  <Route path="/appointment" element={<QuickBook />} />
         <Route path="/doctor" element={<ListDoctor />} />
 
         {/* Patient Dashboard routes */}

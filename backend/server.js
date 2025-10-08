@@ -11,10 +11,12 @@ const path = require("path");
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 
 (async () => {
   await connectDB();
-  await sequelize.sync({ force: true });
+  await sequelize.sync({ alter: false });
 
   app.get("/", (req, res) => {
     res.json({ message: "Hello from MySQL + Sequelize" });
