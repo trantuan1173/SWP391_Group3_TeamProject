@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import Header from "../../components/Header";
+import Header from "../../components/guestlayout/Header";
+import Footer from "../../components/guestlayout/Footer";
 import axios from "axios";
 import { API_ENDPOINTS } from "../../config";
 
@@ -108,6 +109,7 @@ export default function ListDoctor() {
           </div>
         </div>
       </div>
+      <Footer />
     </>
   );
 }

@@ -11,18 +11,23 @@ import UserManagement from "./page/AdminUserManager/UserManagement";
 import AdminDashboard from "./page/AdminDashboard/AdminDashboard";
 import UserDetailManagement from "./page/AdminUserManager/UserDetailManagement";
 import RequireAuth from "./context/RequireAuth";
+import LandingPage from "./page/guest/LandingPage";
+import ContactUs from "./page/guest/ContactUs";
 
 function App() {
   return (
     <AuthProvider>
       <Routes>
+        {/* Landing Page */}
+        <Route path="/" element={<LandingPage />} />
+
         {/* Auth routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verify" element={<VerifyPage />} />
-        <Route path="/" element={<BookMedicalExam />} />
         <Route path="/book" element={<BookMedicalExam />} />
         <Route path="/doctor" element={<ListDoctor />} />
+        <Route path="/contact" element={<ContactUs />} />
 
         {/* Patient Dashboard routes */}
         <Route path="/patient-dashboard" element={<PatientDashboard />} />

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import Header from "../../components/Header"; // Đường dẫn tới Header.jsx
+import Header from "../../components/guestlayout/Header";
+import Footer from "../../components/guestlayout/Footer"; // Đường dẫn tới Header.jsx
 import { API_ENDPOINTS } from '../../config';
 import axios from 'axios';
 
@@ -162,6 +163,8 @@ export default function BookMedicalExam() {
           </p>
         </div>
       </div>
+      <Footer />
     </>
+    
   );
 }
