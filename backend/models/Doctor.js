@@ -1,24 +1,12 @@
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../config/db");
-const User = require("./User");
+const User = require("./Employee");
 
 const Doctor = sequelize.define("Doctor", {
   speciality: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  userId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: "Users",
-      key: "id",
-    },
-  },
-  // workingHours: {
-  //   type: DataTypes.STRING,
-  //   allowNull: false,
-  // },
   isAvailable: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
@@ -35,8 +23,5 @@ const Doctor = sequelize.define("Doctor", {
     defaultValue: DataTypes.NOW,
   },
 });
-
-Doctor.belongsTo(User, { foreignKey: "userId" });
-User.hasOne(Doctor, { foreignKey: "userId" });
 
 module.exports = Doctor;

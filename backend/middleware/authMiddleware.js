@@ -1,73 +1,87 @@
 const jwt = require("jsonwebtoken");
-const { User } = require("../models");
+const { Employee, Patient, Role } = require("../models");
 
-// Protect routes
-const protect = async function(req, res, next) {
-  let token
+const protect = async (req, res, next) => {
+  let token;
 
   if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
-    // Get token from header
-    token = req.headers.authorization.split(" ")[1]
+    token = req.headers.authorization.split(" ")[1];
   }
 
-  // Check if token exists
   if (!token) {
     return res.status(401).json({
       success: false,
-      message: "Not authorized to access this route",
-    })
+      message: "Not authorized, token missing",
+    });
   }
 
   try {
-    // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "your_jwt_secret")
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "your_jwt_secret");
 
-    // Get user from token
-    req.user = await User.findByPk(decoded.id)
+    let user = null;
 
-    if (!req.user) {
+    if (decoded.type === "employee") {
+      // Lấy employee + roles
+      user = await Employee.findByPk(decoded.id, {
+        include: {
+          model: Role,
+          through: { attributes: [] },
+        },
+      });
+
+      if (user) {
+        user = user.toJSON();
+        user.roleNames = user.Roles.map(r => r.name);
+      }
+
+    } else if (decoded.type === "patient") {
+      user = await Patient.findByPk(decoded.id);
+    }
+
+    if (!user) {
       return res.status(401).json({
         success: false,
-        message: "Not authorized to access this route",
-      })
+        message: "User not found or token invalid",
+      });
     }
 
-    next()
-  } catch (error) {
+    req.user = user;
+    req.userType = decoded.type;
+
+    next();
+  } catch (err) {
     return res.status(401).json({
       success: false,
-      message: "Not authorized to access this route",
-    })
+      message: "Not authorized, invalid token",
+    });
   }
-}
+};
 
-// Grant access to specific roles
-const authorize = function() {
-  var roles = Array.prototype.slice.call(arguments);
-  return async function(req, res, next) {
-    // Get user role
-    const user = await User.findByPk(req.user.id)
-
-    if (!user || !user.role) {
+const authorize = (...roles) => {
+  return (req, res, next) => {
+    if (req.userType !== "employee") {
       return res.status(403).json({
         success: false,
-        message: "User role not found",
-      })
+        message: "Only employees can access this route",
+      });
     }
 
-    // Check if user role is authorized
-    if (!roles.includes(user.role)) {
+    const userRoles = req.user.roleNames || [];
+    const isAuthorized = roles.some(role => userRoles.includes(role));
+
+    if (!isAuthorized) {
       return res.status(403).json({
         success: false,
-        message: `User role ${user.role} is not authorized to access this route`,
-      })
+        message: `Employee roles [${userRoles.join(", ")}] are not authorized to access this route`,
+      });
     }
 
-    next()
-  }
-}
+    next();
+  };
+};
 
 module.exports = {
   protect,
   authorize,
+
 }

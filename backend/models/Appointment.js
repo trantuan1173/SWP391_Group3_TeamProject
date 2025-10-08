@@ -2,7 +2,6 @@ const { DataTypes } = require("sequelize");
 const { sequelize } = require("../config/db");
 const Doctor = require("./Doctor");
 const Patient = require("./Patient");
-const User = require("./User");
 
 const Appointment = sequelize.define("Appointment", {
   doctorId: {
@@ -40,13 +39,14 @@ const Appointment = sequelize.define("Appointment", {
     allowNull: false,
     defaultValue: "pending",
   },
-  createBy: {
+  createByType: {
+    type: DataTypes.ENUM("patient", "employee"),
+    allowNull: false,
+    defaultValue: "patient",
+  },
+  createById: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    references: {
-      model: "Users",
-      key: "id",
-    },
   },
   createdAt: {
     type: DataTypes.DATE,

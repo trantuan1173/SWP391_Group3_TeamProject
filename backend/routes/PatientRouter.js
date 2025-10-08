@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const {
+    patientLogin,
   register,
   createAppointment,
   getPrescriptions,
@@ -17,6 +18,33 @@ const {
  *   name: Patient
  *   description: Quản lý bệnh nhân
  */
+
+/**
+ * @swagger
+ * /patients/login:
+ *   post:
+ *     summary: Login a patient
+ *     tags: [Patient]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Patient logged in successfully
+ *       401:
+ *         description: Invalid credentials
+ *       500:
+ *         description: Failed to login
+ */
+router.post("/login", patientLogin);
 
 /**
  * @swagger
@@ -54,10 +82,6 @@ const {
  *         description: Failed to register patient
  */
 router.post("/register", register);
-router.post("/appointments", createAppointment);
-router.get("/prescriptions/:patientId", getPrescriptions);
-router.get("/checkups/:patientId", getCheckups);
-router.get("/documents/:patientId", getDocuments);
 
 /**
  * @swagger

@@ -10,6 +10,7 @@ import VerifyPage from "./page/Auth/VerifyPage";
 import UserManagement from "./page/AdminUserManager/UserManagement";
 import AdminDashboard from "./page/AdminDashboard/AdminDashboard";
 import UserDetailManagement from "./page/AdminUserManager/UserDetailManagement";
+import RequireAuth from "./context/RequireAuth";
 
 function App() {
   return (
@@ -37,6 +38,14 @@ function App() {
           element={<UserDetailManagement />}
         ></Route>
         <Route path="/admin/dashboard" element={<AdminDashboard />}></Route>
+        <Route element={<RequireAuth allowedRoles={["admin"]} />}>
+          <Route path="/admin/user" element={<UserManagement />}></Route>
+          <Route
+            path="/admin/user/:id"
+            element={<UserDetailManagement />}
+          ></Route>
+          <Route path="/admin/dashboard" element={<AdminDashboard />}></Route>
+        </Route>
       </Routes>
     </AuthProvider>
   );

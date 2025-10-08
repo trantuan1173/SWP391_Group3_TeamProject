@@ -1,29 +1,32 @@
-const User = require("./User");
 const Doctor = require("./Doctor");
 const Patient = require("./Patient");
-const Admin = require("./Admin");
 const Appointment = require("./Appointment");
 const MedicalRecord = require("./MedicalRecord");
-const Receptionist = require("./Receptionists");
 const DoctorSchedule = require("./DoctorSchedule");
 const Room = require("./Room");
+const Employee = require("./Employee");
+const EmployeeRole = require("./EmployeeRole");
+const Role = require("./Role");
+const Service = require("./Service");
+const MedicalRecordService = require("./MedicalRecordService")
 
-User.hasOne(Doctor, { foreignKey: "userId" });
-Doctor.belongsTo(User, { foreignKey: "userId" });
+MedicalRecord.belongsToMany(Service, {
+  through: MedicalRecordService,
+  foreignKey: "medicalRecordId",
+});
+Service.belongsToMany(MedicalRecord, {
+  through: MedicalRecordService,
+  foreignKey: "serviceId",
+});
 
-User.hasOne(Patient, { foreignKey: "userId" });
-Patient.belongsTo(User, { foreignKey: "userId" });
+EmployeeRole.belongsTo(Employee, { foreignKey: "employeeId" });
+EmployeeRole.belongsTo(Role, { foreignKey: "roleId" });
 
-User.hasOne(Admin, { foreignKey: "userId" });
-Admin.belongsTo(User, { foreignKey: "userId" });
+Employee.hasOne(Doctor, { foreignKey: "employeeId" });
+Doctor.belongsTo(Employee, { foreignKey: "employeeId" });
 
-User.hasOne(Receptionist, { foreignKey: "userId" });
-Receptionist.belongsTo(User, { foreignKey: "userId" });
-
-User.hasMany(Appointment, { foreignKey: "createBy" });
-Appointment.belongsTo(User, { foreignKey: "createBy" });
-User.hasMany(MedicalRecord, { foreignKey: "createBy" });
-MedicalRecord.belongsTo(User, { foreignKey: "createBy" });
+Employee.hasMany(MedicalRecord, { foreignKey: "createBy" });
+MedicalRecord.belongsTo(Employee, { foreignKey: "createBy" });
 
 Doctor.hasMany(Appointment, { foreignKey: "doctorId" });
 Appointment.belongsTo(Doctor, { foreignKey: "doctorId" });
@@ -47,14 +50,25 @@ MedicalRecord.belongsTo(Room, { foreignKey: "roomId" });
 Room.hasMany(DoctorSchedule, { foreignKey: "roomId" });
 DoctorSchedule.belongsTo(Room, { foreignKey: "roomId" });
 
+Employee.belongsToMany(Role, {
+  through: EmployeeRole,
+  foreignKey: "employeeId",
+});
+Role.belongsToMany(Employee, {
+  through: EmployeeRole,
+  foreignKey: "roleId",
+});
+
 module.exports = {
-  User,
   Doctor,
   Patient,
-  Admin,
-  Receptionist,
   Appointment,
   MedicalRecord,
   DoctorSchedule,
   Room,
+  Employee,
+  EmployeeRole,
+  Role,
+  MedicalRecordService,
+  Service
 };

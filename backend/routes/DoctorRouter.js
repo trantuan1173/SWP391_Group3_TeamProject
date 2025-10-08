@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { register, getDoctor, getDoctorById, updateDoctor, deleteDoctor, getDoctorAvailable, getDoctorSchedule } = require("../controllers/DoctorController");
+const { getDoctor, getDoctorById, updateDoctor, deleteDoctor, getDoctorAvailable } = require("../controllers/DoctorController");
 const { protect, authorize } = require("../middleware/authMiddleware.js");
 
 /**
@@ -120,55 +120,6 @@ router.put("/:id", protect, authorize("admin"), updateDoctor);
  */
 router.delete("/:id", protect, authorize("admin" || "doctor"), deleteDoctor);
 
-/**
- * @swagger
- * /doctors/register:
- *   post:
- *     summary: Register a new doctor
- *     tags: [Doctor]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 example: "John Doe"
- *               email:
- *                 type: string
- *                 example: "john.doe@example.com"
- *               password:
- *                 type: string
- *                 example: "123"
- *               identityNumber:
- *                 type: string
- *                 example: "123456789"
- *               phoneNumber:
- *                 type: string
- *                 example: "123456789"
- *               speciality:
- *                 type: string
- *                 example: "Cardiology"
- *               dateOfBirth:
- *                 type: datetime
- *                 example: "2025-09-14"
- *               gender:
- *                 type: string
- *                 example: "male"
- *               address:
- *                 type: string
- *                 example: "123 Main St"
- *     responses:
- *       201:
- *         description: Doctor registered successfully
- *       200:
- *         description: Doctor updated role successfully
- *       500:
- *         description: Failed to register doctor
- */
-router.post("/register", register);
 
 /**
  * @swagger
@@ -206,7 +157,4 @@ router.post("/register", register);
  *                 $ref: '#/components/schemas/Doctor'
  */
 router.post("/available", getDoctorAvailable);
-
-router.get("/doctors/:doctorId/schedules", getDoctorSchedule);
-
 module.exports = router;
