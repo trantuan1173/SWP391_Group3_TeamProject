@@ -15,8 +15,25 @@ export default function ListDoctor() {
         const doctorUrl = API_ENDPOINTS?.DOCTOR_LIST || "/api/doctor";
         const res = await axios.get(doctorUrl);
         console.log("doctor response:", res);
+        console.log("doctor data:", res.data); 
+        console.log("first doctor avatar:", res.data[0]?.employee?.avatar);
         const list = Array.isArray(res.data) ? res.data : [];
         setDoctors(list);
+
+         const specialtyCount = {};
+        list.forEach(doctor => {
+          const specialty = doctor.speciality || "Chưa có chuyên khoa";
+          specialtyCount[specialty] = (specialtyCount[specialty] || 0) + 1;
+        });
+
+        // Chuyển object thành array để hiển thị
+        const specialtyList = Object.entries(specialtyCount).map(([name, count]) => ({
+          name,
+          doctorCount: count
+        }));
+
+        setSpecialties(specialtyList);
+        console.log("Specialty count:", specialtyList);
       } catch (err) {
         console.error("Fetch doctors error:", err);
         setDoctors([]);
@@ -24,22 +41,7 @@ export default function ListDoctor() {
         setLoading(false);
       }
     };
-
-    const fetchSpecialties = async () => {
-      try {
-        const specialityUrl = API_ENDPOINTS?.SPECIALITY_LIST || "/api/specialties"; // Đường dẫn API cho chuyên khoa
-        const res = await axios.get(specialityUrl);
-        console.log("speciality response:", res);
-        const list = Array.isArray(res.data) ? res.data : [];
-        setSpecialties(list);
-      } catch (err) {
-        console.error("Fetch specialties error:", err);
-        setSpecialties([]);
-      }
-    };
-
     fetchDoctors();
-    fetchSpecialties(); // Gọi hàm để lấy chuyên khoa
   }, []);
 
   return (
@@ -58,9 +60,9 @@ export default function ListDoctor() {
               )}
 
               {doctors.map((doctor, idx) => {
-                const user = doctor.User || {}; // lấy thông tin user bên trong doctor
-                const name = user.name || "Chưa có tên"; // lấy tên
-                const avatar = user.avatar || "https://randomuser.me/api/portraits/men/32.jpg"; // lấy avatar
+                const employee = doctor.employee || {}; // lấy thông tin employee bên trong doctor
+                const name = employee.name || "Chưa có tên"; // lấy tên
+                const avatar = employee.avatar || "https://randomuser.me/api/portraits/men/32.jpg"; // lấy avatar
                 const speciality = doctor.speciality || "Chưa có chuyên khoa"; // lấy tên chuyên khoa
 
                 return (
@@ -69,7 +71,15 @@ export default function ListDoctor() {
                       <img
                         src={avatar}
                         alt="avatar"
-                        className="w-12 h-12 rounded-full border-2 border-gray-300"
+                        className="w-12 h-12 rounded-full border-2 border-gray-300 object-cover"
+
+                        onError={(e) => {
+
+                          console.error("Image load error:", avatar);
+
+                          e.target.src = "https://randomuser.me/api/portraits/men/32.jpg";
+
+                        }}
                       />
                       <div>
                         <div className="font-bold text-base">{name}</div>
@@ -90,7 +100,7 @@ export default function ListDoctor() {
                 {specialties.map((speciality, index) => (
                   <div className="flex justify-between" key={index}>
                     <span>{speciality.name}</span>
-                    <span>{speciality.doctorCount || 0} Bác Sĩ</span> {/* Hiển thị số bác sĩ */}
+                    <span>{speciality.doctorCount} Bác Sĩ</span> {/* Hiển thị số bác sĩ */}
                   </div>
                 ))}
               </div>
