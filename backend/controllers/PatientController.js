@@ -1,42 +1,86 @@
-const { User, Patient, Appointment, MedicalRecord, Doctor } = require("../models");
+const { Patient, Appointment, MedicalRecord, Doctor } = require("../models");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+
+// Generate JWT token
+function generateToken(id, type) {
+  return jwt.sign({ id: id, type: type }, process.env.JWT_SECRET || "your_jwt_secret", {
+    expiresIn: "2h",
+  });
+}
+
+//Patient login
+const patientLogin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const patient = await Patient.findOne({ where: { email } });
+    if (!patient) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const isMatch = await bcrypt.compare(password, patient.password);
+    if (!isMatch) {
+      return res.status(401).json({ error: "Invalid password" });
+    }
+    const token = generateToken(patient.id, "patient");
+    res.json({ token });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to login" });
+  }
+};
 
 // Register patient
 const register = async (req, res) => {
   try {
-    const { name, email, identityNumber, phoneNumber, dateOfBirth, gender, address } = req.body;
+    const { name, email, password, identityNumber, phoneNumber, dateOfBirth, gender, address } = req.body;
 
-    const user = await User.create({
+    let existingEmail = await Patient.findOne({ where: { email } });
+    if (existingEmail) {
+      return res.status(409).json({ error: "Email already exists" });
+    }
+    let existingPhone = await Patient.findOne({ where: { phoneNumber } });
+    if (existingPhone) {
+      return res.status(409).json({ error: "Phone number already exists" });
+    }
+    let existingIdentityNumber = await Patient.findOne({ where: { identityNumber } });
+    if (existingIdentityNumber) {
+      return res.status(409).json({ error: "Identity number already exists" });
+    }
+    const patientUser = await Patient.create({
       name,
       email,
+      password,
       identityNumber,
       phoneNumber,
       dateOfBirth,
       gender,
       address,
-      role: "patient",
-      password: "123456"
     });
 
-    const patient = await Patient.create({ userId: user.id });
-
-    res.status(201).json({ user, patient });
+    res.status(201).json({ patientUser });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to register patient" });
   }
 };
 
-// Create appointment
+// Create appointment with login -decode token
 const createAppointment = async (req, res) => {
   try {
-    const { patientId, date, startTime, endTime } = req.body;
-
+    const { date, startTime, endTime } = req.body;
+    const userId = req.userId;
+    const patient = await Patient.findOne({ where: { userId } });
+    if (!patient) {
+      return res.status(400).json({ error: "Patient record not found for this user" });
+    }
     const appointment = await Appointment.create({
-      patientId,
+      patientId: patient.id,
       date,
       startTime,
       endTime,
-      status: "pending"
+      status: "pending",
+      createById: patient.id,
+      createByType: "patient"
     });
 
     res.status(201).json(appointment);
@@ -50,44 +94,38 @@ const createAppointment = async (req, res) => {
 const createAppointmentWithoutLogin = async (req, res) => {
   try {
     const { name, identityNumber, phoneNumber, date, startTime, endTime } = req.body;
-    const existingUser = await User.findOne({ where: { identityNumber } });
-    if (existingUser) {
-      const patient = await Patient.findOne({ where: { userId: existingUser.id } });
-      if (!patient) {
-        return res.status(400).json({ error: "Patient record not found for this user" });
-      }
-    
+    const existingUser = await Patient.findOne({ where: { identityNumber } });
+    if (existingUser) {    
       const appointment = await Appointment.create({
-        patientId: patient.id,
+        patientId: existingUser.id,
         date,
         startTime,
         endTime,
         status: "pending",
-        createBy: patient.id
+        createById: existingUser.id,
+        createByType: "patient"
       });
     
-      return res.status(201).json({ existingUser, patient, appointment });
+      return res.status(201).json({ existingUser, appointment });
     }
 
-    const newUser = await User.create({
+    const newUser = await Patient.create({
       name,
       identityNumber,
       phoneNumber,
-      role: "patient",
     });
 
-    const patient = await Patient.create({ userId: newUser.id });
-
     const newAppointment = await Appointment.create({
-      patientId: patient.id,
+      patientId: newUser.id,
       date,
       startTime,
       endTime,
       status: "pending",
-      createBy: patient.id
+      createById: newUser.id,
+      createByType: "patient"
     });
 
-    res.status(201).json({newUser, patient, newAppointment});
+    res.status(201).json({newUser, newAppointment});
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to create appointment" });
@@ -219,6 +257,7 @@ const getPatientById = async (req, res) => {
 
 
 module.exports = {
+  patientLogin,
   register,
   createAppointment,
   getPrescriptions,
