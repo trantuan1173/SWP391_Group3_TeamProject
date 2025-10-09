@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { getDoctor, getDoctorById, updateDoctor, deleteDoctor, getDoctorAvailable } = require("../controllers/DoctorController");
+const { getDoctor, getDoctorById, updateDoctor, deleteDoctor, getDoctorAvailable, getDoctorSchedule, getSpecialties } = require("../controllers/DoctorController");
 const { protect, authorize } = require("../middleware/authMiddleware.js");
 
 /**
@@ -157,4 +157,6 @@ router.delete("/:id", protect, authorize("admin" || "doctor"), deleteDoctor);
  *                 $ref: '#/components/schemas/Doctor'
  */
 router.post("/available", getDoctorAvailable);
+
+router.get("/doctors/:doctorId/schedules", getDoctorSchedule);
 module.exports = router;

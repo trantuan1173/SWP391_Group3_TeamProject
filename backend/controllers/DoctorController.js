@@ -1,4 +1,4 @@
-const { Doctor, Appointment, DoctorSchedule } = require("../models");
+const { Doctor, Appointment, DoctorSchedule, Employee, EmployeeRole, Role } = require("../models");
 const { Op } = require("sequelize");
 const {
   sendVerifyEmail,
@@ -9,24 +9,66 @@ const {
 const getDoctor = async (req, res) => {
   try {
     const doctors = await Doctor.findAll({
+      attributes: ["id", "speciality", "isAvailable", "employeeId"], // Lấy speciality từ Doctor
       include: [
         {
-          model: User,
+          model: Employee,
           attributes: ["id", "name", "email", "phoneNumber", "avatar"],
-        },
+          required: true, // INNER JOIN - chỉ lấy Doctor có Employee
+          include: [
+            {
+              model: EmployeeRole,
+              as: 'EmployeeRoles',
+              attributes: [], // Không cần lấy data, chỉ dùng để filter
+              where: {
+                roleId: 2 // Chỉ lấy Employee có roleId = 2 (Bác sĩ)
+              },
+              required: true // INNER JOIN
+            }
+          ]
+        }
       ],
     });
 
-    res.status(200).json(doctors);
+    // Format lại data để dễ sử dụng ở frontend
+    const formattedDoctors = doctors.map(doctor => ({
+      id: doctor.id,
+      speciality: doctor.speciality || "Chưa có chuyên khoa",
+      isAvailable: doctor.isAvailable,
+      employee: {
+        id: doctor.Employee?.id,
+        name: doctor.Employee?.name || "Chưa có tên",
+        email: doctor.Employee?.email,
+        phoneNumber: doctor.Employee?.phoneNumber,
+        avatar: doctor.Employee?.avatar 
+          ? `${req.protocol}://${req.get('host')}${doctor.Employee.avatar}`
+          : "https://randomuser.me/api/portraits/men/32.jpg"
+      }
+    }));
+
+    res.status(200).json(formattedDoctors);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to get doctor" });
+    console.error("Error in getDoctor:", error);
+    res.status(500).json({ error: "Failed to get doctor", details: error.message });
   }
 };
 
 const getDoctorById = async (req, res) => {
   try {
-    const doctor = await Doctor.findByPk(req.params.id);
+    const doctor = await Doctor.findByPk(req.params.id, {
+      attributes: ["id", "speciality", "isAvailable", "employeeId"],
+      include: [
+        {
+          model: Employee,
+          attributes: ["id", "name", "email", "phoneNumber", "avatar"],
+        }
+      ]
+    });
+    
+    if (!doctor) {
+      return res.status(404).json({ error: "Doctor not found" });
+    }
+    
     res.status(200).json(doctor);
   } catch (error) {
     console.error(error);
@@ -58,7 +100,16 @@ const getDoctorAvailable = async (req, res) => {
   try {
     const { speciality, date, startTime, endTime } = req.body;
 
-    const doctors = await Doctor.findAll({where: { isAvailable: true, speciality }});
+    const doctors = await Doctor.findAll({
+      where: { isAvailable: true, speciality },
+      attributes: ["id", "speciality", "isAvailable", "employeeId"],
+      include: [
+        {
+          model: Employee,
+          attributes: ["id", "name", "email", "phoneNumber", "avatar"],
+        }
+      ]
+    });
     const doctorIds = doctors.map(d => d.id);
 
     if (doctorIds.length === 0) {
@@ -97,4 +148,55 @@ const getDoctorAvailable = async (req, res) => {
   }
 };
 
-module.exports = { getDoctor, getDoctorById, updateDoctor, deleteDoctor, getDoctorAvailable };
+const getDoctorSchedule = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+
+    const schedules = await DoctorSchedule.findAll({
+      where: {
+        doctorId: doctorId
+      },
+      order: [
+        ['date', 'ASC'],
+        ['startTime', 'ASC']
+      ]
+    });
+
+    res.status(200).json(schedules);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to get doctor schedule" });
+  }
+};
+
+const { Sequelize } = require("sequelize");
+const getSpecialties = async (req, res) => {
+  try {
+    const specialties = await Doctor.findAll({
+      attributes: [
+        'speciality',
+        [Sequelize.fn('COUNT', Sequelize.col('id')), 'doctorCount']
+      ],
+      where: {
+        speciality: {
+          [Op.ne]: null // Loại bỏ các giá trị null
+        }
+      },
+      group: ['speciality'],
+      raw: true
+    });
+
+    // Format lại data
+    const formattedSpecialties = specialties.map(s => ({
+      name: s.speciality,
+      doctorCount: parseInt(s.doctorCount) || 0
+    }));
+
+    res.status(200).json(formattedSpecialties);
+  } catch (error) {
+    console.error("Error in getSpecialties:", error);
+    res.status(500).json({ error: "Failed to get specialties", details: error.message });
+  }
+};
+
+module.exports = { getDoctor, getDoctorById, updateDoctor, deleteDoctor, getDoctorAvailable, getDoctorSchedule, getSpecialties };

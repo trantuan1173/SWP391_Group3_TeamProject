@@ -11,6 +11,7 @@ export const API_ENDPOINTS = {
   AUTH_PROFILE: `${baseUrl}/api/users/profile`,
   VERIFY: `${baseUrl}/api/users/verify`,
   DOCTOR_LIST: `${baseUrl}/api/doctors`,
+  SPECIALITY_LIST: `${baseUrl}/api/doctors/specialties`,
   USER_LIST: `${baseUrl}/api/users`,
   GET_ALL_USERS: `${baseUrl}/api/admin/employees`,
   GET_ROLES: `${baseUrl}/api/admin/roles`,

@@ -19,8 +19,9 @@ export default function Header() {
         </div>
         {/* Menu */}
         <nav className="flex items-center" style={{ gap: "50px" }}>
-          <a href="/doctor" className="text-black font-medium no-underline mx-[50px]">Bác Sĩ</a>
-          <a href="/book" className="text-black font-medium no-underline mx-[50px]">Đặt lịch khám</a>
+          <a href="/doctor" className="text-black font-medium no-underline mx-[25px]" style={{ textDecoration: 'none' }}>Bác Sĩ</a>
+          <a href="/book" className="text-black font-medium no-underline mx-[25px]" style={{ textDecoration: 'none' }}>Đặt lịch khám</a>
+          <a href="/contact" className="text-black font-medium no-underline mx-[25px]" style={{ textDecoration: 'none' }}>Liên hệ</a>
           <button className="border border-gray-300 rounded px-3 py-1 text-gray-700 bg-gray-100 hover:bg-gray-200 transition text-sm font-medium">
             Blog
           </button>

@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
-import Header from "../../components/Header";
+import Header from "../../components/guestlayout/Header";
+import Footer from "../../components/guestlayout/Footer";
 import axios from "axios";
 import { API_ENDPOINTS } from "../../config";
 
 export default function ListDoctor() {
   const [doctors, setDoctors] = useState([]);
+  const [specialties, setSpecialties] = useState([]); // Khai báo state cho chuyên khoa
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -14,22 +16,32 @@ export default function ListDoctor() {
         const doctorUrl = API_ENDPOINTS?.DOCTOR_LIST || "/api/doctor";
         const res = await axios.get(doctorUrl);
         console.log("doctor response:", res);
-        // hỗ trợ nhiều dạng response
-        const list =
-          Array.isArray(res.data) ||
-          Array.isArray(res.data?.doctors) ||
-          Array.isArray(res.data?.data)
-            ? res.data
-            : [];
+        console.log("doctor data:", res.data); 
+        console.log("first doctor avatar:", res.data[0]?.employee?.avatar);
+        const list = Array.isArray(res.data) ? res.data : [];
         setDoctors(list);
+
+         const specialtyCount = {};
+        list.forEach(doctor => {
+          const specialty = doctor.speciality || "Chưa có chuyên khoa";
+          specialtyCount[specialty] = (specialtyCount[specialty] || 0) + 1;
+        });
+
+        // Chuyển object thành array để hiển thị
+        const specialtyList = Object.entries(specialtyCount).map(([name, count]) => ({
+          name,
+          doctorCount: count
+        }));
+
+        setSpecialties(specialtyList);
+        console.log("Specialty count:", specialtyList);
       } catch (err) {
         console.error("Fetch doctors error:", err);
-        setDoctors([]); // không hiển thị lỗi đỏ, chỉ để danh sách rỗng
+        setDoctors([]);
       } finally {
         setLoading(false);
       }
     };
-
     fetchDoctors();
   }, []);
 
@@ -49,11 +61,10 @@ export default function ListDoctor() {
               )}
 
               {doctors.map((doctor, idx) => {
-                // lấy thông tin từ chính object doctor
-                const user = doctor.User || {}; // Sửa lại để lấy thông tin từ User
-                const name = user.name || "Chưa có tên"; // Lấy tên từ đối tượng User
-                const avatar = user.avatar || "https://randomuser.me/api/portraits/men/32.jpg"; // Lấy avatar từ đối tượng User
-                const speciality = doctor.speciality || "Chưa có chuyên khoa"; // Lấy chuyên khoa
+                const employee = doctor.employee || {}; // lấy thông tin employee bên trong doctor
+                const name = employee.name || "Chưa có tên"; // lấy tên
+                const avatar = employee.avatar || "https://randomuser.me/api/portraits/men/32.jpg"; // lấy avatar
+                const speciality = doctor.speciality || "Chưa có chuyên khoa"; // lấy tên chuyên khoa
 
                 return (
                   <React.Fragment key={doctor.id ?? idx}>
@@ -61,7 +72,15 @@ export default function ListDoctor() {
                       <img
                         src={avatar}
                         alt="avatar"
-                        className="w-12 h-12 rounded-full border-2 border-gray-300"
+                        className="w-12 h-12 rounded-full border-2 border-gray-300 object-cover"
+
+                        onError={(e) => {
+
+                          console.error("Image load error:", avatar);
+
+                          e.target.src = "https://randomuser.me/api/portraits/men/32.jpg";
+
+                        }}
                       />
                       <div>
                         <div className="font-bold text-base">{name}</div>
@@ -79,39 +98,18 @@ export default function ListDoctor() {
             <div className="bg-[#ffe3d1] rounded-xl shadow-md p-6">
               <div className="font-bold text-lg mb-4">Chuyên Khoa</div>
               <div className="space-y-3 text-gray-800 text-base">
-                <div className="flex justify-between">
-                  <span>Sản Phụ Khoa</span>
-                  <span>15 Bác Sĩ</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Mắt</span>
-                  <span>20 Bác Sĩ</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Tai - Mũi - Họng</span>
-                  <span>10 Bác Sĩ</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Nhi</span>
-                  <span>10 Bác Sĩ</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Cơ Xương Khớp</span>
-                  <span>10 Bác Sĩ</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Nội Tim Mạch</span>
-                  <span>10 Bác Sĩ</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Thần Kinh</span>
-                  <span>10 Bác Sĩ</span>
-                </div>
+                {specialties.map((speciality, index) => (
+                  <div className="flex justify-between" key={index}>
+                    <span>{speciality.name}</span>
+                    <span>{speciality.doctorCount} Bác Sĩ</span> {/* Hiển thị số bác sĩ */}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
       </div>
+      <Footer />
     </>
   );
 }

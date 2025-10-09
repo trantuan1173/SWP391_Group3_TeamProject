@@ -8,7 +8,7 @@ const Employee = require("./Employee");
 const EmployeeRole = require("./EmployeeRole");
 const Role = require("./Role");
 const Service = require("./Service");
-const MedicalRecordService = require("./MedicalRecordService")
+const MedicalRecordService = require("./MedicalRecordService");
 
 MedicalRecord.belongsToMany(Service, {
   through: MedicalRecordService,
@@ -24,6 +24,15 @@ EmployeeRole.belongsTo(Role, { foreignKey: "roleId" });
 
 Employee.hasOne(Doctor, { foreignKey: "employeeId" });
 Doctor.belongsTo(Employee, { foreignKey: "employeeId" });
+
+Employee.hasMany(EmployeeRole, { 
+  foreignKey: 'employeeId',
+  as: 'EmployeeRoles'
+});
+
+EmployeeRole.belongsTo(Employee, { 
+  foreignKey: 'employeeId'
+});
 
 Employee.hasMany(MedicalRecord, { foreignKey: "createBy" });
 MedicalRecord.belongsTo(Employee, { foreignKey: "createBy" });

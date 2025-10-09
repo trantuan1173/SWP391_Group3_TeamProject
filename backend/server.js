@@ -8,10 +8,10 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./routes/swagger");
 const app = express();
 const path = require("path");
-
+require('./models');
 app.use(cors());
 app.use(express.json());
-
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 (async () => {
   await connectDB();
   await sequelize.sync({ alter: true });
