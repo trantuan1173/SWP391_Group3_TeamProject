@@ -42,6 +42,9 @@ Appointment.belongsTo(Doctor, { foreignKey: "doctorId" });
 Doctor.hasMany(MedicalRecord, { foreignKey: "doctorId" });
 MedicalRecord.belongsTo(Doctor, { foreignKey: "doctorId" });
 
+Appointment.hasOne(MedicalRecord, { foreignKey: "appointmentId" });
+MedicalRecord.belongsTo(Appointment, { foreignKey: "appointmentId" });
+
 Patient.hasMany(Appointment, { foreignKey: "patientId" });
 Appointment.belongsTo(Patient, { foreignKey: "patientId" });
 Patient.hasMany(MedicalRecord, { foreignKey: "patientId" });

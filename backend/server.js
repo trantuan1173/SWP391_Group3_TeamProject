@@ -12,6 +12,9 @@ require('./models');
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(express.urlencoded({ extended: true }));
+
+
 (async () => {
   await connectDB();
   await sequelize.sync({ alter: true });

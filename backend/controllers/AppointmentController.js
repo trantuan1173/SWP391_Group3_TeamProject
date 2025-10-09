@@ -1,5 +1,4 @@
-const { Appointment } = require("../models");
-const { User } = require("../models");
+const { Appointment, Doctor, Room, Employee } = require("../models");
 const {
   sendVerifyEmail,
   sendForgotPasswordEmail,
@@ -53,7 +52,17 @@ const deleteAppointment = async (req, res) => {
 //Get appointment by patient id
 const getAppointmentByPatientId = async (req, res) => {
   try {
-    const appointment = await Appointment.findAll({ where: { patientId: req.params.id } });
+    const appointment = await Appointment.findAll({
+      where: { patientId: req.params.id },
+      include: [
+        {
+          model: Doctor,
+          include: [{ model: Employee, attributes: ["name", "email", "phoneNumber", "avatar"] }],
+        },
+        { model: Room, attributes: ["name", "type"] },
+      ],
+    });
+
     res.status(200).json(appointment);
   } catch (error) {
     console.error(error);

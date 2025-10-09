@@ -3,6 +3,8 @@ import { Routes, Route } from "react-router-dom";
 import BookMedicalExam from "./page/guest/BookMedicalExam";
 import ListDoctor from "./page/guest/ListDoctor";
 import DoctorSchedule from "./page/doctor/DoctorSchedule";
+import QuickBook from "./page/Patient/QuickBook";
+import ListDoctor from "./page/doctor/ListDoctor";
 import PatientDashboard from './page/Patient/PatientDashboard'
 import Login from "./page/Auth/Login";
 import Register from "./page/Auth/Register";
@@ -26,6 +28,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/verify" element={<VerifyPage />} />
         <Route path="/book" element={<BookMedicalExam />} />
+  <Route path="/appointment" element={<QuickBook />} />
         <Route path="/doctor" element={<ListDoctor />} />
         <Route path="/contact" element={<ContactUs />} />
 
