@@ -16,7 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 
 (async () => {
   await connectDB();
-  await sequelize.sync({ alter: false });
+  await sequelize.sync({ alter: true });
 
   app.get("/", (req, res) => {
     res.json({ message: "Hello from MySQL + Sequelize" });
