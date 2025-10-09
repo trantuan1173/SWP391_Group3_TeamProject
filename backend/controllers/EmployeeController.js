@@ -1,4 +1,6 @@
-const { User, Patient } = require("../models");
+const { Employee } = require("../models");
+const Role = require("../models/Role");
+const EmployeeRole = require("../models/EmployeeRole");
 const jwt = require("jsonwebtoken");
 const { sendVerifyEmail } = require("../service/sendVerifyEmail");
 
@@ -151,20 +153,33 @@ function generateToken(id, type) {
 //   }
 // };
 
-//Employee login
+//Employee login (Log)
 const employeeLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const employee = await Employee.findOne({ where: { email } });
-    if (!employee.isActive) {
-      return res.status(401).json({ error: "User not verified" });
-    }
+    const employee = await Employee.findOne({
+      where: { email },
+      include: [{ model: Role }]
+    });
+    // if (!employee.isActive) {
+    //   return res.status(401).json({ error: "User not verified" });
+    // }
     if (!employee) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
     if (!employee.comparePassword(password)) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
+    // //Check role
+    // if (employee.role.name === "doctor") {
+    //   return res.status(200).json({ employee, token: generateToken(employee.id, "doctor") });
+    // }
+    // if (employee.role.name === "staff") {
+    //   return res.status(200).json({ employee, token: generateToken(employee.id, "staff") });
+    // }
+    // if (employee.role.name === "admin") {
+    //   return res.status(200).json({ employee, token: generateToken(employee.id, "admin") });
+    // }
     res.status(200).json({ employee, token: generateToken(employee.id, "employee") });
   } catch (error) {
     console.error(error);

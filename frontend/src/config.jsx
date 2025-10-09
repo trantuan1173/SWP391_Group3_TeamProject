@@ -6,7 +6,8 @@ export const API_ENDPOINTS = {
 
   // USER_UPDATE_PROFILE: (userId) => `${baseUrl}/api/users/${userId}`,
   // GET_ALL_ROLE: `${baseUrl}/api/roles`,
-  LOGIN: `${baseUrl}/api/users/login`,
+  EMP_LOGIN: `${baseUrl}/api/employees/login`,
+  PATIENT_LOGIN: `${baseUrl}/api/patients/login`,
   REGISTER: `${baseUrl}/api/users/register`,
   AUTH_PROFILE: `${baseUrl}/api/users/profile`,
   VERIFY: `${baseUrl}/api/users/verify`,

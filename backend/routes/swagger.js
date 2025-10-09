@@ -74,7 +74,7 @@ const options = {
     ],
   },
   apis: [
-    "./routes/AdminRouter.js",
+    "./routes/AdminRouter.js", "./routes/EmployeeRouter.js", "./routes/PatientRouter.js",
   ],
 };
 
