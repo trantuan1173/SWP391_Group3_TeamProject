@@ -1,6 +1,4 @@
-const { Employee } = require("../models");
-const Role = require("../models/Role");
-const EmployeeRole = require("../models/EmployeeRole");
+const { Employee, Role, EmployeeRole} = require("../models");
 const jwt = require("jsonwebtoken");
 const { sendVerifyEmail } = require("../service/sendVerifyEmail");
 
@@ -10,6 +8,95 @@ function generateToken(id, type) {
     expiresIn: "2h",
   });
 }
+
+// Lấy thông tin employee kèm role
+// const getEmployeeWithRole = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+
+//     const employee = await Employee.findByPk(id, {
+//       include: [
+//         {
+//           model: EmployeeRole,
+//           as: "employeeRoles",
+//           include: [
+//             {
+//               model: Role,
+//               as: "role",
+//               attributes: ["id", "name"]
+//             }
+//           ]
+//         }
+//       ]
+//     });
+
+//     if (!employee) {
+//       return res.status(404).json({ error: "Không tìm thấy nhân viên" });
+//     }
+
+//     // Lấy danh sách roles
+//     const roles = employee.employeeRoles.map(er => ({
+//       id: er.role.id,
+//       name: er.role.name
+//     }));
+
+//     res.json({
+//       id: employee.id,
+//       name: employee.name,
+//       email: employee.email,
+//       roles,
+//       isDoctor: roles.some(role => role.id === 2) // Check nếu có role Doctor (id=2)
+//     });
+
+//   } catch (error) {
+//     console.error("Error:", error);
+//     res.status(500).json({ error: "Lỗi server" });
+//   }
+// };
+
+
+// Lấy thông tin employee kèm role
+const getEmployeeWithRole = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const employee = await Employee.findByPk(id, {
+      include: [
+        {
+          model: Role,
+          as: "roles", // ✅ Sử dụng alias từ belongsToMany
+          through: { attributes: [] }, // Ẩn bảng trung gian
+          attributes: ["id", "name"]
+        }
+      ]
+    });
+
+    if (!employee) {
+      return res.status(404).json({ error: "Không tìm thấy nhân viên" });
+    }
+
+    // Lấy danh sách roles
+    const roles = employee.roles.map(role => ({
+      id: role.id,
+      name: role.name
+    }));
+
+    res.json({
+      id: employee.id,
+      name: employee.name,
+      email: employee.email,
+      phoneNumber: employee.phoneNumber,
+      address: employee.address,
+      roles,
+      isDoctor: roles.some(role => role.name.toLowerCase() === "doctor") // Check nếu có role Doctor
+    });
+
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Lỗi server", details: error.message });
+  }
+};
+
 
 // const register = async (req, res) => {
 //   try {
@@ -187,6 +274,7 @@ const employeeLogin = async (req, res) => {
   }
 };
 
+
 const authProfile = async (req, res) => {
   try {
     const token = req.headers.authorization.split(" ")[1];
@@ -210,4 +298,4 @@ const authProfile = async (req, res) => {
   }
 };
 
-module.exports = { employeeLogin, authProfile };
+module.exports = { employeeLogin, getEmployeeWithRole, authProfile };

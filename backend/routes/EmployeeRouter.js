@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const { employeeLogin, authProfile } = require("../controllers/EmployeeController");
+const { employeeLogin, getEmployeeWithRole , authProfile  } = require("../controllers/EmployeeController");
+const EmployeeController = require('../controllers/EmployeeController');
+const { protect } = require("../middleware/authMiddleware");
 
 /**
  * @swagger
@@ -35,6 +37,26 @@ const { employeeLogin, authProfile } = require("../controllers/EmployeeControlle
  *         description: Failed to login
  */
 router.post("/login", employeeLogin);
+
+/**
+ * @swagger
+ * /employees/{id}/with-role:
+ *   get:
+ *     summary: Lấy thông tin nhân viên kèm role
+ *     tags: [Employees]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Thông tin nhân viên và role
+ */
+router.get("/:id/with-role", EmployeeController.getEmployeeWithRole);
 
 /**
  * @swagger

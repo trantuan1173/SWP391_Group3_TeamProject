@@ -70,7 +70,7 @@ export default function Login() {
                   const roleName = employee.Roles[0].name;
                   switch (roleName) {
                       case "Doctor":
-                          navigate("/doctor");
+                          navigate("/doctor/schedule");
                           break;
                       case "Receptionist":
                           navigate("receptionist");
