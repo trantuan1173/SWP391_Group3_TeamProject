@@ -1,7 +1,48 @@
 const express = require("express");
 const router = express.Router();
-const { getAllMedicalRecordByPatientId, getAllMedicalRecordByAppointmentId, getMedicalRecordById, createMedicalRecord, updateMedicalRecord, deleteMedicalRecord } = require("../controllers/MedicalRecordController");
+const { getAllMedicalRecordByPatientId, getAllMedicalRecordByAppointmentId, getMedicalRecordById, createMedicalRecord, updateMedicalRecord, deleteMedicalRecord,getMedicalRecordsByDoctor,getPatientsByDoctor } = require("../controllers/MedicalRecordController");
 const { protect, authorize } = require("../middleware/authMiddleware");
+
+/**
+ * @swagger
+ * /medical-records/doctor/{doctorId}:
+ *   get:
+ *     summary: Lấy tất cả hồ sơ khám của bác sĩ
+ *     tags: [Medical Record]
+ *     parameters:
+ *       - in: path
+ *         name: doctorId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: patientId
+ *         schema:
+ *           type: integer
+ *         description: Lọc theo bệnh nhân (optional)
+ *     responses:
+ *       200:
+ *         description: Danh sách hồ sơ khám
+ */
+router.get("/doctor/:doctorId", protect, authorize("Doctor", "Admin"), getMedicalRecordsByDoctor);
+
+/**
+ * @swagger
+ * /medical-records/doctor/{doctorId}/patients:
+ *   get:
+ *     summary: Lấy danh sách bệnh nhân đã từng khám của bác sĩ
+ *     tags: [Medical Record]
+ *     parameters:
+ *       - in: path
+ *         name: doctorId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Danh sách bệnh nhân
+ */
+router.get("/doctor/:doctorId/patients", protect, authorize("Doctor", "Admin"), getPatientsByDoctor);
 
 /**
  * @swagger

@@ -1,9 +1,10 @@
-const { MedicalRecord } = require("../models");
+const { MedicalRecord, Employee } = require("../models");
 const { Appointment } = require("../models");
 const { Patient } = require("../models");
-const { Doctor } = require("../models");
+//const { Doctor } = require("../models");
 const { Service } = require("../models");
 const { MedicalRecordService } = require("../models");
+const { Op } = require("sequelize");
 
 const getAllMedicalRecordByPatientId = async (req, res) => {
     try {
@@ -176,11 +177,146 @@ const deleteMedicalRecord = async (req, res) => {
     }
 };
 
+const getMedicalRecordsByDoctor = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+    const { patientId } = req.query;
+
+    console.log("Getting medical records for doctorId:", doctorId, "patientId:", patientId); // Debug
+
+    // Kiểm tra xem doctorId có khớp với user đang đăng nhập không
+    if (req.userId && req.userId !== parseInt(doctorId)) {
+      return res.status(403).json({ 
+        success: false,
+        error: "Bạn chỉ có thể xem hồ sơ của bệnh nhân mà bạn đã khám" 
+      });
+    }
+
+    const whereConditions = { doctorId: parseInt(doctorId) };
+    if (patientId) {
+      whereConditions.patientId = parseInt(patientId);
+    }
+
+    console.log("Where conditions:", whereConditions); // Debug
+
+    const medicalRecords = await MedicalRecord.findAll({
+      where: whereConditions,
+      include: [
+        {
+          model: Patient,
+          attributes: ['id', 'name', 'email', 'phoneNumber', 'dateOfBirth', 'gender']
+        },
+        {
+          model: Appointment,
+          attributes: ['id', 'date', 'startTime', 'endTime', 'status']
+        }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+
+    console.log("Found medical records:", medicalRecords.length); // Debug
+
+    const formattedRecords = medicalRecords.map(record => ({
+      id: record.id,
+      appointmentId: record.appointmentId,
+      symptoms: record.symptoms,
+      diagnosis: record.diagnosis,
+      treatment: record.treatment,
+      orderDetails: typeof record.orderDetails === 'string' 
+        ? JSON.parse(record.orderDetails) 
+        : (record.orderDetails || []),
+      createdAt: record.createdAt,
+      patient: record.Patient,
+      appointment: record.Appointment
+    }));
+
+    res.status(200).json({
+      success: true,
+      message: "Lấy danh sách hồ sơ khám thành công",
+      data: formattedRecords
+    });
+  } catch (error) {
+    console.error("Error in getMedicalRecordsByDoctor:", error);
+    res.status(500).json({ 
+      success: false,
+      error: "Failed to get medical records",
+      details: error.message 
+    });
+  }
+};
+
+const getPatientsByDoctor = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+
+    console.log("Getting patients for doctorId:", doctorId); // Debug
+    console.log("Request userId:", req.userId); // Debug
+
+    // Kiểm tra quyền truy cập
+    if (req.userId && req.userId !== parseInt(doctorId)) {
+      return res.status(403).json({ 
+        success: false,
+        error: "Bạn chỉ có thể xem danh sách bệnh nhân của mình" 
+      });
+    }
+
+    // Lấy danh sách appointments của doctor
+    const appointments = await Appointment.findAll({
+      where: { 
+        doctorId: parseInt(doctorId),
+        status: { [Op.in]: ['confirmed', 'completed'] }
+      },
+      attributes: ['patientId'],
+      group: ['patientId'],
+      raw: true
+    });
+
+    console.log("Found appointments:", appointments); // Debug
+
+    if (appointments.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "Chưa có bệnh nhân nào",
+        data: []
+      });
+    }
+
+    // Lấy danh sách patientIds
+    const patientIds = appointments.map(a => a.patientId);
+    console.log("Patient IDs:", patientIds); // Debug
+
+    // Lấy thông tin bệnh nhân
+    const patients = await Patient.findAll({
+      where: {
+        id: { [Op.in]: patientIds }
+      },
+      attributes: ['id', 'name', 'email', 'phoneNumber', 'dateOfBirth', 'gender']
+    });
+
+    console.log("Found patients:", patients.length); // Debug
+
+    res.status(200).json({
+      success: true,
+      message: "Lấy danh sách bệnh nhân thành công",
+      data: patients
+    });
+  } catch (error) {
+    console.error("Error in getPatientsByDoctor:", error);
+    res.status(500).json({ 
+      success: false,
+      error: "Failed to get patients",
+      details: error.message 
+    });
+  }
+};
+
 module.exports = {
     getAllMedicalRecordByPatientId,
     getAllMedicalRecordByAppointmentId,
     getMedicalRecordById,
     createMedicalRecord,
     updateMedicalRecord,
-    deleteMedicalRecord
+    deleteMedicalRecord,
+    getMedicalRecordsByDoctor,
+    getPatientsByDoctor
 };

@@ -26,5 +26,4 @@ const Room = sequelize.define("Room", {
     defaultValue: DataTypes.NOW,
   },
 });
-
 module.exports = Room;

@@ -82,8 +82,6 @@ export default function Login() {
                           navigate("/");
                   }
               } else {
-                //debug
-                console.warn("No roles found for employee");
                   navigate("/");
               }
           }

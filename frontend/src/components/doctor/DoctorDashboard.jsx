@@ -44,7 +44,7 @@ export default function DoctorDashboard({ children, activeMenu, setActiveMenu, d
                 <span>Schedule</span>
               </button>
               <button
-                onClick={() => setActiveMenu('patients')}
+                onClick={() => { setActiveMenu('patients'); navigate('/doctor/exam-records'); }}
                 className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg transition ${
                   activeMenu === 'patients' 
                     ? 'bg-white text-green-600 font-semibold' 
@@ -55,6 +55,7 @@ export default function DoctorDashboard({ children, activeMenu, setActiveMenu, d
                 <span className="text-lg">🧑‍⚕️</span>
                 <span>Patients</span>
               </button>
+
               <button
                 onClick={() => setActiveMenu('settings')}
                 className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg transition ${

@@ -24,4 +24,7 @@ export const API_ENDPOINTS = {
   CREATE_APPOINTMENT: `${baseUrl}/api/patients/appointments`,
   CREATE_APPOINTMENT_WITHOUT_LOGIN: `${baseUrl}/api/patients/appointmentsWithoutLogin`,
   CONFIRM_APPOINTMENT: `${baseUrl}/api/patients/confirmAppointment`,
+  GET_MEDICAL_RECORDS_BY_DOCTOR: (doctorId, patientId = null) => `${baseUrl}/api/medical-records/doctor/${doctorId}${patientId ? `?patientId=${patientId}` : ''}`,
+  GET_PATIENTS_BY_DOCTOR: (doctorId) => `${baseUrl}/api/medical-records/doctor/${doctorId}/patients`,
+  GET_EMPLOYEE_WITH_ROLE: (employeeId) => `${baseUrl}/api/employees/${employeeId}/with-role`,
 };

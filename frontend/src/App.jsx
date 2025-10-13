@@ -14,6 +14,7 @@ import UserDetailManagement from "./page/AdminUserManager/UserDetailManagement";
 import RequireAuth from "./context/RequireAuth";
 import LandingPage from "./page/guest/LandingPage";
 import ContactUs from "./page/guest/ContactUs";
+import ViewExamRecord from "./page/doctor/ViewExamRecord";
 
 function App() {
   return (
@@ -27,7 +28,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/verify" element={<VerifyPage />} />
         <Route path="/book" element={<BookMedicalExam />} />
-  <Route path="/appointment" element={<QuickBook />} />
+        <Route path="/appointment" element={<QuickBook />} />
         <Route path="/doctor" element={<ListDoctor />} />
         <Route path="/contact" element={<ContactUs />} />
 
@@ -35,8 +36,9 @@ function App() {
         <Route path="/patient-dashboard" element={<PatientDashboard />} />
         <Route path="/patient-dashboard/:id" element={<PatientDashboard />} />
 
-        {/* Doctor Schedule routes */}
+        {/* Doctor Dashboard routes */}
         <Route path="/doctor/schedule" element={<DoctorSchedule />} />
+        <Route path="/doctor/exam-records" element={<ViewExamRecord />} />
 
         {/* Admin routes */}      
         <Route path="/admin/user" element={<UserManagement />}></Route>
