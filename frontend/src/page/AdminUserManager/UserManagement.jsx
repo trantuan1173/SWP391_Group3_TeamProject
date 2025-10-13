@@ -54,7 +54,7 @@ export default function UserManagement() {
   const [searchInput, setSearchInput] = useState(""); // nhập vào input
   const search = useDebounce(searchInput, 500); // debounce 500ms
 
-  const pageSize = 5;
+  const [pageSize, setPageSize] = useState(5);
   const navigate = useNavigate();
 
   // ===== FETCH USERS =====

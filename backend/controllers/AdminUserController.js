@@ -6,6 +6,7 @@ const { Op } = require("sequelize");
 const Role = require("../models/Role");
 const EmployeeRole = require("../models/EmployeeRole");
 const { sendStaffVerifyEmail } = require("../service/sendVerifyEmail");
+const bcrypt = require("bcrypt");
 
 //Create role
 const createRole = async (req, res) => {

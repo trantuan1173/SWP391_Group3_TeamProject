@@ -3,9 +3,9 @@ import { Routes, Route } from "react-router-dom";
 import BookMedicalExam from "./page/guest/BookMedicalExam";
 import ListDoctor from "./page/guest/ListDoctor";
 import DoctorSchedule from "./page/doctor/DoctorSchedule";
-import QuickBook from "./page/Patient/QuickBook";
-import ListDoctor from "./page/doctor/ListDoctor";
-import PatientDashboard from './page/Patient/PatientDashboard'
+// import QuickBook from "./page/Patient/QuickBook";
+// import ListDoctor from "./page/doctor/ListDoctor";
+import PatientDashboard from "./page/Patient/PatientDashboard";
 import Login from "./page/Auth/Login";
 import Register from "./page/Auth/Register";
 import VerifyPage from "./page/Auth/VerifyPage";
@@ -28,7 +28,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/verify" element={<VerifyPage />} />
         <Route path="/book" element={<BookMedicalExam />} />
-  <Route path="/appointment" element={<QuickBook />} />
+        {/* <Route path="/appointment" element={<QuickBook />} /> */}
         <Route path="/doctor" element={<ListDoctor />} />
         <Route path="/contact" element={<ContactUs />} />
 
@@ -37,9 +37,9 @@ function App() {
         <Route path="/patient-dashboard/:id" element={<PatientDashboard />} />
 
         {/* Doctor Schedule routes */}
-        <Route path="/doctor/:doctorId/schedule" element={<DoctorSchedule />} />  
+        <Route path="/doctor/:doctorId/schedule" element={<DoctorSchedule />} />
 
-        {/* Admin routes */}      
+        {/* Admin routes */}
         <Route path="/admin/user" element={<UserManagement />}></Route>
         <Route
           path="/admin/user/:id"
