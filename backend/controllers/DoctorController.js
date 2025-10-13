@@ -9,7 +9,48 @@ const {
 const getDoctor = async (req, res) => {
   try {
     const doctors = await Employee.findAll({
-      attributes: ["id", "speciality", "isActive"], // Lấy speciality từ Doctor
+      attributes: ["id", "speciality", "isActive", "name", "email", "phoneNumber", "avatar"],
+      include: [
+        {
+          model: EmployeeRole,
+          as: 'EmployeeRoles',
+          attributes: [], // Không cần lấy data, chỉ dùng để filter
+          where: {
+            roleId: 2 // Chỉ lấy Employee có roleId = 2 (Bác sĩ)
+          },
+          required: true // INNER JOIN
+
+        }
+      ],
+    });
+
+    // Format lại data để dễ sử dụng ở frontend
+    const formattedDoctors = doctors.map(doctor => ({
+      id: doctor.id,
+      speciality: doctor.speciality || "Chưa có chuyên khoa",
+      isActive: doctor.isActive,
+      employee: {
+        id: doctor.Employee?.id,
+        name: doctor.Employee?.name || "Chưa có tên",
+        email: doctor.Employee?.email,
+        phoneNumber: doctor.Employee?.phoneNumber,
+        avatar: doctor.Employee?.avatar
+          ? `${req.protocol}://${req.get('host')}${doctor.Employee.avatar}`
+          : "https://randomuser.me/api/portraits/men/32.jpg"
+      }
+    }));
+
+    res.status(200).json(formattedDoctors);
+  } catch (error) {
+    console.error("Error in getDoctor:", error);
+    res.status(500).json({ error: "Failed to get doctor", details: error.message });
+  }
+};
+
+const getDoctorById = async (req, res) => {
+  try {
+    const doctor = await Employee.findByPk(req.params.id, {
+      attributes: ["id", "speciality", "isActive", "name", "email", "phoneNumber", "avatar"],
       include: [
         {
           model: Employee,
@@ -27,48 +68,13 @@ const getDoctor = async (req, res) => {
             }
           ]
         }
-      ],
-    });
-
-    // Format lại data để dễ sử dụng ở frontend
-    const formattedDoctors = doctors.map(doctor => ({
-      id: doctor.id,
-      speciality: doctor.speciality || "Chưa có chuyên khoa",
-      isActive: doctor.isActive,
-      employee: {
-        id: doctor.Employee?.id,
-        name: doctor.Employee?.name || "Chưa có tên",
-        email: doctor.Employee?.email,
-        phoneNumber: doctor.Employee?.phoneNumber,
-        avatar: doctor.Employee?.avatar 
-          ? `${req.protocol}://${req.get('host')}${doctor.Employee.avatar}`
-          : "https://randomuser.me/api/portraits/men/32.jpg"
-      }
-    }));
-
-    res.status(200).json(formattedDoctors);
-  } catch (error) {
-    console.error("Error in getDoctor:", error);
-    res.status(500).json({ error: "Failed to get doctor", details: error.message });
-  }
-};
-
-const getDoctorById = async (req, res) => {
-  try {
-    const doctor = await Employee.findByPk(req.params.id, {
-      attributes: ["id", "speciality", "isActive"],
-      include: [
-        {
-          model: Employee,
-          attributes: ["id", "name", "email", "phoneNumber", "avatar"],
-        }
       ]
     });
-    
+
     if (!doctor) {
       return res.status(404).json({ error: "Doctor not found" });
     }
-    
+
     res.status(200).json(doctor);
   } catch (error) {
     console.error(error);
@@ -102,7 +108,25 @@ const getDoctorAvailable = async (req, res) => {
 
     const doctors = await Employee.findAll({
       where: { isActive: true, speciality },
-      attributes: ["id", "speciality", "isActive" , "name", "email", "phoneNumber", "avatar"],
+      attributes: ["id", "speciality", "isActive", "name", "email", "phoneNumber", "avatar"],
+      include: [
+        {
+          model: Employee,
+          attributes: ["id", "name", "email", "phoneNumber", "avatar"],
+          required: true, // INNER JOIN - chỉ lấy Doctor có Employee
+          include: [
+            {
+              model: EmployeeRole,
+              as: 'EmployeeRoles',
+              attributes: [], // Không cần lấy data, chỉ dùng để filter
+              where: {
+                roleId: 2 // Chỉ lấy Employee có roleId = 2 (Bác sĩ)
+              },
+              required: true // INNER JOIN
+            }
+          ]
+        }
+      ]
     });
     const doctorIds = doctors.map(d => d.id);
 
@@ -115,7 +139,7 @@ const getDoctorAvailable = async (req, res) => {
         doctorId: { [Op.in]: doctorIds },
         date,
         startTime: { [Op.lte]: startTime },
-        endTime:   { [Op.gte]: endTime }
+        endTime: { [Op.gte]: endTime }
       }
     });
     const validDoctorIds = validSchedules.map(s => s.doctorId);
@@ -127,7 +151,7 @@ const getDoctorAvailable = async (req, res) => {
         status: "confirmed",
         [Op.and]: [
           { startTime: { [Op.lt]: endTime } },
-          { endTime:   { [Op.gt]: startTime } }
+          { endTime: { [Op.gt]: startTime } }
         ]
       }
     });

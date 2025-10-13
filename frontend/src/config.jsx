@@ -9,7 +9,7 @@ export const API_ENDPOINTS = {
   EMP_LOGIN: `${baseUrl}/api/employees/login`,
   PATIENT_LOGIN: `${baseUrl}/api/patients/login`,
   REGISTER: `${baseUrl}/api/users/register`,
-  AUTH_PROFILE: `${baseUrl}/api/users/profile`,
+  AUTH_PROFILE: `${baseUrl}/api/employees/profile`,
   VERIFY: `${baseUrl}/api/users/verify`,
   DOCTOR_LIST: `${baseUrl}/api/doctors`,
   GET_DOCTOR_SCHEDULE: (doctorId) => `${baseUrl}/api/doctors/${doctorId}/schedule`,
@@ -24,4 +24,6 @@ export const API_ENDPOINTS = {
   CREATE_APPOINTMENT: `${baseUrl}/api/patients/appointments`,
   CREATE_APPOINTMENT_WITHOUT_LOGIN: `${baseUrl}/api/patients/appointmentsWithoutLogin`,
   CONFIRM_APPOINTMENT: `${baseUrl}/api/patients/confirmAppointment`,
+  GET_ALL_APPOINTMENTS: `${baseUrl}/api/appointments`,
+  GET_APPOINTMENT_BY_ID: (appointmentId) => `${baseUrl}/api/appointments/${appointmentId}`,
 };
