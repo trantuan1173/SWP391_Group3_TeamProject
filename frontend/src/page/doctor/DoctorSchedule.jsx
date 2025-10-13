@@ -150,7 +150,7 @@ const DoctorSchedule = () => {
         <div className="bg-white rounded-xl shadow p-6">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-semibold text-gray-800">Lịch Làm Việc</h1>
-            <div className="flex items-center gap-4">
+            {/* <div className="flex items-center gap-4">
               <input
                 type="text"
                 placeholder="Search by name or date..."
@@ -163,7 +163,7 @@ const DoctorSchedule = () => {
               >
                 Create Schedule
               </button>
-            </div>
+            </div> */}
           </div>
 
           {/* table header similar to image (but we display weekly grid below) */}
