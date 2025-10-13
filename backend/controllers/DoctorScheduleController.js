@@ -10,12 +10,7 @@ const getDoctorSchedule = async (req, res) => {
       where: {
         doctorId: doctorId
       },
-      include: [
-        {
-          model: Room,
-          attributes: ['id', 'name']
-        }
-      ],
+      attributes: ['id', 'doctorId', 'date', 'startTime', 'endTime'],
       order: [
         ['date', 'ASC'],
         ['startTime', 'ASC']
