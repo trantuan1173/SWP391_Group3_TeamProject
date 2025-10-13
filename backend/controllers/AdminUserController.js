@@ -195,7 +195,7 @@ const getEmployees = async (req, res) => {
         "address",
         "identityNumber",
       ],
-      include: [{ model: Role }],
+      include: [{ model: Role, as: "roles", attributes: ["name"] }],
       where: whereCondition,
       limit: pageSize,
       offset,
@@ -236,7 +236,7 @@ const deleteEmployee = async (req, res) => {
 const getEmployeeById = async (req, res) => {
   try {
     const user = await Employee.findByPk(req.params.id, {
-      include: [{ model: Role }],
+      include: [{ model: Role, as: "roles", attributes: ["name"] }],
     });
     if (!user) return res.status(404).json({ error: "Employee not found" });
     res.json(user);
@@ -277,7 +277,7 @@ const updateEmployee = async (req, res) => {
     // Tìm nhân viên hiện tại
     const existingUser = await Employee.findOne({
       where: { id },
-      include: [{ model: Role }],
+      include: [{ model: Role, as: "roles", attributes: ["name"] }],
     });
 
     if (!existingUser) {
@@ -344,7 +344,7 @@ const updateEmployee = async (req, res) => {
 
     if (newRole && newRole !== oldRole) {
       await EmployeeRole.destroy({ where: { employeeId: id } });
-      const roleRecord = await Role.findOne({ where: { name: newRole } });
+      const roleRecord = await Role.findOne({ where: { name: newRole }, include: [{ model: Role, as: "roles", attributes: ["name"] }] });
       if (!roleRecord) {
         return res.status(404).json({ error: `Role '${newRole}' not found` });
       }
@@ -367,7 +367,7 @@ const updateEmployee = async (req, res) => {
 
     // ==== Lấy lại dữ liệu đã cập nhật ====
     const updatedUser = await Employee.findByPk(id, {
-      include: [{ model: Role }],
+      include: [{ model: Role, as: "roles", attributes: ["name"] }],
       attributes: { exclude: ["password"] },
     });
 

@@ -19,6 +19,11 @@ import RequireAuth from "./context/RequireAuth";
 import PatientOnly from "./context/PatientOnly";
 import LandingPage from "./page/guest/LandingPage";
 import ContactUs from "./page/guest/ContactUs";
+import ReceptionistSideBar from "./components/Receptionnist/ReceptionistSideBar";
+import ReceptionistDashboard from "./page/Receptionist/ReceptionistDashboard";
+import ReceptionistPatient from "./page/Receptionist/ReceptionistPatient";
+import ReceptionistAppointment from "./page/Receptionist/ReceptionistAppointment";
+import ReceptionistDoctor from "./page/Receptionist/ReceptionistDoctor";
 
 function App() {
   const RedirectPatientId = () => {
@@ -37,7 +42,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/verify" element={<VerifyPage />} />
         <Route path="/book" element={<BookMedicalExam />} />
-  <Route path="/appointment" element={<QuickBook />} />
+        <Route path="/appointment" element={<QuickBook />} />
         <Route path="/doctor" element={<ListDoctor />} />
         <Route path="/contact" element={<ContactUs />} />
 
@@ -59,7 +64,7 @@ function App() {
         {/* Doctor Schedule routes */}
         <Route path="/doctor/schedule" element={<DoctorSchedule />} />
 
-        {/* Admin routes */}      
+        {/* Admin routes */}
         <Route path="/admin/user" element={<UserManagement />}></Route>
         <Route
           path="/admin/user/:id"
@@ -73,6 +78,14 @@ function App() {
             element={<UserDetailManagement />}
           ></Route>
           <Route path="/admin/dashboard" element={<AdminDashboard />}></Route>
+        </Route>
+        <Route element={<RequireAuth allowedRoles={["Receptionist"]} />}>
+          <Route path="/receptionist" element={<ReceptionistSideBar />}>
+            <Route path="dashboard" element={<ReceptionistDashboard />} />
+            <Route path="patients" element={<ReceptionistPatient />} />
+            <Route path="appointments" element={<ReceptionistAppointment />} />
+            <Route path="doctors" element={<ReceptionistDoctor />} />
+          </Route>
         </Route>
       </Routes>
     </AuthProvider>

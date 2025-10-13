@@ -90,7 +90,25 @@ const getDoctorAvailable = async (req, res) => {
 
     const doctors = await Employee.findAll({
       where: { isActive: true, speciality },
-      attributes: ["id", "speciality", "isActive" , "name", "email", "phoneNumber", "avatar"],
+      attributes: ["id", "speciality", "isActive", "name", "email", "phoneNumber", "avatar"],
+      include: [
+        {
+          model: Employee,
+          attributes: ["id", "name", "email", "phoneNumber", "avatar"],
+          required: true, // INNER JOIN - chỉ lấy Doctor có Employee
+          include: [
+            {
+              model: EmployeeRole,
+              as: 'EmployeeRoles',
+              attributes: [], // Không cần lấy data, chỉ dùng để filter
+              where: {
+                roleId: 2 // Chỉ lấy Employee có roleId = 2 (Bác sĩ)
+              },
+              required: true // INNER JOIN
+            }
+          ]
+        }
+      ]
     });
     const doctorIds = doctors.map(d => d.id);
 
@@ -103,7 +121,7 @@ const getDoctorAvailable = async (req, res) => {
         doctorId: { [Op.in]: doctorIds },
         date,
         startTime: { [Op.lte]: startTime },
-        endTime:   { [Op.gte]: endTime }
+        endTime: { [Op.gte]: endTime }
       }
     });
     const validDoctorIds = validSchedules.map(s => s.doctorId);
@@ -115,7 +133,7 @@ const getDoctorAvailable = async (req, res) => {
         status: "confirmed",
         [Op.and]: [
           { startTime: { [Op.lt]: endTime } },
-          { endTime:   { [Op.gt]: startTime } }
+          { endTime: { [Op.gt]: startTime } }
         ]
       }
     });

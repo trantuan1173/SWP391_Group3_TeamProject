@@ -1,4 +1,4 @@
-const { Appointment, Room, Employee } = require("../models");
+const { Appointment, Room, Employee, Patient } = require("../models");
 const {
   sendVerifyEmail,
   sendForgotPasswordEmail,
@@ -8,7 +8,17 @@ const {
 //Get all appointment
 const getAppointment = async (req, res) => {
   try {
-    const staff = await Appointment.findAll();
+    const staff = await Appointment.findAll({
+        include: [
+            {
+                model: Patient,
+            },
+            {
+                model: Employee,
+            },
+            { model: Room, attributes: ["name", "type"] },
+        ],
+    });
     res.status(200).json(staff);
   } catch (error) {
     console.error(error);

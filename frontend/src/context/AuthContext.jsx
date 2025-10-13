@@ -1,4 +1,3 @@
-// context/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
 import api from "../lib/axios";
@@ -7,16 +6,11 @@ import { API_ENDPOINTS } from "../config";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // chứa role, profile, ...
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("token");
-  };
-
   useEffect(() => {
-    const fetchUser = async () => {
+    const initAuth = async () => {
       const token = localStorage.getItem("token");
       if (!token) {
         setLoading(false);
@@ -24,30 +18,39 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        // use api instance which automatically attaches Authorization header
-        const res = await api.get(API_ENDPOINTS.AUTH_PROFILE);
-        // backend may return different shapes depending on endpoint
-        // Try common possibilities: { user }, { employee }, { success, employee }, { patient }
-        const data = res.data || {};
-        if (data.user) setUser(data.user);
-        else if (data.employee) setUser(data.employee);
-        else if (data.patient) setUser(data.patient);
-        else if (data.success && data.employee) setUser(data.employee);
-        else if (data.success && data.user) setUser(data.user);
-        else setUser(data);
-      } catch (error) {
+        const res = await axios.get(API_ENDPOINTS.AUTH_PROFILE, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (res.data.success && res.data.employee) {
+          setUser(res.data.employee);
+        } else {
+          localStorage.removeItem("token");
+        }
+      } catch (err) {
+        console.error("Failed to fetch user:", err.response || err.message);
         localStorage.removeItem("token");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUser();
+    initAuth();
   }, []);
 
+  const login = (employee, token) => {
+    localStorage.setItem("token", token);
+    setUser(employee);
+  };
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    setUser(null);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, setUser, loading, logout }}>
-      {!loading && children}
+    <AuthContext.Provider value={{ user, loading, setUser, login, logout }}>
+      {children}
     </AuthContext.Provider>
   );
 };
