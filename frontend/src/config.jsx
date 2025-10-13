@@ -24,4 +24,7 @@ REGISTER: `${baseUrl}/api/patients/register`,
   CREATE_APPOINTMENT: `${baseUrl}/api/patients/appointments`,
   CREATE_APPOINTMENT_WITHOUT_LOGIN: `${baseUrl}/api/patients/appointmentsWithoutLogin`,
   CONFIRM_APPOINTMENT: `${baseUrl}/api/patients/confirmAppointment`,
+  GET_APPOINTMENTS_BY_PATIENT: (patientId) => `${baseUrl}/api/appointments/patient/${patientId}`,
+  APPOINTMENT_BY_ID: (appointmentId) => `${baseUrl}/api/appointments/${appointmentId}`,
+  PATIENT_BY_ID: (patientId) => `${baseUrl}/api/patients/${patientId}`,
 };

@@ -8,6 +8,7 @@ const {
   getCheckups,
   getDocuments,
   getPatientById,
+  updatePatient,
   createAppointmentWithoutLogin,
   confirmAppointment
 } = require("../controllers/PatientController");
@@ -111,7 +112,8 @@ router.post("/register", register);
  *       500:
  *         description: Failed to create appointment
  */
-router.post("/appointments", createAppointment);
+// Require authentication for creating an appointment as a logged-in patient
+router.post("/appointments", protect, createAppointment);
 
 /**
  * @swagger
@@ -265,5 +267,8 @@ router.get("/documents/:patientId", getDocuments);
  */
 // Protect the patient profile route: only authenticated users
 router.get("/:id", protect, getPatientById);
+
+// Update patient profile
+router.put('/:id', protect, updatePatient);
 
 module.exports = router;

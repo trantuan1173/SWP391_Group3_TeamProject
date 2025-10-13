@@ -1,4 +1,4 @@
-const { Patient, Appointment, MedicalRecord, Doctor, Employee, Room, Service } = require("../models");
+const { Patient, Appointment, MedicalRecord, Employee, Room, Service } = require("../models");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -108,6 +108,7 @@ const register = async (req, res) => {
 const createAppointment = async (req, res) => {
   try {
     const { date, startTime, endTime } = req.body;
+    console.log('[createAppointment] payload:', req.body);
     const userId = req.userId;
 
     const patient = await Patient.findByPk(userId);
@@ -271,20 +272,15 @@ const getPatientById = async (req, res) => {
           {
             model: Appointment,
             include: [
-              {
-                model: Doctor,
-                include: [{ model: Employee, attributes: ["name", "email", "phoneNumber"] }],
-              },
+              // doctor stored on Appointment as foreign key to Employee
+              { model: Employee, attributes: ["name", "email", "phoneNumber"] },
               { model: Room, attributes: ["name", "type"] },
             ],
           },
           {
             model: MedicalRecord,
             include: [
-              {
-                model: Doctor,
-                include: [{ model: Employee, attributes: ["name", "email", "phoneNumber", "avatar"] }],
-              },
+              { model: Employee, attributes: ["name", "email", "phoneNumber", "avatar"] },
               { model: Room, attributes: ["name", "type"] },
               { model: Appointment, attributes: ["date", "startTime", "endTime"] },
               { model: Service, through: { attributes: ["quantity", "total"] } },
@@ -309,6 +305,9 @@ const getPatientById = async (req, res) => {
       name: patient.name,
       email: patient.email,
       phoneNumber: patient.phoneNumber,
+      address: patient.address || null,
+      dateOfBirth: patient.dateOfBirth || null,
+      gender: patient.gender || null,
       prescriptions: hasRelations ? (patient.MedicalRecords || []) : [],
       checkups: hasRelations ? (patient.Appointments || []) : [],
       documents: hasRelations ? (patient.MedicalRecords || []) : [],
@@ -330,4 +329,31 @@ module.exports = {
   getCheckups,
   getDocuments,
   getPatientById,
+  // Update patient profile (only patient themself or admin via other routes)
+  updatePatient: async (req, res) => {
+    try {
+      const { id } = req.params;
+      // Only patient owners can update their profile
+      if (req.userType === 'patient') {
+        if (!req.user || parseInt(req.user.id) !== parseInt(id)) {
+          return res.status(403).json({ error: 'Forbidden: cannot update other patient' });
+        }
+      }
+
+      const allowed = ['name', 'email', 'phoneNumber', 'address'];
+      const payload = {};
+      for (const k of allowed) if (k in req.body) payload[k] = req.body[k];
+
+      const patient = await Patient.findByPk(id);
+      if (!patient) return res.status(404).json({ error: 'Patient not found' });
+
+      await patient.update(payload);
+      const p = patient.toJSON();
+      if (p.password) delete p.password;
+      res.json({ message: 'Profile updated', patient: p });
+    } catch (error) {
+      console.error('[updatePatient] error:', error);
+      res.status(500).json({ error: 'Failed to update patient' });
+    }
+  }
 };

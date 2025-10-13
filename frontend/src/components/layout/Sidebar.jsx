@@ -5,12 +5,14 @@ import { useAuth } from "../../context/AuthContext";
 
 export default function Sidebar({ patient }) {
   const sidebarItems = [
-    { icon: <Home size={20} />, label: "Dashboard", key: "dashboard" },
-    { icon: <Calendar size={20} />, label: "Appointment", key: "appointment" },
-    { icon: <Calendar size={20} />, label: "Schedule", key: "schedule" },
-    { icon: <Users size={20} />, label: "Patients", key: "patients" },
-    { icon: <ShoppingCart size={20} />, label: "Orders", key: "orders" },
-    { icon: <FlaskConical size={20} />, label: "Laboratory", key: "lab" },
+    // { icon: <Home size={20} />, label: "Dashboard", key: "dashboard" },
+    // { icon: <Calendar size={20} />, label: "Appointment", key: "appointment" },
+       { icon: <Home size={20} />, label: "Patients page", key: "patients" },
+  { icon: <Users size={20} />, label: "Doctor List", key: "doctors" },
+    // { icon: <Calendar size={20} />, label: "Schedule", key: "schedule" },
+ 
+    // { icon: <ShoppingCart size={20} />, label: "Orders", key: "orders" },
+    // { icon: <FlaskConical size={20} />, label: "Laboratory", key: "lab" },
   ];
 
   // Lấy thông tin user từ patient (nếu có)
@@ -92,13 +94,21 @@ export default function Sidebar({ patient }) {
               title={item.label}
                 onClick={() => {
                   setActiveKey(item.key);
-                  // Appointment navigates to quick-book if logged in, otherwise to public book page
+                  // Map keys to routes (special-case 'appointment' depending on auth)
                   if (item.key === 'appointment') {
-                    if (user) navigate('/quick-book');
-                    else navigate('/book');
+                    if (user) return navigate('/quick-book');
+                    return navigate('/book');
                   }
-                  if (item.key === 'dashboard') navigate('/');
-                  if (item.key === 'patients') navigate('/patient-dashboard');
+                  if (item.key === 'dashboard') return navigate('/');
+                  if (item.key === 'patients') {
+                    // If user is a patient, navigate to their dashboard
+                    if (user && user.id) return navigate(`/patient/${user.id}`);
+                    return navigate('/patient');
+                  }
+                  if (item.key === 'doctors') return navigate('/patient/doctors');
+                  if (item.key === 'schedule') return navigate('/doctor/schedule');
+                  // Fallback: navigate to key as path
+                  return navigate(`/${item.key}`);
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -120,30 +130,21 @@ export default function Sidebar({ patient }) {
         })}
       </nav>
 
-      {/* Profile */}
+      {/* Profile (no avatar) */}
       <div className="p-3 border-t border-[#00923F]">
-        <div className="flex items-center gap-3">
-          <img
-            src={
-              avatar
-                ? avatar.startsWith("http")
-                  ? avatar
-                  : `http://localhost:1118/uploads/avatars/${avatar.replace(/^\/uploads\/avatars\//, "")}`
-                : "https://via.placeholder.com/48"
-            }
-            alt={name || "User"}
-            className="w-10 h-10 rounded-full object-cover"
-            onError={(e) => console.error("Image load error:", e)}
-          />
-          {!collapsed && (
-            <div className="flex-1">
-              <div className="text-sm font-semibold">{name}</div>
-              <div className="text-[11px] text-green-100">{email}</div>
-            </div>
-          )}
-        </div>
         {!collapsed && (
-          <div className="mt-3">
+          <div className="mb-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm font-semibold">{name}</div>
+                <div className="text-[11px] text-green-100">{email}</div>
+              </div>
+              {/* profile actions moved to PatientInfo */}
+            </div>
+          </div>
+        )}
+        {!collapsed && (
+          <div className="mt-1">
             <button onClick={handleLogout} className="w-full text-sm py-2 rounded-full bg-white text-green-700 hover:bg-white/90">Log out</button>
           </div>
         )}

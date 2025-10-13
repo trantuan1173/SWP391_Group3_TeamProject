@@ -8,45 +8,32 @@ const {
 
 const getDoctor = async (req, res) => {
   try {
+    // Find employees who have the 'doctor' role (roleId = 2)
     const doctors = await Employee.findAll({
-      attributes: ["id", "speciality", "isActive"], // Lấy speciality từ Doctor
+      attributes: ["id", "name", "email", "phoneNumber", "avatar", "speciality", "isActive"],
       include: [
         {
-          model: Employee,
-          attributes: ["id", "name", "email", "phoneNumber", "avatar"],
-          required: true, // INNER JOIN - chỉ lấy Doctor có Employee
-          include: [
-            {
-              model: EmployeeRole,
-              as: 'EmployeeRoles',
-              attributes: [], // Không cần lấy data, chỉ dùng để filter
-              where: {
-                roleId: 2 // Chỉ lấy Employee có roleId = 2 (Bác sĩ)
-              },
-              required: true // INNER JOIN
-            }
-          ]
+          model: EmployeeRole,
+          as: 'employeeRoles',
+          attributes: [],
+          where: { roleId: 2 },
+          required: true,
         }
       ],
     });
 
-    // Format lại data để dễ sử dụng ở frontend
-    const formattedDoctors = doctors.map(doctor => ({
-      id: doctor.id,
-      speciality: doctor.speciality || "Chưa có chuyên khoa",
-      isActive: doctor.isActive,
-      employee: {
-        id: doctor.Employee?.id,
-        name: doctor.Employee?.name || "Chưa có tên",
-        email: doctor.Employee?.email,
-        phoneNumber: doctor.Employee?.phoneNumber,
-        avatar: doctor.Employee?.avatar 
-          ? `${req.protocol}://${req.get('host')}${doctor.Employee.avatar}`
-          : "https://randomuser.me/api/portraits/men/32.jpg"
-      }
+    // Format response for frontend
+    const formattedDoctors = doctors.map((d) => ({
+      id: d.id,
+      name: d.name || 'Chưa có tên',
+      email: d.email,
+      phoneNumber: d.phoneNumber,
+      avatar: d.avatar ? `${req.protocol}://${req.get('host')}${d.avatar}` : null,
+      speciality: d.speciality || 'Chưa có chuyên khoa',
+      isActive: d.isActive,
     }));
 
-    res.status(200).json(formattedDoctors);
+    return res.status(200).json(formattedDoctors);
   } catch (error) {
     console.error("Error in getDoctor:", error);
     res.status(500).json({ error: "Failed to get doctor", details: error.message });
@@ -55,21 +42,22 @@ const getDoctor = async (req, res) => {
 
 const getDoctorById = async (req, res) => {
   try {
-    const doctor = await Employee.findByPk(req.params.id, {
-      attributes: ["id", "speciality", "isActive"],
-      include: [
-        {
-          model: Employee,
-          attributes: ["id", "name", "email", "phoneNumber", "avatar"],
-        }
-      ]
+    const d = await Employee.findByPk(req.params.id, {
+      attributes: ["id", "name", "email", "phoneNumber", "avatar", "speciality", "isActive"]
     });
-    
-    if (!doctor) {
-      return res.status(404).json({ error: "Doctor not found" });
-    }
-    
-    res.status(200).json(doctor);
+    if (!d) return res.status(404).json({ error: "Doctor not found" });
+
+    const formatted = {
+      id: d.id,
+      name: d.name || 'Chưa có tên',
+      email: d.email,
+      phoneNumber: d.phoneNumber,
+      avatar: d.avatar ? `${req.protocol}://${req.get('host')}${d.avatar}` : null,
+      speciality: d.speciality || 'Chưa có chuyên khoa',
+      isActive: d.isActive,
+    };
+
+    res.status(200).json(formatted);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to get doctor" });
