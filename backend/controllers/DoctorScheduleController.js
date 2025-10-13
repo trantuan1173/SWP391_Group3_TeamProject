@@ -1,4 +1,4 @@
-const { DoctorSchedule, Doctor, Employee, Room } = require("../models");
+const { DoctorSchedule, Employee, Room } = require("../models");
 const { Op } = require("sequelize");
 
 // Lấy lịch làm việc của bác sĩ

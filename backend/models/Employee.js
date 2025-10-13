@@ -48,6 +48,10 @@ const Employee = sequelize.define(
       allowNull: false,
       defaultValue: false,
     },
+    speciality: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     otp: {
       type: DataTypes.STRING,
       allowNull: true,

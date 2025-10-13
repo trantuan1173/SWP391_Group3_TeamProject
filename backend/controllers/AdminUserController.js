@@ -1,5 +1,5 @@
 const Employee = require("../models/Employee");
-const Doctor = require("../models/Doctor");
+
 const Patient = require("../models/Patient");
 const { Staff } = require("../models");
 const { Op } = require("sequelize");
@@ -107,13 +107,13 @@ const createEmployee = async (req, res) => {
     }
 
     const employee = await Employee.create({ ...userData });
-    if (role === "doctor") {
-      await Doctor.create({
-        employeeId: employee.id,
-        speciality: "",
-        workingHours: "",
-      });
-    }
+    // if (role === "doctor") {
+    //   await Doctor.create({
+    //     employeeId: employee.id,
+    //     speciality: "",
+    //     workingHours: "",
+    //   });
+    // }
 
     const roleRecord = await Role.findOne({ where: { name: role } });
     if (!roleRecord) {
@@ -220,8 +220,8 @@ const deleteEmployee = async (req, res) => {
   try {
     const { id } = req.params;
     await EmployeeRole.destroy({ where: { employeeId: id } });
-    await Doctor.destroy({ where: { employeeId: id } });
-    await Patient.destroy({ where: { employeeId: id } });
+    // await Doctor.destroy({ where: { employeeId: id } });
+    // await Patient.destroy({ where: { employeeId: id } });
     const deleted = await Employee.destroy({ where: { id } });
     if (!deleted) return res.status(404).json({ error: "Employee not found" });
 
@@ -353,16 +353,16 @@ const updateEmployee = async (req, res) => {
         roleId: roleRecord.id,
       });
 
-      if (oldRole === "doctor" && newRole !== "doctor") {
-        await Doctor.destroy({ where: { employeeId: id } });
-      }
-      if (newRole === "doctor" && oldRole !== "doctor") {
-        await Doctor.create({
-          employeeId: id,
-          speciality: "",
-          workingHours: "",
-        });
-      }
+      // if (oldRole === "doctor" && newRole !== "doctor") {
+      //   await Doctor.destroy({ where: { employeeId: id } });
+      // }
+      // if (newRole === "doctor" && oldRole !== "doctor") {
+      //   await Doctor.create({
+      //     employeeId: id,
+      //     speciality: "",
+      //     workingHours: "",
+      //   });
+      // }
     }
 
     // ==== Lấy lại dữ liệu đã cập nhật ====

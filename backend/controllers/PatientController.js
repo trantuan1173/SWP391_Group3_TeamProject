@@ -1,4 +1,4 @@
-const { Patient, Appointment, MedicalRecord, Doctor, Employee, Room, Service } = require("../models");
+const { Patient, Appointment, MedicalRecord, Employee, Room, Service } = require("../models");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -191,7 +191,7 @@ const getPrescriptions = async (req, res) => {
       where,
       include: [
         {
-          model: Doctor,
+          model: Employee,
           include: [
             {
               model: User,
@@ -247,7 +247,7 @@ const getPatientById = async (req, res) => {
       model: Appointment,
       include: [
         {
-          model: Doctor,
+          model: Employee,
           include: [{ model: Employee, attributes: ["name", "email", "phoneNumber"] }],
         },
         { model: Room, attributes: ["name", "type"] },
@@ -257,7 +257,7 @@ const getPatientById = async (req, res) => {
       model: MedicalRecord,
       include: [
         {
-          model: Doctor,
+          model: Employee,
           include: [{ model: Employee, attributes: ["name", "email", "phoneNumber", "avatar"] }],
         },
         { model: Room, attributes: ["name", "type"] },

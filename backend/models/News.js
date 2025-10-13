@@ -1,16 +1,27 @@
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../config/db");
-const User = require("./Employee");
+const Employee = require("./Employee");
 
-const Doctor = sequelize.define("Doctor", {
-  speciality: {
+const News = sequelize.define("News", {
+  title: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  isAvailable: {
-    type: DataTypes.BOOLEAN,
+  image: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  createdBy: {
+    type: DataTypes.INTEGER,
     allowNull: false,
-    defaultValue: true,
+  },
+  tag: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  content: {
+    type: DataTypes.TEXT,
+    allowNull: false,
   },
   createdAt: {
     type: DataTypes.DATE,
@@ -24,4 +35,4 @@ const Doctor = sequelize.define("Doctor", {
   },
 });
 
-module.exports = Doctor;
+module.exports = News;

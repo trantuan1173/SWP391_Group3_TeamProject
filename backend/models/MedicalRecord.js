@@ -3,7 +3,7 @@ const { sequelize } = require("../config/db");
 const User = require("./Employee");
 const Appointment = require("./Appointment");
 const Patient = require("./Patient");
-const Doctor = require("./Doctor");
+const Doctor = require("./News");
 
 const MedicalRecord = sequelize.define("MedicalRecord", {
   appointmentId: {
@@ -25,10 +25,6 @@ const MedicalRecord = sequelize.define("MedicalRecord", {
   doctorId: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    references: {
-      model: "Doctors",
-      key: "id",
-    },
   },
   symptoms: {
     type: DataTypes.STRING,
@@ -41,6 +37,10 @@ const MedicalRecord = sequelize.define("MedicalRecord", {
   treatment: {
     type: DataTypes.STRING,
     allowNull: false,
+  },
+  orderDetails: {
+    type: DataTypes.JSON,
+    allowNull: true,
   },
   createdAt: {
     type: DataTypes.DATE,
