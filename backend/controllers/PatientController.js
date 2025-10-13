@@ -14,19 +14,28 @@ const patientLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    console.log(`[patientLogin] attempt for email: ${email}`);
+
     if (!email || !password)
       return res.status(400).json({ error: "Email and password are required" });
 
     const patient = await Patient.findOne({ where: { email } });
-    if (!patient)
+    if (!patient) {
+      console.log(`[patientLogin] user not found for email: ${email}`);
       return res.status(404).json({ error: "User not found" });
+    }
 
     const isMatch = await bcrypt.compare(password, patient.password);
-    if (!isMatch)
+    console.log(`[patientLogin] password match for ${email}: ${isMatch}`);
+    if (!isMatch) {
       return res.status(401).json({ error: "Invalid password" });
+    }
 
     const token = generateToken(patient.id, "patient");
-    res.json({ message: "Login successful", token });
+    // Return token and patient info (without password) so frontend can set user state
+    const patientJson = patient.toJSON ? patient.toJSON() : { ...patient };
+    if (patientJson.password) delete patientJson.password;
+    res.json({ message: "Login successful", token, patient: patientJson });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to login" });
@@ -51,28 +60,33 @@ const register = async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
 
     // Check duplicates
-    const existing = await Patient.findOne({
-      where: { email },
-    });
-    if (existing) return res.status(409).json({ error: "Email already exists" });
+    console.log(`[register] attempt: email=${email} identityNumber=${identityNumber} phone=${phoneNumber}`);
+    const existing = await Patient.findOne({ where: { email } });
+    if (existing) {
+      console.log(`[register] conflict: email exists -> ${email}`);
+      return res.status(409).json({ error: "Email already exists" });
+    }
 
     if (phoneNumber) {
       const existingPhone = await Patient.findOne({ where: { phoneNumber } });
-      if (existingPhone) return res.status(409).json({ error: "Phone number already exists" });
+      if (existingPhone) {
+        console.log(`[register] conflict: phone exists -> ${phoneNumber}`);
+        return res.status(409).json({ error: "Phone number already exists" });
+      }
     }
 
     if (identityNumber) {
       const existingIdentity = await Patient.findOne({ where: { identityNumber } });
-      if (existingIdentity) return res.status(409).json({ error: "Identity number already exists" });
+      if (existingIdentity) {
+        console.log(`[register] conflict: identity exists -> ${identityNumber}`);
+        return res.status(409).json({ error: "Identity number already exists" });
+      }
     }
-
-    // Hash password before saving
-    const hashedPassword = await bcrypt.hash(password, 10);
 
     const newPatient = await Patient.create({
       name,
       email,
-      password: hashedPassword,
+      password: password,
       identityNumber: identityNumber || null,
       phoneNumber: phoneNumber || null,
       dateOfBirth: dateOfBirth || null,
@@ -240,50 +254,68 @@ const getPatientById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const patient = await Patient.findOne({
-  where: { id },
-  include: [
-    {
-      model: Appointment,
-      include: [
-        {
-          model: Doctor,
-          include: [{ model: Employee, attributes: ["name", "email", "phoneNumber"] }],
-        },
-        { model: Room, attributes: ["name", "type"] },
-      ],
-    },
-    {
-      model: MedicalRecord,
-      include: [
-        {
-          model: Doctor,
-          include: [{ model: Employee, attributes: ["name", "email", "phoneNumber", "avatar"] }],
-        },
-        { model: Room, attributes: ["name", "type"] },
-        { model: Appointment, attributes: ["date", "startTime", "endTime"] },
-        { model: Service, through: { attributes: ["quantity", "total"] } },
-      ],
-    },
-  ],
-});
+    console.log(`[getPatientById] request for id=${id}`);
+    // If the route is protected, req.user and req.userType may be set by middleware
+    if (req.userType === 'patient') {
+      // Patients can only access their own profile
+      if (!req.user || parseInt(req.user.id) !== parseInt(id)) {
+        return res.status(403).json({ error: "Forbidden: cannot access other patient's data" });
+      }
+    }
 
+    let patient = null;
+    try {
+      patient = await Patient.findOne({
+        where: { id },
+        include: [
+          {
+            model: Appointment,
+            include: [
+              {
+                model: Doctor,
+                include: [{ model: Employee, attributes: ["name", "email", "phoneNumber"] }],
+              },
+              { model: Room, attributes: ["name", "type"] },
+            ],
+          },
+          {
+            model: MedicalRecord,
+            include: [
+              {
+                model: Doctor,
+                include: [{ model: Employee, attributes: ["name", "email", "phoneNumber", "avatar"] }],
+              },
+              { model: Room, attributes: ["name", "type"] },
+              { model: Appointment, attributes: ["date", "startTime", "endTime"] },
+              { model: Service, through: { attributes: ["quantity", "total"] } },
+            ],
+          },
+        ],
+      });
+    } catch (includeError) {
+      console.error("[getPatientById] include query failed, falling back to basic fetch. Error:", includeError && includeError.stack ? includeError.stack : includeError);
+      // Try a simpler lookup to avoid returning 500 to the client
+      patient = await Patient.findByPk(id);
+    }
 
     if (!patient)
       return res.status(404).json({ error: "Patient not found" });
+
+    // If we have full relations, use them; otherwise return a basic profile with empty arrays
+    const hasRelations = !!patient.MedicalRecords || !!patient.Appointments;
 
     res.json({
       id: patient.id,
       name: patient.name,
       email: patient.email,
       phoneNumber: patient.phoneNumber,
-      prescriptions: patient.MedicalRecords || [],
-      checkups: patient.Appointments || [],
-      documents: patient.MedicalRecords || [],
+      prescriptions: hasRelations ? (patient.MedicalRecords || []) : [],
+      checkups: hasRelations ? (patient.Appointments || []) : [],
+      documents: hasRelations ? (patient.MedicalRecords || []) : [],
       payments: [],
     });
   } catch (error) {
-    console.error(error);
+    console.error("[getPatientById] error:", error && error.stack ? error.stack : error);
     res.status(500).json({ error: "Failed to fetch patient" });
   }
 };

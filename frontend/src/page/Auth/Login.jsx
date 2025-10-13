@@ -63,10 +63,16 @@ export default function Login() {
   
               setUser(isPatient ? patient : employee);
   
-              // Redirect
-              if (isPatient) {
-                  navigate("/patient-dashboard");
-              } else if (employee && employee.Roles && employee.Roles.length > 0) {
+        // Redirect
+        if (isPatient) {
+          const patientId = patient?.id || patient?.ID || (patient && patient.patientId);
+          // If we have a patient id, go to their dashboard page
+          if (patientId) {
+            navigate(`/patient-dashboard/${patientId}`);
+          } else {
+            navigate("/patient-dashboard");
+          }
+        } else if (employee && employee.Roles && employee.Roles.length > 0) {
                   const roleName = employee.Roles[0].name;
                   switch (roleName) {
                       case "Doctor":

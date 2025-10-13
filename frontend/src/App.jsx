@@ -13,6 +13,7 @@ import UserManagement from "./page/AdminUserManager/UserManagement";
 import AdminDashboard from "./page/AdminDashboard/AdminDashboard";
 import UserDetailManagement from "./page/AdminUserManager/UserDetailManagement";
 import RequireAuth from "./context/RequireAuth";
+import PatientOnly from "./context/PatientOnly";
 import LandingPage from "./page/guest/LandingPage";
 import ContactUs from "./page/guest/ContactUs";
 
@@ -34,7 +35,9 @@ function App() {
 
         {/* Patient Dashboard routes */}
         <Route path="/patient-dashboard" element={<PatientDashboard />} />
-        <Route path="/patient-dashboard/:id" element={<PatientDashboard />} />
+        <Route element={<PatientOnly />}>
+          <Route path="/patient-dashboard/:id" element={<PatientDashboard />} />
+        </Route>
 
         {/* Doctor Schedule routes */}
         <Route path="/doctor/:doctorId/schedule" element={<DoctorSchedule />} />  

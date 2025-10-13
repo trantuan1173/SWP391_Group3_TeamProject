@@ -11,6 +11,7 @@ const {
   createAppointmentWithoutLogin,
   confirmAppointment
 } = require("../controllers/PatientController");
+const { protect } = require("../middleware/authMiddleware");
 
 /**
  * @swagger
@@ -262,6 +263,7 @@ router.get("/documents/:patientId", getDocuments);
  *       500:
  *         description: Failed to fetch patient
  */
-router.get("/:id", getPatientById);
+// Protect the patient profile route: only authenticated users
+router.get("/:id", protect, getPatientById);
 
 module.exports = router;

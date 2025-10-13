@@ -8,7 +8,7 @@ export const API_ENDPOINTS = {
   // GET_ALL_ROLE: `${baseUrl}/api/roles`,
   EMP_LOGIN: `${baseUrl}/api/employees/login`,
   PATIENT_LOGIN: `${baseUrl}/api/patients/login`,
-  REGISTER: `${baseUrl}/api/users/register`,
+REGISTER: `${baseUrl}/api/patients/register`,
   AUTH_PROFILE: `${baseUrl}/api/users/profile`,
   VERIFY: `${baseUrl}/api/users/verify`,
   DOCTOR_LIST: `${baseUrl}/api/doctors`,

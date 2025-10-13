@@ -65,7 +65,9 @@ export default function PatientDashboard() {
     async function fetchPatient() {
       setLoading(true);
       try {
-        const res = await fetch(`http://localhost:1118/api/patients/${id}`);
+        const token = localStorage.getItem("token");
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const res = await fetch(`http://localhost:1118/api/patients/${id}`, { headers });
         if (!res.ok) throw new Error("Không tìm thấy bệnh nhân.");
         const data = await res.json();
         setPatient(data);
@@ -84,10 +86,21 @@ export default function PatientDashboard() {
     async function fetchAppointments() {
       try {
         const res = await fetch(`http://localhost:1118/api/appointments/patient/${id}`);
+        if (!res.ok) {
+          // avoid setting a non-array (error object) into state
+          const errText = await res.text();
+          console.error(`Failed to fetch appointments: ${res.status} ${res.statusText}`, errText);
+          setAppointments([]);
+          return;
+        }
         const data = await res.json();
-        setAppointments(data);
+        // Ensure we only set an array into appointments state
+        if (Array.isArray(data)) setAppointments(data);
+        else if (data && Array.isArray(data.appointments)) setAppointments(data.appointments);
+        else setAppointments([]);
       } catch (err) {
         console.error("Lỗi tải lịch khám:", err);
+        setAppointments([]);
       }
     }
     if (id) fetchAppointments();
@@ -156,9 +169,9 @@ export default function PatientDashboard() {
               <div className="bg-white rounded-2xl p-5 shadow-sm h-36 flex flex-col justify-between">
                 <div>
                   <div className="text-xs text-gray-400">Total Appointments</div>
-                  <div className="text-2xl font-bold text-green-700">{appointments.length}</div>
+                  <div className="text-2xl font-bold text-green-700">{Array.isArray(appointments) ? appointments.length : 0}</div>
                 </div>
-                <div className="text-xs text-gray-500">Last: {appointments[0] ? formatDateTime(appointments[0].date) : "-"}</div>
+                <div className="text-xs text-gray-500">Last: {Array.isArray(appointments) && appointments[0] ? formatDateTime(appointments[0].date) : "-"}</div>
               </div>
 
               <div className="bg-white rounded-2xl p-5 shadow-sm h-36 flex flex-col justify-between">

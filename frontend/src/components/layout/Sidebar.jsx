@@ -45,6 +45,12 @@ export default function Sidebar({ patient }) {
 
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { logout } = useAuth();
+  
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   return (
     <aside
@@ -136,6 +142,11 @@ export default function Sidebar({ patient }) {
             </div>
           )}
         </div>
+        {!collapsed && (
+          <div className="mt-3">
+            <button onClick={handleLogout} className="w-full text-sm py-2 rounded-full bg-white text-green-700 hover:bg-white/90">Log out</button>
+          </div>
+        )}
       </div>
     </aside>
   );
