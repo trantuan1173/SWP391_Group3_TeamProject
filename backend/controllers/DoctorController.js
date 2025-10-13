@@ -1,4 +1,4 @@
-const { Doctor, Appointment, DoctorSchedule, Employee, EmployeeRole, Role } = require("../models");
+const { Appointment, DoctorSchedule, Employee, EmployeeRole, Role } = require("../models");
 const { Op } = require("sequelize");
 const {
   sendVerifyEmail,
@@ -8,8 +8,8 @@ const {
 
 const getDoctor = async (req, res) => {
   try {
-    const doctors = await Doctor.findAll({
-      attributes: ["id", "speciality", "isAvailable", "employeeId"], // Lấy speciality từ Doctor
+    const doctors = await Employee.findAll({
+      attributes: ["id", "speciality", "isActive"], // Lấy speciality từ Doctor
       include: [
         {
           model: Employee,
@@ -34,7 +34,7 @@ const getDoctor = async (req, res) => {
     const formattedDoctors = doctors.map(doctor => ({
       id: doctor.id,
       speciality: doctor.speciality || "Chưa có chuyên khoa",
-      isAvailable: doctor.isAvailable,
+      isActive: doctor.isActive,
       employee: {
         id: doctor.Employee?.id,
         name: doctor.Employee?.name || "Chưa có tên",
@@ -55,8 +55,8 @@ const getDoctor = async (req, res) => {
 
 const getDoctorById = async (req, res) => {
   try {
-    const doctor = await Doctor.findByPk(req.params.id, {
-      attributes: ["id", "speciality", "isAvailable", "employeeId"],
+    const doctor = await Employee.findByPk(req.params.id, {
+      attributes: ["id", "speciality", "isActive"],
       include: [
         {
           model: Employee,
@@ -78,7 +78,7 @@ const getDoctorById = async (req, res) => {
 
 const updateDoctor = async (req, res) => {
   try {
-    const doctor = await Doctor.update(req.body, { where: { id: req.params.id } });
+    const doctor = await Employee.update(req.body, { where: { id: req.params.id } });
     res.status(200).json(doctor);
   } catch (error) {
     console.error(error);
@@ -88,7 +88,7 @@ const updateDoctor = async (req, res) => {
 
 const deleteDoctor = async (req, res) => {
   try {
-    const doctor = await Doctor.destroy({ where: { id: req.params.id } });
+    const doctor = await Employee.destroy({ where: { id: req.params.id } });
     res.status(200).json(doctor);
   } catch (error) {
     console.error(error);
@@ -100,15 +100,9 @@ const getDoctorAvailable = async (req, res) => {
   try {
     const { speciality, date, startTime, endTime } = req.body;
 
-    const doctors = await Doctor.findAll({
-      where: { isAvailable: true, speciality },
-      attributes: ["id", "speciality", "isAvailable", "employeeId"],
-      include: [
-        {
-          model: Employee,
-          attributes: ["id", "name", "email", "phoneNumber", "avatar"],
-        }
-      ]
+    const doctors = await Employee.findAll({
+      where: { isActive: true, speciality },
+      attributes: ["id", "speciality", "isActive" , "name", "email", "phoneNumber", "avatar"],
     });
     const doctorIds = doctors.map(d => d.id);
 
@@ -172,7 +166,7 @@ const getDoctorSchedule = async (req, res) => {
 const { Sequelize } = require("sequelize");
 const getSpecialties = async (req, res) => {
   try {
-    const specialties = await Doctor.findAll({
+    const specialties = await Employee.findAll({
       attributes: [
         'speciality',
         [Sequelize.fn('COUNT', Sequelize.col('id')), 'doctorCount']

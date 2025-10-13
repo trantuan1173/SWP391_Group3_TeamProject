@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Header from '../../components/Header';
+import Header from '../../components/guestlayout/Header';
 import { API_ENDPOINTS } from '../../config';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
