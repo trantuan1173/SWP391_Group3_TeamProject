@@ -18,7 +18,6 @@ Appointment.hasOne(Feedback, { foreignKey: "appointmentId" });
 Feedback.belongsTo(Patient, { foreignKey: "patientId" });
 Patient.hasOne(Feedback, { foreignKey: "patientId" });
 
-
 MedicalRecord.belongsToMany(Service, {
   through: MedicalRecordService,
   foreignKey: "medicalRecordId",
@@ -28,19 +27,27 @@ Service.belongsToMany(MedicalRecord, {
   foreignKey: "serviceId",
 });
 
-EmployeeRole.belongsTo(Employee, { 
-  foreignKey: 'employeeId',
-  as: 'employee'  
-});
-EmployeeRole.belongsTo(Role, { foreignKey: "roleId" });
+// fix here ↓
+EmployeeRole.belongsTo(Employee, { foreignKey: "employeeId", as: "employee" });
+EmployeeRole.belongsTo(Role, { foreignKey: "roleId", as: "role" }); // fix here
 
-Employee.hasMany(EmployeeRole, { 
-  foreignKey: 'employeeId',
-  as: 'employeeRoles'
+Employee.belongsToMany(Role, {
+  through: EmployeeRole,
+  foreignKey: "employeeId",
+  as: "roles", // fix here
 });
+
+Role.belongsToMany(Employee, {
+  through: EmployeeRole,
+  foreignKey: "roleId",
+  as: "employees",
+});
+
+// Employee.hasMany(EmployeeRole, { foreignKey: 'employeeId', as: 'employeeRoles' }); // fix here
 
 Employee.hasMany(Appointment, { foreignKey: "doctorId" });
 Appointment.belongsTo(Employee, { foreignKey: "doctorId" });
+
 Employee.hasMany(MedicalRecord, { foreignKey: "doctorId" });
 MedicalRecord.belongsTo(Employee, { foreignKey: "doctorId" });
 
@@ -61,17 +68,6 @@ Appointment.belongsTo(Room, { foreignKey: "roomId" });
 Room.hasMany(MedicalRecord, { foreignKey: "roomId" });
 MedicalRecord.belongsTo(Room, { foreignKey: "roomId" });
 
-Employee.belongsToMany(Role, {
-  through: EmployeeRole,
-  foreignKey: "employeeId",
-  as: 'roles'
-});
-Role.belongsToMany(Employee, {
-  through: EmployeeRole,
-  foreignKey: "roleId",
-  as: 'employees'
-});
-
 News.belongsTo(Employee, { foreignKey: "createdBy" });
 Employee.hasMany(News, { foreignKey: "createdBy" });
 
@@ -86,5 +82,6 @@ module.exports = {
   Role,
   MedicalRecordService,
   Service,
-  News
+  Feedback,
+  News,
 };
