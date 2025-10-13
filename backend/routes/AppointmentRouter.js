@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { getAppointment, getAppointmentById, updateAppointment, deleteAppointment, getAppointmentByPatientId, getAppointmentByDoctorId, getAppointmentByStatus } = require("../controllers/AppointmentController");
-
+const { protect, authorize } = require("../middleware/authMiddleware");
 /**
  * @swagger
  * tags:
@@ -18,14 +18,8 @@ const { getAppointment, getAppointmentById, updateAppointment, deleteAppointment
  *     responses:
  *       200:
  *         description: List of appointments
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Appointment'
  */
-router.get("/", getAppointment);
+router.get("/", protect, authorize("Admin", "Receptionist"), getAppointment);
 
 /**
  * @swagger
@@ -42,12 +36,8 @@ router.get("/", getAppointment);
  *     responses:
  *       200:
  *         description: Appointment found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Appointment'
  */
-router.get("/:id", getAppointmentById);
+router.get("/:id", protect, authorize("Admin", "Receptionist"), getAppointmentById);
 
 /**
  * @swagger
@@ -68,15 +58,7 @@ router.get("/:id", getAppointmentById);
  *           schema:
  *             type: object
  *             properties:
- *               name:
- *                 type: string
- *               email:
- *                 type: string
- *               identityNumber:
- *                 type: string
- *               phoneNumber:
- *                 type: string
- *               speciality:
+ *               status:
  *                 type: string
  *               dateOfBirth:
  *                 type: string
@@ -90,7 +72,7 @@ router.get("/:id", getAppointmentById);
  *       500:
  *         description: Failed to update appointment
  */
-router.put("/:id", updateAppointment);
+router.put("/:id", protect, authorize("Admin", "Receptionist"), updateAppointment);
 
 /**
  * @swagger
@@ -110,7 +92,7 @@ router.put("/:id", updateAppointment);
  *       500:
  *         description: Failed to delete appointment
  */
-router.delete("/:id", deleteAppointment);
+router.delete("/:id", protect, authorize("Admin", "Receptionist"), deleteAppointment);
 
 /**
  * @swagger
@@ -127,14 +109,8 @@ router.delete("/:id", deleteAppointment);
  *     responses:
  *       200:
  *         description: List of appointments
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Appointment'
  */
-router.get("/patient/:id", getAppointmentByPatientId);
+router.get("/patient/:id", protect, authorize("Admin", "Receptionist", "Doctor"), getAppointmentByPatientId);
 
 /**
  * @swagger
@@ -151,14 +127,8 @@ router.get("/patient/:id", getAppointmentByPatientId);
  *     responses:
  *       200:
  *         description: List of appointments
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Appointment'
  */
-router.get("/doctor/:id", getAppointmentByDoctorId);
+router.get("/doctor/:id", protect, authorize("Admin", "Receptionist", "Doctor"), getAppointmentByDoctorId);
 
 /**
  * @swagger
@@ -175,13 +145,7 @@ router.get("/doctor/:id", getAppointmentByDoctorId);
  *     responses:
  *       200:
  *         description: List of appointments
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Appointment'
  */
-router.get("/status/:status", getAppointmentByStatus);
+router.get("/status/:status", protect, authorize("Admin", "Receptionist", "Doctor"), getAppointmentByStatus);
 
 module.exports = router;

@@ -4,8 +4,7 @@ import { API_ENDPOINTS } from '../../config';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-
-const Register = () => {
+ const Register = () => {
   const [formData, setFormData] = useState({
     name: '',
     password: '',

@@ -345,7 +345,10 @@ const updateEmployee = async (req, res) => {
 
     if (newRole && newRole !== oldRole) {
       await EmployeeRole.destroy({ where: { employeeId: id } });
-      const roleRecord = await Role.findOne({ where: { name: newRole } });
+      const roleRecord = await Role.findOne({
+        where: { name: newRole },
+        include: [{ model: Role, as: "roles", attributes: ["name"] }],
+      });
       if (!roleRecord) {
         return res.status(404).json({ error: `Role '${newRole}' not found` });
       }

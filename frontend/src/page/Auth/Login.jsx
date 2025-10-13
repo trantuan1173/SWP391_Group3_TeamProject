@@ -15,39 +15,6 @@ export default function Login() {
     const handleChange = (e) =>
         setForm({ ...form, [e.target.name]: e.target.value });
 
-    // const handleSubmit = async (e) => {
-    //     e.preventDefault();
-    //     setIsLoading(true);
-    //     setErrorMessage(""); 
-
-    //     try {
-    //         const endpoint = isPatient ? API_ENDPOINTS.PATIENT_LOGIN : API_ENDPOINTS.EMP_LOGIN;
-    //         const response = await axios.post(endpoint, form);
-
-    //         if (response.status === 200) {
-    //             const { token } = response.data;
-    //             console.log(response.data)
-    //             localStorage.setItem('token', token);
-    //             navigate("/"); 
-    //         }
-    //     } catch (error) {
-    //         if (error.response) {
-    //             const status = error.response.status;
-    //             const message = error.response.data.message || "Đăng nhập thất bại";
-
-    //             if (status === 401 || status === 403) {
-    //                 setErrorMessage(message); 
-    //             } else {
-    //                 setErrorMessage("Đã có lỗi xảy ra. Vui lòng thử lại."); 
-    //             }
-    //         } else {
-    //             setErrorMessage("Không thể kết nối đến máy chủ."); 
-    //         }
-    //     } finally {
-    //         setIsLoading(false);
-    //     }
-    // };
-
     const handleSubmit = async (e) => {
       e.preventDefault();
       setIsLoading(true);
@@ -63,17 +30,23 @@ export default function Login() {
   
               setUser(isPatient ? patient : employee);
   
-              // Redirect
-              if (isPatient) {
-                  navigate("/patient-dashboard");
-              } else if (employee && employee.Roles && employee.Roles.length > 0) {
-                  const roleName = employee.Roles[0].name;
+        // Redirect
+        if (isPatient) {
+          const patientId = patient?.id || patient?.ID || (patient && patient.patientId);
+          // If we have a patient id, go to their dashboard page
+          if (patientId) {
+            navigate(`/patient-dashboard/${patientId}`);
+          } else {
+            navigate("/patient-dashboard");
+          }
+        } else if (employee && employee.roles && employee.roles.length > 0) {
+                  const roleName = employee.roles[0].name;
                   switch (roleName) {
                       case "Doctor":
                           navigate("/doctor/schedule");
                           break;
                       case "Receptionist":
-                          navigate("receptionist");
+                          navigate("/receptionist");
                           break;
                       case "Admin":
                           navigate("/admin/user");
