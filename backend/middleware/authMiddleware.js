@@ -25,13 +25,14 @@ const protect = async (req, res, next) => {
       user = await Employee.findByPk(decoded.id, {
         include: {
           model: Role,
+          as: "roles",
           through: { attributes: [] },
         },
       });
 
       if (user) {
         user = user.toJSON();
-        user.roleNames = user.Roles.map(r => r.name);
+        user.roleNames = user.roles.map(r => r.name);
       }
 
     } else if (decoded.type === "patient") {

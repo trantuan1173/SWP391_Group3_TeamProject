@@ -1,115 +1,155 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const DoctorSchedule = () => {
-  const { doctorId } = useParams();
   const [schedules, setSchedules] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [doctorInfo, setDoctorInfo] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchSchedules = async () => {
-      try {
-        const response = await axios.get(`/api/doctors/${doctorId}/schedules`);
-        setSchedules(response.data);
-      } catch (error) {
-        console.error(error);
+    checkAuthAndFetchData();
+  }, []);
+
+  const checkAuthAndFetchData = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/login");
+        return;
       }
-    };
-    fetchSchedules();
-  }, [doctorId]);
+
+      const tokenParts = token.split('.');
+      if (tokenParts.length !== 3) {
+        navigate("/login");
+        return;
+      }
+
+      const payload = JSON.parse(atob(tokenParts[1]));
+      const userId = payload.id || payload.userId || payload.sub;
+      setCurrentUserId(userId); // <-- Sẽ không lỗi nếu bạn khai báo đúng useState
+
+      if (!userId) {
+        navigate("/login");
+        return;
+      }
+
+      const response = await axios.get(
+        `http://localhost:1118/api/employees/${userId}/with-role`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.data.isDoctor) {
+        alert("Bạn không có quyền truy cập trang này");
+        navigate("/");
+        return;
+      }
+
+      setDoctorInfo(response.data);
+      await fetchSchedules(userId, token);
+
+    } catch (error) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        localStorage.removeItem("token");
+        navigate("/login");
+      } else {
+        alert("Có lỗi xảy ra. Vui lòng thử lại!");
+      }
+    }
+  };
+
+  const fetchSchedules = async (doctorId, token) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:1118/api/doctor-schedules/${doctorId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      setSchedules(response.data);
+    } catch (error) {
+      if (error.response?.status !== 404) {
+        throw error;
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-xl">Đang tải...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-xl text-red-500">Lỗi: {error}</div>
+      </div>
+    );
+  }
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full">
-        <Sidebar className={"border-0 h-screen bg-[#00A646]"}>
-          <SidebarHeader className="border-b border-green-500 p-4 bg-[#00A646]">
-            <img
-              src="/icon/logo.png"
-              alt="Healthy People Logo"
-              className="!w-[150px] ml-auto mr-auto filter"
-            />
-          </SidebarHeader>
+    <div className="container mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6">Lịch làm việc của tôi</h1>
+      
+      {doctorInfo && (
+        <div className="bg-white p-4 rounded-lg shadow mb-6">
+          <h2 className="text-xl font-semibold">
+            Bác sĩ: {doctorInfo.Employee?.name || 'N/A'}
+          </h2>
+          <p className="text-gray-600">
+            Chuyên khoa: {doctorInfo.speciality || 'N/A'}
+          </p>
+          <p className="text-sm text-gray-500">
+            Trạng thái: {doctorInfo.isAvailable ? 'Đang làm việc' : 'Không làm việc'}
+          </p>
+        </div>
+      )}
 
-          <SidebarContent className="bg-[#00A646]">
-            <SidebarGroup>
-              <SidebarGroupContent>
-                <SidebarMenu className="!p-0">
-                  {navigationItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton variant="admin" asChild>
-                        <button
-                          onClick={() => navigate(item.url)}
-                          className="flex w-full items-center !p-6 !rounded-md hover:!text-white active:!bg-purple-800 text-black transition-colors font-bold"
-                        >
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
-                        </button>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
-
-          <SidebarFooter className="border-t border-green-500 p-4 bg-[#00A646] md:rounded-br-[50px]">
-            {user ? (
-              <div className="flex items-center justify-between w-full">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-gradient-to-br from-green-300 to-green-100 rounded-lg flex items-center justify-center">
-                    <span className="text-green-800 font-bold text-sm">
-                      {user.name?.charAt(0).toUpperCase() || "U"}
-                    </span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="font-semibold text-sm text-white">
-                      {user.name}
-                    </span>
-                    <span className="text-xs text-green-200">{user.role}</span>
-                  </div>
+      {schedules.length === 0 ? (
+        <div className="bg-white p-6 rounded-lg shadow text-center">
+          <p className="text-gray-500">Chưa có lịch làm việc nào</p>
+        </div>
+      ) : (
+        <div className="grid gap-4">
+          {schedules.map((schedule) => (
+            <div key={schedule.id} className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition-shadow">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="font-semibold text-lg">
+                    📅 {new Date(schedule.date).toLocaleDateString('vi-VN', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </p>
+                  <p className="text-gray-600 mt-2">
+                    🕐 {schedule.startTime} - {schedule.endTime}
+                  </p>
+                  {schedule.Room && (
+                    <p className="text-gray-600">
+                      🏥 Phòng: {schedule.Room.name}
+                    </p>
+                  )}
                 </div>
-                <Button
-                  onClick={logout}
-                  className="text-white !rounded-md !text-sm bg-red-400 hover:!bg-red-500"
-                >
-                  Logout
-                </Button>
               </div>
-            ) : (
-              <div className="text-white text-sm">Not logged in</div>
-            )}
-          </SidebarFooter>
-        </Sidebar>
-
-        <SidebarInset className="flex flex-col flex-1">
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 bg-white">
-            <SidebarTrigger className="-ml-1" />
-          </header>
-
-          <main className="flex-1 p-4 bg-gray-50">
-            <h2 className="text-xl font-bold mb-4">Lịch khám của bác sĩ</h2>
-            <table className="min-w-full bg-white border border-gray-300">
-              <thead>
-                <tr className="bg-gray-200">
-                  <th className="border px-4 py-2">Ngày</th>
-                  <th className="border px-4 py-2">Giờ bắt đầu</th>
-                  <th className="border px-4 py-2">Giờ kết thúc</th>
-                </tr>
-              </thead>
-              <tbody>
-                {schedules.map((schedule) => (
-                  <tr key={schedule.id}>
-                    <td className="border px-4 py-2">{schedule.date}</td>
-                    <td className="border px-4 py-2">{schedule.startTime}</td>
-                    <td className="border px-4 py-2">{schedule.endTime}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </main>
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 };
 

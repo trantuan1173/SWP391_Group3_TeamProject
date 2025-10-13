@@ -1,18 +1,12 @@
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../config/db");
-const Doctor = require("./Doctor");
+const Doctor = require("./News");
 const Patient = require("./Patient");
 
 const Appointment = sequelize.define("Appointment", {
   doctorId: {
     type: DataTypes.INTEGER,
     allowNull: true,
-    references: {
-      model: "Doctors",
-      key: "id",
-    },
-    onDelete: "SET NULL",
-    onUpdate: "CASCADE",
   },
   patientId: {
     type: DataTypes.INTEGER,

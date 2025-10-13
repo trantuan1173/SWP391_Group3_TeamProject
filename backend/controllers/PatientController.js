@@ -205,7 +205,7 @@ const getPrescriptions = async (req, res) => {
       where,
       include: [
         {
-          model: Doctor,
+          model: Employee,
           include: [
             {
               model: User,

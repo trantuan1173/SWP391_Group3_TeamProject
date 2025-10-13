@@ -1,6 +1,7 @@
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../config/db");
 const bcrypt = require("bcrypt");
+const EmployeeRole = require('./EmployeeRole');
 
 const Employee = sequelize.define(
   "Employee",
@@ -46,6 +47,10 @@ const Employee = sequelize.define(
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,
+    },
+    speciality: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     otp: {
       type: DataTypes.STRING,

@@ -1,15 +1,11 @@
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../config/db");
-const Doctor = require("./Doctor");
+const Doctor = require("./News");
 
 const DoctorSchedule = sequelize.define("DoctorSchedule", {
   doctorId: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    references: {
-      model: "Doctors",
-      key: "id",
-    },
   },
   date: {
     type: DataTypes.DATE,
