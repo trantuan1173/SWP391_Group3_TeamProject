@@ -75,6 +75,9 @@ Role.belongsToMany(Employee, {
 News.belongsTo(Employee, { foreignKey: "createdBy" });
 Employee.hasMany(News, { foreignKey: "createdBy" });
 
+// Thêm associations cho DoctorSchedule và Room
+DoctorSchedule.belongsTo(Room, { foreignKey: "roomId" });
+Room.hasMany(DoctorSchedule, { foreignKey: "roomId" });
 module.exports = {
   Patient,
   Appointment,

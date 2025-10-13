@@ -13,11 +13,11 @@ export default function ListDoctor() {
     const fetchDoctors = async () => {
       setLoading(true);
       try {
-        const doctorUrl = API_ENDPOINTS?.DOCTOR_LIST || "/api/doctor";
+        const doctorUrl = API_ENDPOINTS?.DOCTOR_LIST || "/api/doctors";
         const res = await axios.get(doctorUrl);
         console.log("doctor response:", res);
         console.log("doctor data:", res.data); 
-        console.log("first doctor avatar:", res.data[0]?.employee?.avatar);
+        // console.log("first doctor avatar:", res.data[0]?.employee?.avatar);
         const list = Array.isArray(res.data) ? res.data : [];
         setDoctors(list);
 

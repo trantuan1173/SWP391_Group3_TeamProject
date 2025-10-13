@@ -9,23 +9,22 @@ const {
 const getDoctor = async (req, res) => {
   try {
     const doctors = await Employee.findAll({
-      attributes: ["id", "speciality", "isActive"], // Lấy speciality từ Doctor
+      attributes: ["id", "name", "email", "phoneNumber", "avatar", "speciality", "isActive"],
       include: [
         {
-          model: Employee,
-          attributes: ["id", "name", "email", "phoneNumber", "avatar"],
-          required: true, // INNER JOIN - chỉ lấy Doctor có Employee
-          include: [
-            {
-              model: EmployeeRole,
-              as: 'EmployeeRoles',
-              attributes: [], // Không cần lấy data, chỉ dùng để filter
-              where: {
-                roleId: 2 // Chỉ lấy Employee có roleId = 2 (Bác sĩ)
-              },
-              required: true // INNER JOIN
-            }
-          ]
+          model: EmployeeRole,
+
+          as: 'employeeRoles',
+
+          attributes: [],
+
+          where: {
+
+            roleId: 2 // Chỉ lấy Employee có roleId = 2 (Bác sĩ)
+
+          },
+
+          required: true
         }
       ],
     });
@@ -36,12 +35,12 @@ const getDoctor = async (req, res) => {
       speciality: doctor.speciality || "Chưa có chuyên khoa",
       isActive: doctor.isActive,
       employee: {
-        id: doctor.Employee?.id,
-        name: doctor.Employee?.name || "Chưa có tên",
-        email: doctor.Employee?.email,
-        phoneNumber: doctor.Employee?.phoneNumber,
-        avatar: doctor.Employee?.avatar 
-          ? `${req.protocol}://${req.get('host')}${doctor.Employee.avatar}`
+        id: doctor.id,
+        name: doctor.name || "Chưa có tên",
+        email: doctor.email,
+        phoneNumber: doctor.phoneNumber,
+        avatar: doctor.avatar 
+          ? `${req.protocol}://${req.get('host')}${doctor.avatar}`
           : "https://randomuser.me/api/portraits/men/32.jpg"
       }
     }));

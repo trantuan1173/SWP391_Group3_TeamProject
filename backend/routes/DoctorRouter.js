@@ -120,7 +120,7 @@ router.put("/:id", protect, authorize("admin"), updateDoctor);
  */
 router.delete("/:id", protect, authorize("admin" || "doctor"), deleteDoctor);
 
-
+router.get("/specialties", getSpecialties);
 /**
  * @swagger
  * /doctors/available:

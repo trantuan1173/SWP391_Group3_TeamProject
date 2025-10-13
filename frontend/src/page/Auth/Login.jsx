@@ -66,22 +66,24 @@ export default function Login() {
               // Redirect
               if (isPatient) {
                   navigate("/patient-dashboard");
-              } else if (employee && employee.Roles && employee.Roles.length > 0) {
-                  const roleName = employee.Roles[0].name;
+              } else if (employee && employee.roles && employee.roles.length > 0) {
+                  const roleName = employee.roles[0].name.toLowerCase();
                   switch (roleName) {
-                      case "Doctor":
+                      case "doctor":
                           navigate("/doctor/schedule");
                           break;
-                      case "Receptionist":
+                      case "receptionist":
                           navigate("receptionist");
                           break;
-                      case "Admin":
+                      case "admin":
                           navigate("/admin/user");
                           break;
                       default:
                           navigate("/");
                   }
               } else {
+                //debug
+                console.warn("No roles found for employee");
                   navigate("/");
               }
           }
