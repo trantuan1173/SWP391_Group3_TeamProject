@@ -340,7 +340,7 @@ module.exports = {
         }
       }
 
-      const allowed = ['name', 'email', 'phoneNumber', 'address'];
+  const allowed = ['name', 'email', 'phoneNumber', 'address', 'dateOfBirth'];
       const payload = {};
       for (const k of allowed) if (k in req.body) payload[k] = req.body[k];
 

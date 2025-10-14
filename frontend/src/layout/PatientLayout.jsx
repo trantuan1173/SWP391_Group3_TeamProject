@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import Sidebar from '../components/layout/Sidebar';
+import PatientSidebar from '../components/layout/Sidebar';
 import axios from '../lib/axios';
 import { API_ENDPOINTS } from '../config';
 
@@ -25,7 +25,7 @@ export default function PatientLayout() {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      <Sidebar patient={patient} />
+  <PatientSidebar patient={patient} />
       <div className="flex-1 flex flex-col rounded-l-3xl overflow-hidden">
         <Outlet />
       </div>

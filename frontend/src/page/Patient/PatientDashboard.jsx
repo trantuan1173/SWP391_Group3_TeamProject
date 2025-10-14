@@ -157,199 +157,199 @@ export default function PatientDashboard() {
     );
 
   return (
-    <div className="flex-1 flex flex-col rounded-l-3xl overflow-hidden h-full">
-        <header className="bg-white px-8 py-4 shadow flex items-center justify-between">
-          <div className="flex items-center border rounded-full overflow-hidden w-[420px] bg-gray-50">
-            <input
-              type="text"
-              placeholder="Tìm kiếm..."
-              className="flex-1 px-3 py-2 bg-transparent outline-none text-sm"
-            />
-          </div>
-          <div className="w-10 h-10 border rounded-full flex items-center justify-center bg-gray-50">
-            <Clock size={20} className="text-gray-600" />
-          </div>
-        </header>
+    <>
+      <header className="bg-white px-8 py-4 shadow flex items-center justify-between">
+        <div className="flex items-center border rounded-full overflow-hidden w-[420px] bg-gray-50">
+          <input
+            type="text"
+            placeholder="Tìm kiếm..."
+            className="flex-1 px-3 py-2 bg-transparent outline-none text-sm"
+          />
+        </div>
+        <div className="w-10 h-10 border rounded-full flex items-center justify-center bg-gray-50">
+          <Clock size={20} className="text-gray-600" />
+        </div>
+      </header>
 
-        <main className="flex-1 overflow-y-auto px-6 md:px-10 py-6">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6 items-start">
-            <div className="lg:col-span-3">
-              <PatientInfo patient={patient} onUpdate={(p) => setPatient(p)} className="shadow-sm" />
-            </div>
-            <div className="lg:col-span-1 space-y-4">
-              <div className="bg-white rounded-2xl p-5 shadow-sm h-36 flex flex-col justify-between">
-                <div>
-                  <div className="text-xs text-gray-400">Total Appointments</div>
-                  <div className="text-2xl font-bold text-green-700">{Array.isArray(appointments) ? appointments.length : 0}</div>
-                </div>
-                <div className="text-xs text-gray-500">Last: {Array.isArray(appointments) && appointments[0] ? formatDateTime(appointments[0].date) : "-"}</div>
+      <main className="flex-1 overflow-y-auto px-6 md:px-10 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6 items-start">
+          <div className="lg:col-span-3">
+            <PatientInfo patient={patient} onUpdate={(p) => setPatient(p)} className="shadow-sm" />
+          </div>
+          <div className="lg:col-span-1 space-y-4">
+            <div className="bg-white rounded-2xl p-5 shadow-sm h-36 flex flex-col justify-between">
+              <div>
+                <div className="text-xs text-gray-400">Total Appointments</div>
+                <div className="text-2xl font-bold text-green-700">{Array.isArray(appointments) ? appointments.length : 0}</div>
               </div>
+              <div className="text-xs text-gray-500">Last: {Array.isArray(appointments) && appointments[0] ? formatDateTime(appointments[0].date) : "-"}</div>
+            </div>
 
-              <div className="bg-white rounded-2xl p-5 shadow-sm h-36 flex flex-col justify-between">
-                <div>
-                  <div className="text-xs text-gray-400">Medical Records</div>
-                  <div className="text-2xl font-bold text-purple-700">{medicalRecords.length}</div>
-                </div>
-                <div className="text-xs text-gray-500">Latest: {medicalRecords[0] ? formatDate(medicalRecords[0].createdAt || medicalRecords[0].date) : "-"}</div>
+            <div className="bg-white rounded-2xl p-5 shadow-sm h-36 flex flex-col justify-between">
+              <div>
+                <div className="text-xs text-gray-400">Medical Records</div>
+                <div className="text-2xl font-bold text-purple-700">{medicalRecords.length}</div>
               </div>
+              <div className="text-xs text-gray-500">Latest: {medicalRecords[0] ? formatDate(medicalRecords[0].createdAt || medicalRecords[0].date) : "-"}</div>
             </div>
           </div>
+        </div>
 
-          {/* Tabs: Appointments / Records / Book */}
-          <div className="mb-6 flex justify-center lg:justify-start gap-3">
-            {[
-              { key: 'Appointments', label: 'Lịch khám' },
-              { key: 'Records', label: 'Hồ sơ y tế' },
-              { key: 'Book', label: 'Đặt lịch' },
-            ].map(t => (
-              <button key={t.key} onClick={() => setActiveTab(t.key)} className={`px-4 py-2 rounded-full text-sm font-semibold transition-shadow ${activeTab===t.key? 'bg-green-600 text-white shadow' : 'bg-white text-gray-700 hover:shadow-sm'}`}>
-                {t.label}
-              </button>
-            ))}
-          </div>
+        {/* Tabs: Appointments / Records / Book */}
+        <div className="mb-6 flex justify-center lg:justify-start gap-3">
+          {[
+            { key: 'Appointments', label: 'Lịch khám' },
+            { key: 'Records', label: 'Hồ sơ y tế' },
+            { key: 'Book', label: 'Đặt lịch' },
+          ].map(t => (
+            <button key={t.key} onClick={() => setActiveTab(t.key)} className={`px-4 py-2 rounded-full text-sm font-semibold transition-shadow ${activeTab===t.key? 'bg-green-600 text-white shadow' : 'bg-white text-gray-700 hover:shadow-sm'}`}>
+              {t.label}
+            </button>
+          ))}
+        </div>
 
-          <div className="space-y-8">
-            {activeTab === 'Appointments' && (
-              <section>
-                <h3 className="text-xl font-semibold mb-4">Lịch khám</h3>
-                {appointments.length === 0 ? (
-                  <div className="p-6 bg-white rounded-lg shadow text-center text-gray-500">Chưa có lịch khám.</div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {appointments.map((a) => {
-                      const { day, month } = formatDayMonth(a.date);
-                        // Hiển thị trạng thái lịch khám rõ ràng
-                        let statusLabel = '';
-                        let statusColor = '';
-                        switch (a.status) {
-                          case 'pending':
-                            statusLabel = 'Chờ xác nhận'; statusColor = 'text-yellow-600'; break;
-                          case 'confirmed':
-                            statusLabel = 'Đã xác nhận'; statusColor = 'text-green-600'; break;
-                          case 'completed':
-                            statusLabel = 'Đã khám'; statusColor = 'text-blue-600'; break;
-                          case 'cancelled':
-                            statusLabel = 'Đã hủy'; statusColor = 'text-red-600'; break;
-                          default:
-                            statusLabel = a.status; statusColor = 'text-gray-600';
-                        }
-                        return (
-                          <div key={a.id} className="bg-white p-4 rounded-xl shadow hover:shadow-md transition flex items-center gap-4">
-                            <div className="w-14 h-14 rounded-lg bg-green-50 flex flex-col items-center justify-center text-green-700">
-                              <div className="text-lg font-bold">{day}</div>
-                              <div className="text-xs">{month}</div>
-                            </div>
-                            <div className="flex-1">
-                              <div className="font-semibold text-gray-800">{a.Employee?.name || a.doctorName || "Chưa rõ bác sĩ"}</div>
-                              <div className="text-sm text-gray-500">{formatDateTime(a.date)}</div>
-                              <div className="text-sm text-gray-500">{a.startTime} — {a.endTime} • {a.Room?.name || 'N/A'}</div>
-                            </div>
-                            <div className="flex flex-col items-end gap-2">
-                              <div className={`text-sm font-medium ${statusColor}`}>{statusLabel}</div>
-                              {a.status === 'pending' || a.status === 'confirmed' ? (
-                                <button
-                                  onClick={async () => {
-                                    if (!confirm('Bạn có chắc muốn hủy lịch này?')) return;
-                                    await cancelAppointment(a.id);
-                                  }}
-                                  className="text-xs text-red-600 hover:underline"
-                                >
-                                  Hủy
-                                </button>
-                              ) : null}
-                            </div>
+        <div className="space-y-8">
+          {activeTab === 'Appointments' && (
+            <section>
+              <h3 className="text-xl font-semibold mb-4">Lịch khám</h3>
+              {appointments.length === 0 ? (
+                <div className="p-6 bg-white rounded-lg shadow text-center text-gray-500">Chưa có lịch khám.</div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {appointments.map((a) => {
+                    const { day, month } = formatDayMonth(a.date);
+                      // Hiển thị trạng thái lịch khám rõ ràng
+                      let statusLabel = '';
+                      let statusColor = '';
+                      switch (a.status) {
+                        case 'pending':
+                          statusLabel = 'Chờ xác nhận'; statusColor = 'text-yellow-600'; break;
+                        case 'confirmed':
+                          statusLabel = 'Đã xác nhận'; statusColor = 'text-green-600'; break;
+                        case 'completed':
+                          statusLabel = 'Đã khám'; statusColor = 'text-blue-600'; break;
+                        case 'cancelled':
+                          statusLabel = 'Đã hủy'; statusColor = 'text-red-600'; break;
+                        default:
+                          statusLabel = a.status; statusColor = 'text-gray-600';
+                      }
+                      return (
+                        <div key={a.id} className="bg-white p-4 rounded-xl shadow hover:shadow-md transition flex items-center gap-4">
+                          <div className="w-14 h-14 rounded-lg bg-green-50 flex flex-col items-center justify-center text-green-700">
+                            <div className="text-lg font-bold">{day}</div>
+                            <div className="text-xs">{month}</div>
                           </div>
-                        );
-                    })}
-                  </div>
-                )}
-              </section>
-            )}
-
-            {activeTab === 'Records' && (
-              <section>
-                <h3 className="text-xl font-semibold mb-4">Hồ sơ y tế</h3>
-                {medicalRecords.length === 0 ? (
-                  <div className="p-6 bg-white rounded-lg shadow text-center text-gray-500">Chưa có hồ sơ y tế.</div>
-                ) : (
-                  <div className="bg-white rounded-2xl shadow overflow-hidden">
-                    <table className="w-full text-sm">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-4 py-3 text-left">Ngày</th>
-                          {/* <th className="px-4 py-3 text-left">Bác sĩ</th> */}
-                          <th className="px-4 py-3 text-left">Tóm tắt</th>
-                         </tr>
-                      </thead>
-                      <tbody>
-                        {medicalRecords.map((d, i) => (
-                          <tr key={d.id || i} className="border-t">
-                            <td className="px-4 py-3 align-top">{d.createdAt ? formatDateTime(d.createdAt) : '-'}</td>
-                            {/* <td className="px-4 py-3 align-top">{d.Doctor?.Employee?.name || d.doctorName || '-'}</td> */}
-                            <td className="px-4 py-3 align-top">
-                              <div className="font-medium">{d.treatment || d.diagnosis || 'Không có thông tin'}</div>
-                              {d.notes && <div className="text-xs text-gray-500 mt-1">{d.notes}</div>}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </section>
-            )}
-
-            {activeTab === 'Book' && (
-              <section>
-                <h3 className="text-xl font-semibold mb-4">Đặt lịch</h3>
-                <div className="bg-[#ede9fe] rounded-2xl p-6 max-w-md">
-                  <form
-                    onSubmit={async (e) => {
-                      e.preventDefault();
-                      setBookingMessage("");
-                      if (!bookingDate || !bookingStartTime) {
-                        setBookingMessage("Vui lòng chọn ngày và giờ");
-                        return;
-                      }
-                      setBookingLoading(true);
-                      try {
-                        const token = localStorage.getItem("token");
-                        const payload = { date: bookingDate, startTime: bookingStartTime, endTime: "" };
-                        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-                        const res = await axios.post(API_ENDPOINTS.CREATE_APPOINTMENT, payload, { headers });
-                        if (res.data && res.data.appointment) {
-                          setAppointments((prev) => [res.data.appointment, ...prev]);
-                        } else if (res.data) {
-                          setAppointments((prev) => [res.data, ...prev]);
-                        }
-                        setBookingMessage("Đặt lịch thành công");
-                        setBookingDate("");
-                        setBookingStartTime("");
-                      } catch (err) {
-                        console.error(err);
-                        setBookingMessage("Đặt lịch thất bại");
-                      } finally {
-                        setBookingLoading(false);
-                      }
-                    }}
-                  >
-                    <div className="mb-3">
-                      <label className="block text-gray-700 text-sm mb-1">Ngày</label>
-                      <input type="date" value={bookingDate} onChange={(e) => setBookingDate(e.target.value)} className="w-full border-2 border-purple-400 rounded-lg px-3 py-2 text-sm focus:outline-none" />
-                    </div>
-                    <div className="mb-3">
-                      <label className="block text-gray-700 text-sm mb-1">Giờ</label>
-                      <input type="time" value={bookingStartTime} onChange={(e) => setBookingStartTime(e.target.value)} className="w-full border-2 border-purple-400 rounded-lg px-3 py-2 text-sm focus:outline-none" />
-                    </div>
-                    {bookingMessage && <div className="text-sm text-red-600 mb-2">{bookingMessage}</div>}
-                    <button type="submit" disabled={bookingLoading} className="w-full bg-green-900 text-white py-2 rounded-full">{bookingLoading ? 'Đang gửi...' : 'Đặt lịch'}</button>
-                  </form>
+                          <div className="flex-1">
+                            <div className="font-semibold text-gray-800">{a.Employee?.name || a.doctorName || "Chưa rõ bác sĩ"}</div>
+                            <div className="text-sm text-gray-500">{formatDateTime(a.date)}</div>
+                            <div className="text-sm text-gray-500">{a.startTime} — {a.endTime} • {a.Room?.name || 'N/A'}</div>
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                            <div className={`text-sm font-medium ${statusColor}`}>{statusLabel}</div>
+                            {a.status === 'pending' || a.status === 'confirmed' ? (
+                              <button
+                                onClick={async () => {
+                                  if (!confirm('Bạn có chắc muốn hủy lịch này?')) return;
+                                  await cancelAppointment(a.id);
+                                }}
+                                className="text-xs text-red-600 hover:underline"
+                              >
+                                Hủy
+                              </button>
+                            ) : null}
+                          </div>
+                        </div>
+                      );
+                  })}
                 </div>
-              </section>
-            )}
-          </div>
-        </main>
-      </div>
+              )}
+            </section>
+          )}
+
+          {activeTab === 'Records' && (
+            <section>
+              <h3 className="text-xl font-semibold mb-4">Hồ sơ y tế</h3>
+              {medicalRecords.length === 0 ? (
+                <div className="p-6 bg-white rounded-lg shadow text-center text-gray-500">Chưa có hồ sơ y tế.</div>
+              ) : (
+                <div className="bg-white rounded-2xl shadow overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left">Ngày</th>
+                        {/* <th className="px-4 py-3 text-left">Bác sĩ</th> */}
+                        <th className="px-4 py-3 text-left">Tóm tắt</th>
+                       </tr>
+                    </thead>
+                    <tbody>
+                      {medicalRecords.map((d, i) => (
+                        <tr key={d.id || i} className="border-t">
+                          <td className="px-4 py-3 align-top">{d.createdAt ? formatDateTime(d.createdAt) : '-'}</td>
+                          {/* <td className="px-4 py-3 align-top">{d.Doctor?.Employee?.name || d.doctorName || '-'}</td> */}
+                          <td className="px-4 py-3 align-top">
+                            <div className="font-medium">{d.treatment || d.diagnosis || 'Không có thông tin'}</div>
+                            {d.notes && <div className="text-xs text-gray-500 mt-1">{d.notes}</div>}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </section>
+          )}
+
+          {activeTab === 'Book' && (
+            <section>
+              <h3 className="text-xl font-semibold mb-4">Đặt lịch</h3>
+              <div className="bg-[#ede9fe] rounded-2xl p-6 max-w-md">
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    setBookingMessage("");
+                    if (!bookingDate || !bookingStartTime) {
+                      setBookingMessage("Vui lòng chọn ngày và giờ");
+                      return;
+                    }
+                    setBookingLoading(true);
+                    try {
+                      const token = localStorage.getItem("token");
+                      const payload = { date: bookingDate, startTime: bookingStartTime, endTime: "" };
+                      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+                      const res = await axios.post(API_ENDPOINTS.CREATE_APPOINTMENT, payload, { headers });
+                      if (res.data && res.data.appointment) {
+                        setAppointments((prev) => [res.data.appointment, ...prev]);
+                      } else if (res.data) {
+                        setAppointments((prev) => [res.data, ...prev]);
+                      }
+                      setBookingMessage("Đặt lịch thành công");
+                      setBookingDate("");
+                      setBookingStartTime("");
+                    } catch (err) {
+                      console.error(err);
+                      setBookingMessage("Đặt lịch thất bại");
+                    } finally {
+                      setBookingLoading(false);
+                    }
+                  }}
+                >
+                  <div className="mb-3">
+                    <label className="block text-gray-700 text-sm mb-1">Ngày</label>
+                    <input type="date" value={bookingDate} onChange={(e) => setBookingDate(e.target.value)} className="w-full border-2 border-purple-400 rounded-lg px-3 py-2 text-sm focus:outline-none" />
+                  </div>
+                  <div className="mb-3">
+                    <label className="block text-gray-700 text-sm mb-1">Giờ</label>
+                    <input type="time" value={bookingStartTime} onChange={(e) => setBookingStartTime(e.target.value)} className="w-full border-2 border-purple-400 rounded-lg px-3 py-2 text-sm focus:outline-none" />
+                  </div>
+                  {bookingMessage && <div className="text-sm text-red-600 mb-2">{bookingMessage}</div>}
+                  <button type="submit" disabled={bookingLoading} className="w-full bg-green-900 text-white py-2 rounded-full">{bookingLoading ? 'Đang gửi...' : 'Đặt lịch'}</button>
+                </form>
+              </div>
+            </section>
+          )}
+        </div>
+      </main>
+    </>
   );
 }
 
