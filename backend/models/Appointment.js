@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../config/db");
-const Doctor = require("./News");
 const Patient = require("./Patient");
+const Employee = require("./Employee");
 
 const Appointment = sequelize.define("Appointment", {
   doctorId: {

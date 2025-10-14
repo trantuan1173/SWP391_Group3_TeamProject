@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Clock } from "lucide-react";
 import { useParams } from "react-router-dom";
-import Sidebar from "../../components/layout/Sidebar";
+// Sidebar now provided by PatientLayout
 import PatientInfo from "./components/PatientInfo";
-import axios from "axios";
+import axios from "../../lib/axios";
 import { API_ENDPOINTS } from "../../config";
 import { useAuth } from "../../context/AuthContext";
 // documents UI implemented inline below (no separate file)
@@ -65,9 +65,8 @@ export default function PatientDashboard() {
     async function fetchPatient() {
       setLoading(true);
       try {
-        const res = await fetch(`http://localhost:1118/api/patients/${id}`);
-        if (!res.ok) throw new Error("Không tìm thấy bệnh nhân.");
-        const data = await res.json();
+        const res = await axios.get(API_ENDPOINTS.PATIENT_BY_ID(id));
+        const data = res.data;
         setPatient(data);
         setError(null);
       } catch (err) {
@@ -83,15 +82,40 @@ export default function PatientDashboard() {
   useEffect(() => {
     async function fetchAppointments() {
       try {
-        const res = await fetch(`http://localhost:1118/api/appointments/patient/${id}`);
-        const data = await res.json();
-        setAppointments(data);
+        const res = await axios.get(API_ENDPOINTS.GET_APPOINTMENTS_BY_PATIENT(id));
+        const data = res.data;
+        setAppointments(Array.isArray(data) ? data : (data && Array.isArray(data.appointments) ? data.appointments : []));
       } catch (err) {
         console.error("Lỗi tải lịch khám:", err);
+        setAppointments([]);
       }
     }
     if (id) fetchAppointments();
   }, [id]);
+
+  // Cancel appointment
+  async function cancelAppointment(appointmentId) {
+    if (!appointmentId) return;
+    try {
+      // optimistic update: mark as cancelled locally
+      setAppointments((prev) => prev.map((a) => (a.id === appointmentId ? { ...a, status: 'cancelled' } : a)));
+      const res = await axios.put(API_ENDPOINTS.APPOINTMENT_BY_ID(appointmentId), { status: 'cancelled' });
+      // update with server response if provided
+      if (res && res.data) {
+        setAppointments((prev) => prev.map((a) => (a.id === appointmentId ? res.data : a)));
+      }
+    } catch (err) {
+      console.error('Failed to cancel appointment', err);
+      // revert by re-fetching appointments
+      try {
+        const res = await axios.get(API_ENDPOINTS.GET_APPOINTMENTS_BY_PATIENT(id));
+        const data = res.data;
+        setAppointments(Array.isArray(data) ? data : data.appointments || []);
+      } catch (e) {
+        console.error('Failed to reload appointments after cancel error', e);
+      }
+    }
+  }
 
   // Lấy lịch sử khám (hồ sơ y tế)
   // Populate medical records from the patient details returned by /api/patients/:id
@@ -131,14 +155,12 @@ export default function PatientDashboard() {
     );
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <Sidebar patient={patient} />
-      <div className="flex-1 flex flex-col rounded-l-3xl overflow-hidden">
+    <div className="flex-1 flex flex-col rounded-l-3xl overflow-hidden h-full">
         <header className="bg-white px-8 py-4 shadow flex items-center justify-between">
           <div className="flex items-center border rounded-full overflow-hidden w-[420px] bg-gray-50">
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Tìm kiếm..."
               className="flex-1 px-3 py-2 bg-transparent outline-none text-sm"
             />
           </div>
@@ -150,15 +172,15 @@ export default function PatientDashboard() {
         <main className="flex-1 overflow-y-auto px-6 md:px-10 py-6">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6 items-start">
             <div className="lg:col-span-3">
-              <PatientInfo patient={patient} className="shadow-sm" />
+              <PatientInfo patient={patient} onUpdate={(p) => setPatient(p)} className="shadow-sm" />
             </div>
             <div className="lg:col-span-1 space-y-4">
               <div className="bg-white rounded-2xl p-5 shadow-sm h-36 flex flex-col justify-between">
                 <div>
                   <div className="text-xs text-gray-400">Total Appointments</div>
-                  <div className="text-2xl font-bold text-green-700">{appointments.length}</div>
+                  <div className="text-2xl font-bold text-green-700">{Array.isArray(appointments) ? appointments.length : 0}</div>
                 </div>
-                <div className="text-xs text-gray-500">Last: {appointments[0] ? formatDateTime(appointments[0].date) : "-"}</div>
+                <div className="text-xs text-gray-500">Last: {Array.isArray(appointments) && appointments[0] ? formatDateTime(appointments[0].date) : "-"}</div>
               </div>
 
               <div className="bg-white rounded-2xl p-5 shadow-sm h-36 flex flex-col justify-between">
@@ -174,9 +196,9 @@ export default function PatientDashboard() {
           {/* Tabs: Appointments / Records / Book */}
           <div className="mb-6 flex justify-center lg:justify-start gap-3">
             {[
-              { key: 'Appointments', label: 'Appointments' },
-              { key: 'Records', label: 'Medical Records' },
-              { key: 'Book', label: 'Book' },
+              { key: 'Appointments', label: 'Lịch khám' },
+              { key: 'Records', label: 'Hồ sơ y tế' },
+              { key: 'Book', label: 'Đặt lịch' },
             ].map(t => (
               <button key={t.key} onClick={() => setActiveTab(t.key)} className={`px-4 py-2 rounded-full text-sm font-semibold transition-shadow ${activeTab===t.key? 'bg-green-600 text-white shadow' : 'bg-white text-gray-700 hover:shadow-sm'}`}>
                 {t.label}
@@ -187,25 +209,40 @@ export default function PatientDashboard() {
           <div className="space-y-8">
             {activeTab === 'Appointments' && (
               <section>
-                <h3 className="text-xl font-semibold mb-4">Upcoming / Past Appointments</h3>
+                <h3 className="text-xl font-semibold mb-4">Lịch khám</h3>
                 {appointments.length === 0 ? (
-                  <p className="text-gray-500">No appointments yet.</p>
+                  <div className="p-6 bg-white rounded-lg shadow text-center text-gray-500">Chưa có lịch khám.</div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {appointments.map((a) => {
                       const { day, month } = formatDayMonth(a.date);
                       return (
-                        <div key={a.id} className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4">
+                        <div key={a.id} className="bg-white p-4 rounded-xl shadow hover:shadow-md transition flex items-center gap-4">
                           <div className="w-14 h-14 rounded-lg bg-green-50 flex flex-col items-center justify-center text-green-700">
                             <div className="text-lg font-bold">{day}</div>
                             <div className="text-xs">{month}</div>
                           </div>
                           <div className="flex-1">
-                            <div className="font-semibold text-gray-800">{a.Doctor?.Employee?.name || "Chưa rõ bác sĩ"}</div>
+                            <div className="font-semibold text-gray-800">{a.Employee?.name || a.doctorName || "Chưa rõ bác sĩ"}</div>
                             <div className="text-sm text-gray-500">{formatDateTime(a.date)}</div>
                             <div className="text-sm text-gray-500">{a.startTime} — {a.endTime} • {a.Room?.name || 'N/A'}</div>
                           </div>
-                          <div className="text-sm text-green-600 font-medium">{a.status}</div>
+                          <div className="flex flex-col items-end gap-2">
+                            <div className={`text-sm font-medium ${a.status === 'cancelled' ? 'text-red-600' : 'text-green-600'}`}>{a.status === 'cancelled' ? 'Đã hủy' : a.status}</div>
+                            {!(a.status === 'cancelled' || a.status === 'completed') ? (
+                              <button
+                                onClick={async () => {
+                                  if (!confirm('Bạn có chắc muốn hủy lịch này?')) return;
+                                  await cancelAppointment(a.id);
+                                }}
+                                className="text-xs text-red-600 hover:underline"
+                              >
+                                Hủy
+                              </button>
+                            ) : (
+                              <div className="text-xs text-gray-500">{a.status === 'cancelled' ? 'Đã hủy' : 'Hoàn tất'}</div>
+                            )}
+                          </div>
                         </div>
                       );
                     })}
@@ -216,29 +253,28 @@ export default function PatientDashboard() {
 
             {activeTab === 'Records' && (
               <section>
-                <h3 className="text-xl font-semibold mb-4">Medical Records</h3>
+                <h3 className="text-xl font-semibold mb-4">Hồ sơ y tế</h3>
                 {medicalRecords.length === 0 ? (
-                  <p className="text-gray-500">Chưa có hồ sơ y tế.</p>
+                  <div className="p-6 bg-white rounded-lg shadow text-center text-gray-500">Chưa có hồ sơ y tế.</div>
                 ) : (
                   <div className="bg-white rounded-2xl shadow overflow-hidden">
                     <table className="w-full text-sm">
                       <thead className="bg-gray-50">
                         <tr>
-                          <th className="px-4 py-3 text-left">Date</th>
-                          <th className="px-4 py-3 text-left">Doctor</th>
-                          <th className="px-4 py-3 text-left">Summary</th>
+                          <th className="px-4 py-3 text-left">Ngày</th>
+                          {/* <th className="px-4 py-3 text-left">Bác sĩ</th> */}
+                          <th className="px-4 py-3 text-left">Tóm tắt</th>
                          </tr>
                       </thead>
                       <tbody>
                         {medicalRecords.map((d, i) => (
                           <tr key={d.id || i} className="border-t">
                             <td className="px-4 py-3 align-top">{d.createdAt ? formatDateTime(d.createdAt) : '-'}</td>
-                            <td className="px-4 py-3 align-top">{d.Doctor?.Employee?.name || d.doctorName || '-'}</td>
+                            {/* <td className="px-4 py-3 align-top">{d.Doctor?.Employee?.name || d.doctorName || '-'}</td> */}
                             <td className="px-4 py-3 align-top">
-                              <div className="font-medium">{d.treatment || d.diagnosis || 'No details'}</div>
+                              <div className="font-medium">{d.treatment || d.diagnosis || 'Không có thông tin'}</div>
                               {d.notes && <div className="text-xs text-gray-500 mt-1">{d.notes}</div>}
                             </td>
-                            
                           </tr>
                         ))}
                       </tbody>
@@ -250,7 +286,7 @@ export default function PatientDashboard() {
 
             {activeTab === 'Book' && (
               <section>
-                <h3 className="text-xl font-semibold mb-4">Book Appointment</h3>
+                <h3 className="text-xl font-semibold mb-4">Đặt lịch</h3>
                 <div className="bg-[#ede9fe] rounded-2xl p-6 max-w-md">
                   <form
                     onSubmit={async (e) => {
@@ -299,7 +335,6 @@ export default function PatientDashboard() {
           </div>
         </main>
       </div>
-    </div>
   );
 }
 

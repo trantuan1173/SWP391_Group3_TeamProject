@@ -7,7 +7,7 @@ const { protect } = require("../middleware/authMiddleware");
 /**
  * @swagger
  * tags:
- *   name: Employee
+ *   name: Employees
  *   description: Quản lý người dùng
  */
 
@@ -16,7 +16,7 @@ const { protect } = require("../middleware/authMiddleware");
  * /employees/login:
  *   post:
  *     summary: Login a user
- *     tags: [Employee]
+ *     tags: [Employees]
  *     requestBody:
  *       required: true
  *       content:
@@ -56,14 +56,14 @@ router.post("/login", employeeLogin);
  *       200:
  *         description: Thông tin nhân viên và role
  */
-router.get("/:id/with-role", EmployeeController.getEmployeeWithRole);
+router.get("/:id/with-role", getEmployeeWithRole);
 
 /**
  * @swagger
  * /employees/profile:
  *   get:
  *     summary: Get user profile
- *     tags: [Employee]
+ *     tags: [Employees]
  *     responses:
  *       200:
  *         description: User profile fetched successfully

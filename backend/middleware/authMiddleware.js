@@ -48,6 +48,8 @@ const protect = async (req, res, next) => {
 
     req.user = user;
     req.userType = decoded.type;
+  // expose the raw id from the token for convenience in controllers
+  req.userId = decoded.id;
 
     next();
   } catch (err) {
