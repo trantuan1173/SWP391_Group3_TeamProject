@@ -1,4 +1,4 @@
-const { MedicalRecord, Appointment, Patient, Employee, Service, MedicalRecordService } = require("../models");
+const {MedicalRecord, Appointment, Patient, Employee, Service, MedicalRecordService } = require("../models");
 const { Op } = require("sequelize");
 
 const getAllMedicalRecordByPatientId = async (req, res) => {
@@ -22,6 +22,81 @@ const getAllMedicalRecordByPatientId = async (req, res) => {
         console.error(error);
         res.status(500).json({ error: "Failed to get medical records" });
     }
+};
+
+const getAllPatients = async (req, res) => {
+  try {
+    const patients = await Patient.findAll({
+      attributes: ['id', 'name', 'email', 'phoneNumber', 'dateOfBirth', 'gender'],
+      order: [['name', 'ASC']]
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Lấy danh sách bệnh nhân thành công",
+      data: patients
+    });
+  } catch (error) {
+    console.error("Error in getAllPatients:", error);
+    res.status(500).json({ 
+      success: false,
+      error: "Failed to get patients",
+      details: error.message 
+    });
+  }
+};
+
+// Lấy tất cả hồ sơ khám của một bệnh nhân (không phân biệt bác sĩ)
+const getAllMedicalRecordsByPatient = async (req, res) => {
+  try {
+    const { patientId } = req.params;
+
+    console.log("Getting all medical records for patientId:", patientId);
+
+    const medicalRecords = await MedicalRecord.findAll({
+      where: { patientId: parseInt(patientId) },
+      include: [
+        {
+          model: Employee,
+          attributes: ['id', 'name', 'email', 'phoneNumber']
+        },
+        {
+          model: Appointment,
+          attributes: ['id', 'date', 'startTime', 'endTime', 'status']
+        }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+
+    console.log("Found medical records:", medicalRecords.length);
+
+    const formattedRecords = medicalRecords.map(record => ({
+      id: record.id,
+      appointmentId: record.appointmentId,
+      symptoms: record.symptoms,
+      diagnosis: record.diagnosis,
+      treatment: record.treatment,
+      orderDetails: typeof record.orderDetails === 'string' 
+        ? JSON.parse(record.orderDetails) 
+        : (record.orderDetails || []),
+      createdAt: record.createdAt,
+      doctor: record.Employee, // Thông tin bác sĩ đã khám
+      appointment: record.Appointment
+    }));
+
+    res.status(200).json({
+      success: true,
+      message: "Lấy danh sách hồ sơ khám thành công",
+      data: formattedRecords
+    });
+  } catch (error) {
+    console.error("Error in getAllMedicalRecordsByPatient:", error);
+    res.status(500).json({ 
+      success: false,
+      error: "Failed to get medical records",
+      details: error.message 
+    });
+  }
 };
 
 const getAllMedicalRecordByAppointmentId = async (req, res) => {
@@ -328,6 +403,7 @@ const getPatientsByDoctor = async (req, res) => {
 };
 
 module.exports = {
+    getAllPatients,
     getAllMedicalRecordByPatientId,
     getAllMedicalRecordByAppointmentId,
     getMedicalRecordById,
@@ -335,5 +411,6 @@ module.exports = {
     updateMedicalRecord,
     deleteMedicalRecord,
     getMedicalRecordsByDoctor,
-    getPatientsByDoctor
+    getPatientsByDoctor,
+    getAllMedicalRecordsByPatient
 };

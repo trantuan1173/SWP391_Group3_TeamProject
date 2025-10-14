@@ -65,8 +65,8 @@ export default function DoctorDashboard({ children, activeMenu, setActiveMenu, d
                 }`}
                 style={{ borderRadius: "20px", marginBottom: "10px" }}
               >
-                <span className="text-lg">⚙️</span>
-                <span>Settings</span>
+                <span className="text-lg"></span>
+                <span>gernerate</span>
               </button>
             </nav>
           </div>
