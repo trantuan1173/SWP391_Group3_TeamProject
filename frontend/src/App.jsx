@@ -4,7 +4,7 @@ import BookMedicalExam from "./page/guest/BookMedicalExam";
 import ListDoctor from "./page/guest/ListDoctor";
 import DoctorSchedule from "./page/doctor/DoctorSchedule";
 import QuickBook from "./page/Patient/QuickBook";
-import PatientDashboard from './page/Patient/PatientDashboard'
+import PatientDashboard from "./page/Patient/PatientDashboard";
 import Doctors from "./page/Patient/Doctors";
 import PatientEdit from "./page/Patient/PatientEdit";
 import PatientProfile from "./page/Patient/PatientProfile";
@@ -25,6 +25,7 @@ import ReceptionistDashboard from "./page/Receptionist/ReceptionistDashboard";
 import ReceptionistPatient from "./page/Receptionist/ReceptionistPatient";
 import ReceptionistAppointment from "./page/Receptionist/ReceptionistAppointment";
 import ReceptionistDoctor from "./page/Receptionist/ReceptionistDoctor";
+import ReceptionistNews from "./page/Receptionist/ReceptionistNews";
 
 function App() {
   const RedirectPatientId = () => {
@@ -59,7 +60,10 @@ function App() {
         </Route>
 
         {/* Legacy routes -> redirects to new /patient paths */}
-        <Route path="/patient-dashboard" element={<Navigate to="/patient" replace />} />
+        <Route
+          path="/patient-dashboard"
+          element={<Navigate to="/patient" replace />}
+        />
         <Route path="/patient-dashboard/:id" element={<RedirectPatientId />} />
 
         {/* Doctor Dashboard routes */}
@@ -87,6 +91,7 @@ function App() {
             <Route path="patients" element={<ReceptionistPatient />} />
             <Route path="appointments" element={<ReceptionistAppointment />} />
             <Route path="doctors" element={<ReceptionistDoctor />} />
+            <Route path="news" element={<ReceptionistNews />} />
           </Route>
         </Route>
       </Routes>

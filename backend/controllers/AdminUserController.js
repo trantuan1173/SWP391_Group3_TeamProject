@@ -6,6 +6,7 @@ const { Op } = require("sequelize");
 const Role = require("../models/Role");
 const EmployeeRole = require("../models/EmployeeRole");
 const { sendStaffVerifyEmail } = require("../service/sendVerifyEmail");
+const bcrypt = require("bcrypt");
 
 //Create role
 const createRole = async (req, res) => {
@@ -195,7 +196,7 @@ const getEmployees = async (req, res) => {
         "address",
         "identityNumber",
       ],
-      include: [{ model: Role, as: "roles", attributes: ["name"] }],
+      include: [{ model: Role, as: "roles" }],
       where: whereCondition,
       limit: pageSize,
       offset,
@@ -236,7 +237,7 @@ const deleteEmployee = async (req, res) => {
 const getEmployeeById = async (req, res) => {
   try {
     const user = await Employee.findByPk(req.params.id, {
-      include: [{ model: Role, as: "roles", attributes: ["name"] }],
+      include: [{ model: Role, as: "roles" }],
     });
     if (!user) return res.status(404).json({ error: "Employee not found" });
     res.json(user);
@@ -277,7 +278,7 @@ const updateEmployee = async (req, res) => {
     // Tìm nhân viên hiện tại
     const existingUser = await Employee.findOne({
       where: { id },
-      include: [{ model: Role, as: "roles", attributes: ["name"] }],
+      include: [{ model: Role, as: "roles" }],
     });
 
     if (!existingUser) {
@@ -344,7 +345,10 @@ const updateEmployee = async (req, res) => {
 
     if (newRole && newRole !== oldRole) {
       await EmployeeRole.destroy({ where: { employeeId: id } });
-      const roleRecord = await Role.findOne({ where: { name: newRole }, include: [{ model: Role, as: "roles", attributes: ["name"] }] });
+      const roleRecord = await Role.findOne({
+        where: { name: newRole },
+        include: [{ model: Role, as: "roles", attributes: ["name"] }],
+      });
       if (!roleRecord) {
         return res.status(404).json({ error: `Role '${newRole}' not found` });
       }
@@ -367,7 +371,7 @@ const updateEmployee = async (req, res) => {
 
     // ==== Lấy lại dữ liệu đã cập nhật ====
     const updatedUser = await Employee.findByPk(id, {
-      include: [{ model: Role, as: "roles", attributes: ["name"] }],
+      include: [{ model: Role, as: "roles" }],
       attributes: { exclude: ["password"] },
     });
 

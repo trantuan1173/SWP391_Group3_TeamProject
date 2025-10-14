@@ -1,3 +1,99 @@
-export default function Dashboard() {
-    return <div className="text-xl font-semibold">Receptionist Dashboard</div>;
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { API_ENDPOINTS } from "../../config";
+import { CalendarDays, CreditCard } from "lucide-react";
+
+export default function ReceptionistDashboard() {
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTodayAppointments = async () => {
+      try {
+        const res = await axios.get(API_ENDPOINTS.GET_ALL_APPOINTMENTS,
+            {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            }
+        );
+        const today = new Date();
+        const filteredAppointments = res.data.filter(a => {
+          const appointmentDate = new Date(a.date);
+          return (appointmentDate >= today || a.status !== "completed");
+        });
+        setAppointments(filteredAppointments || []);
+      } catch (error) {
+        console.error("Failed to fetch today's appointments:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTodayAppointments();
+  }, []);
+
+  if (loading) {
+    return <div className="p-6 text-gray-500">Loading dashboard...</div>;
   }
+
+  const totalAppointments = appointments.length;
+  const toPaymentCount = appointments.filter(
+    (a) => a.status === "to-payment"
+  ).length;
+  const pendingCount = appointments.filter(a => a.status === "pending").length;
+
+  return (
+    <div className="p-8">
+      <h1 className="text-2xl font-semibold mb-6 text-gray-800">
+        Receptionist Dashboard
+      </h1>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <div className="bg-blue-100 border border-blue-300 rounded-lg shadow-sm p-6 flex items-center gap-4">
+          <div className="bg-blue-500 text-white p-3 rounded-full">
+            <CalendarDays className="h-6 w-6" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-700">
+              Total Appointments
+            </h2>
+            <p className="text-3xl font-bold text-blue-700">
+              {totalAppointments}
+            </p>
+            <p className="text-sm text-gray-500 mt-1">For today</p>
+          </div>
+        </div>
+
+        <div className="bg-yellow-100 border border-yellow-300 rounded-lg shadow-sm p-6 flex items-center gap-4">
+          <div className="bg-yellow-500 text-white p-3 rounded-full">
+            <CreditCard className="h-6 w-6" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-700">
+              Awaiting Payment
+            </h2>
+            <p className="text-3xl font-bold text-yellow-700">
+              {toPaymentCount}
+            </p>
+            <p className="text-sm text-gray-500 mt-1">Completed & Unpaid</p>
+          </div>
+        </div>
+
+        <div className="bg-green-100 border border-green-300 rounded-lg shadow-sm p-6 flex items-center gap-4">
+          <div className="bg-green-500 text-white p-3 rounded-full">
+            <CalendarDays className="h-6 w-6" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-700">
+              Pending Appointments
+            </h2>
+            <p className="text-3xl font-bold text-green-700">
+              {pendingCount}
+            </p>
+            <p className="text-sm text-gray-500 mt-1">Waiting for confirmation</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -4,7 +4,7 @@ const {
   sendForgotPasswordEmail,
   sendStaffVerifyEmail,
 } = require("../service/sendVerifyEmail");
-
+const { Op, sequelize } = require("sequelize");
 //Get all appointment
 const getAppointment = async (req, res) => {
   try {
@@ -39,6 +39,30 @@ const getAppointmentById = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to get appointment" });
+  }
+};
+
+//Get all appointmenr today
+const getAppointmentToday = async (req, res) => {
+  try {
+    // Lấy toàn bộ appointments
+    const appointments = await Appointment.findAll();
+
+    // Lấy ngày hiện tại (theo giờ VN)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Lọc: chỉ lấy các appointment có ngày >= hôm nay
+    const filtered = appointments.filter(a => {
+      const apptDate = new Date(a.date);
+      apptDate.setHours(0, 0, 0, 0);
+      return apptDate >= today;
+    });
+
+    res.status(200).json(filtered);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to get appointments" });
   }
 };
 
@@ -114,4 +138,4 @@ const getAppointmentByStatus = async (req, res) => {
   }
 };
 
-module.exports = { getAppointment, getAppointmentById, updateAppointment, deleteAppointment, getAppointmentByPatientId, getAppointmentByDoctorId, getAppointmentByStatus };
+module.exports = { getAppointment, getAppointmentById, updateAppointment, deleteAppointment, getAppointmentByPatientId, getAppointmentByDoctorId, getAppointmentByStatus, getAppointmentToday };

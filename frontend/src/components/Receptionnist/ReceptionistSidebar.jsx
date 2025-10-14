@@ -15,7 +15,7 @@ import {
     SidebarFooter,
 } from "@/components/ui/sidebar";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, Calendar, Bed } from "lucide-react";
+import { LayoutDashboard, Users, Calendar, Bed, Newspaper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 
@@ -29,6 +29,7 @@ const ReceptionistSideBar = () => {
         { title: "Patients", url: "/receptionist/patients", icon: Bed },
         { title: "Appointments", url: "/receptionist/appointments", icon: Calendar },
         { title: "Doctors", url: "/receptionist/doctors", icon: Users },
+        { title: "News", url: "/receptionist/news", icon: Newspaper },
     ];
 
     const handleLogout = () => {
