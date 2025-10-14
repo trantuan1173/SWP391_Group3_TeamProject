@@ -30,10 +30,8 @@ export default function Appointments() {
   const filteredAppointments = appointments.filter((a) => {
     const appointmentDate = new Date(a.date);
 
-    // Lọc theo trạng thái
     if (statusFilter !== "all" && a.status !== statusFilter) return false;
 
-    // Lọc theo ngày cụ thể
     if (selectedDate) {
       const filterDate = new Date(selectedDate);
       return (
@@ -43,12 +41,10 @@ export default function Appointments() {
       );
     }
 
-    // Mặc định hiển thị hôm nay và tương lai
     if (!selectedMonth && appointmentDate < new Date(now.setHours(0, 0, 0, 0))) {
       return false;
     }
 
-    // Nếu chọn tháng (dành cho lịch cũ)
     if (selectedMonth) {
       const [year, month] = selectedMonth.split("-");
       return (
@@ -68,7 +64,6 @@ export default function Appointments() {
         </h1>
 
         <div className="flex gap-3 flex-wrap">
-          {/* Filter trạng thái */}
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -81,7 +76,6 @@ export default function Appointments() {
             <option value="completed">Completed</option>
           </select>
 
-          {/* Filter ngày */}
           <input
             type="date"
             value={selectedDate}
@@ -92,7 +86,6 @@ export default function Appointments() {
             className="border border-gray-300 rounded-md px-3 py-2 text-sm"
           />
 
-          {/* Filter tháng cho lịch cũ */}
           <input
             type="month"
             value={selectedMonth}
@@ -119,13 +112,13 @@ export default function Appointments() {
         </thead>
         <tbody>
           {filteredAppointments.length > 0 ? (
-            filteredAppointments.map((a) => (
+            filteredAppointments.map((a, index) => (
               <tr
                 key={a.id}
                 className="hover:bg-gray-50 border-b transition-colors"
               >
-                <td className="p-3">{a.id}</td>
-                <td className="p-3">{a.patientId}</td>
+                <td className="p-3">{index + 1}</td>
+                <td className="p-3">{a.Patient.name}</td>
                 <td className="p-3">
                   {new Date(a.date).toLocaleDateString("vi-VN")}
                 </td>

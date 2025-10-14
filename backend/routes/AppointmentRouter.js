@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { getAppointment, getAppointmentById, updateAppointment, deleteAppointment, getAppointmentByPatientId, getAppointmentByDoctorId, getAppointmentByStatus } = require("../controllers/AppointmentController");
+const { getAppointment, getAppointmentById, updateAppointment, deleteAppointment, getAppointmentByPatientId, getAppointmentByDoctorId, getAppointmentByStatus, getAppointmentToday } = require("../controllers/AppointmentController");
 const { protect, authorize } = require("../middleware/authMiddleware");
 /**
  * @swagger
@@ -93,6 +93,18 @@ router.put("/:id", protect, authorize("Admin", "Receptionist"), updateAppointmen
  *         description: Failed to delete appointment
  */
 router.delete("/:id", protect, authorize("Admin", "Receptionist"), deleteAppointment);
+
+/**
+ * @swagger
+ * /appointments/today:
+ *   get:
+ *     summary: Get all appointments today
+ *     tags: [Appointment]
+ *     responses:
+ *       200:
+ *         description: List of appointments
+ */
+router.get("/today", protect, authorize("Admin", "Receptionist"), getAppointmentToday);
 
 /**
  * @swagger

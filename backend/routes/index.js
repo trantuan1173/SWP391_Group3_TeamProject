@@ -10,6 +10,7 @@ const doctorScheduleRouter = require("./DoctorScheduleRouter");
 const employeeRouter = require("./EmployeeRouter");
 const serviceRouter = require("./ServiceRouter");
 const medicalRecordRouter = require("./MedicalRecordRouter");
+const newsRouter = require("./NewsRouter");
 
 router.use("/doctors", DoctorRouter);
 router.use("/patients", PatientRouter);
@@ -20,5 +21,6 @@ router.use("/admin", AdminRouter);
 router.use("/doctor-schedules", doctorScheduleRouter);
 router.use("/services", serviceRouter);
 router.use("/medical-records", medicalRecordRouter);
+router.use("/news", newsRouter);
 module.exports = router;
  
