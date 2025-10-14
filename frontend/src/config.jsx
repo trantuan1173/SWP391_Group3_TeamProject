@@ -29,4 +29,9 @@ export const API_ENDPOINTS = {
   PATIENT_BY_ID: (patientId) => `${baseUrl}/api/patients/${patientId}`,
   GET_ALL_APPOINTMENTS: `${baseUrl}/api/appointments`,
   GET_APPOINTMENT_BY_ID: (appointmentId) => `${baseUrl}/api/appointments/${appointmentId}`,
+  GET_TODAY_APPOINTMENTS: `${baseUrl}/api/appointments/today`,
+  CREATE_NEWS: `${baseUrl}/api/news`,
+  UPDATE_NEWS: (newsId) => `${baseUrl}/api/news/${newsId}`,
+  DELETE_NEWS: (newsId) => `${baseUrl}/api/news/${newsId}`,
+  GET_NEWS: `${baseUrl}/api/news`,
 };
