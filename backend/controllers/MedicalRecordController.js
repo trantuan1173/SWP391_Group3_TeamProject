@@ -1,4 +1,5 @@
 const { MedicalRecord, Appointment, Patient, Employee, Service, MedicalRecordService } = require("../models");
+const { Op } = require("sequelize");
 
 const getAllMedicalRecordByPatientId = async (req, res) => {
     try {

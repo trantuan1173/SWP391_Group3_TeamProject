@@ -62,8 +62,8 @@ export default function ListDoctor() {
 
               {doctors.map((doctor, idx) => {
                 const employee = doctor.employee || {}; // lấy thông tin employee bên trong doctor
-                const name = employee.name || "Chưa có tên"; // lấy tên
-                const avatar = employee.avatar || "https://randomuser.me/api/portraits/men/32.jpg"; // lấy avatar
+                const name = doctor.name || "Chưa có tên"; // lấy tên
+                const avatar = doctor.avatar || "https://randomuser.me/api/portraits/men/32.jpg"; // lấy avatar
                 const speciality = doctor.speciality || "Chưa có chuyên khoa"; // lấy tên chuyên khoa
 
                 return (
