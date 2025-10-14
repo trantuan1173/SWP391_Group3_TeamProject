@@ -226,15 +226,15 @@ export default function UserManagement() {
                 <TableCell>{user.name}</TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>
-                  {user.Roles && user.Roles.length > 0 ? (
+                  {user.roles && user.roles.length > 0 ? (
                     <div
                       className={`text-white text-[13px] font-bold capitalize rounded-3xl w-20 py-1 text-center ${
-                        user.Roles[0].name === "employee"
+                        user.roles[0].name === "employee"
                           ? "bg-blue-500"
                           : "bg-green-500"
                       }`}
                     >
-                      {user.Roles[0].name}
+                      {user.roles[0].name}
                     </div>
                   ) : (
                     <span className="text-gray-400">No role</span>

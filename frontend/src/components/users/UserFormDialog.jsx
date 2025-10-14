@@ -97,7 +97,7 @@ export default function UserFormDialog({ open, setOpen, onSubmit, userId }) {
           form.reset({
             ...data,
             password: "",
-            role: data.Roles?.[0]?.name || "doctor",
+            role: data.roles?.[0]?.name || "doctor",
             dateOfBirth: data.dateOfBirth
               ? new Date(data.dateOfBirth).toISOString().split("T")[0]
               : "",

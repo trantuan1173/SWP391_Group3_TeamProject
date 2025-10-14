@@ -4,7 +4,7 @@ import BookMedicalExam from "./page/guest/BookMedicalExam";
 import ListDoctor from "./page/guest/ListDoctor";
 import DoctorSchedule from "./page/doctor/DoctorSchedule";
 import QuickBook from "./page/Patient/QuickBook";
-import PatientDashboard from './page/Patient/PatientDashboard'
+import PatientDashboard from "./page/Patient/PatientDashboard";
 import Doctors from "./page/Patient/Doctors";
 import PatientEdit from "./page/Patient/PatientEdit";
 import PatientProfile from "./page/Patient/PatientProfile";
@@ -58,7 +58,10 @@ function App() {
         </Route>
 
         {/* Legacy routes -> redirects to new /patient paths */}
-        <Route path="/patient-dashboard" element={<Navigate to="/patient" replace />} />
+        <Route
+          path="/patient-dashboard"
+          element={<Navigate to="/patient" replace />}
+        />
         <Route path="/patient-dashboard/:id" element={<RedirectPatientId />} />
 
         {/* Doctor Schedule routes */}
