@@ -1,22 +1,22 @@
-const { MedicalRecord, Employee } = require("../models");
-const { Appointment } = require("../models");
-const { Patient } = require("../models");
-//const { Doctor } = require("../models");
-const { Service } = require("../models");
-const { MedicalRecordService } = require("../models");
-const { Op } = require("sequelize");
+const { MedicalRecord, Appointment, Patient, Employee, Service, MedicalRecordService } = require("../models");
 
 const getAllMedicalRecordByPatientId = async (req, res) => {
     try {
         const { patientId } = req.params;
-        const medicalRecords = await MedicalRecord.findAll({ where: { patientId } });
-        res.status(200).json({
-            message: "Lấy danh sách hồ sơ khám thành công",
-            data: medicalRecords.map((medicalRecord) => ({
-                ...medicalRecord.dataValues,
-                orderDetails: JSON.parse(medicalRecord.orderDetails),
-            })),
-        });
+    const medicalRecords = await MedicalRecord.findAll({
+      where: { patientId },
+      include: [
+        { model: Employee, attributes: ["id", "name", "email", "phoneNumber", "avatar"] },
+        { model: Appointment, attributes: ["id", "date", "startTime", "endTime"] },
+      ],
+    });
+    res.status(200).json({
+      message: "Lấy danh sách hồ sơ khám thành công",
+      data: medicalRecords.map((medicalRecord) => ({
+        ...medicalRecord.dataValues,
+        orderDetails: JSON.parse(medicalRecord.orderDetails),
+      })),
+    });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Failed to get medical records" });
@@ -26,14 +26,20 @@ const getAllMedicalRecordByPatientId = async (req, res) => {
 const getAllMedicalRecordByAppointmentId = async (req, res) => {
     try {
         const { appointmentId } = req.params;
-        const medicalRecords = await MedicalRecord.findAll({ where: { appointmentId } });
-        res.status(200).json({
-            message: "Lấy danh sách hồ sơ khám thành công",
-            data: medicalRecords.map((medicalRecord) => ({
-                ...medicalRecord.dataValues,
-                orderDetails: JSON.parse(medicalRecord.orderDetails),
-            })),
-        });
+    const medicalRecords = await MedicalRecord.findAll({
+      where: { appointmentId },
+      include: [
+        { model: Employee, attributes: ["id", "name", "email", "phoneNumber", "avatar"] },
+        { model: Appointment, attributes: ["id", "date", "startTime", "endTime"] },
+      ],
+    });
+    res.status(200).json({
+      message: "Lấy danh sách hồ sơ khám thành công",
+      data: medicalRecords.map((medicalRecord) => ({
+        ...medicalRecord.dataValues,
+        orderDetails: JSON.parse(medicalRecord.orderDetails),
+      })),
+    });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Failed to get medical records" });
@@ -43,7 +49,12 @@ const getAllMedicalRecordByAppointmentId = async (req, res) => {
 const getMedicalRecordById = async (req, res) => {
     try {
         const { id } = req.params;
-        const medicalRecord = await MedicalRecord.findByPk(id);
+    const medicalRecord = await MedicalRecord.findByPk(id, {
+      include: [
+        { model: Employee, attributes: ["id", "name", "email", "phoneNumber", "avatar"] },
+        { model: Appointment, attributes: ["id", "date", "startTime", "endTime"] },
+      ],
+    });
         if (!medicalRecord) {
             return res.status(404).json({ error: "Medical record not found" });
         }
@@ -62,8 +73,13 @@ const getMedicalRecordById = async (req, res) => {
 
 const createMedicalRecord = async (req, res) => {
 
-    const { patientId, doctorId, appointmentId, symptoms, diagnosis, treatment, services } = req.body;
+  const { patientId, doctorId, appointmentId, symptoms, diagnosis, treatment, services } = req.body;
     try {
+    // If doctorId provided, ensure it references an Employee
+    if (doctorId) {
+      const doc = await Employee.findByPk(doctorId);
+      if (!doc) return res.status(400).json({ error: 'Invalid doctorId' });
+    }
         const serviceIds = services.map(s => s.serviceId);
         const serviceList = await Service.findAll({
           where: { id: serviceIds },

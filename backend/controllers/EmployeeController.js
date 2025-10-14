@@ -19,8 +19,8 @@ const getEmployeeWithRole = async (req, res) => {
       include: [
         {
           model: Role,
-          as: "roles", // ✅ Sử dụng alias từ belongsToMany
-          through: { attributes: [] }, // Ẩn bảng trung gian
+          as: "roles", 
+          through: { attributes: [] }, 
           attributes: ["id", "name"]
         }
       ]
@@ -59,15 +59,15 @@ const employeeLogin = async (req, res) => {
     const { email, password } = req.body;
     const employee = await Employee.findOne({
       where: { email },
-      include: [{ model: Role, as: "roles", through: { attributes: [] } }]
+      include: [{ model: Role, as: "roles", through: { attributes: [] }, attributes: ["id", "name"] }]
     });
-    // if (!employee.isActive) {
-    //   return res.status(401).json({ error: "User not verified" });
-    // }
+    if (!employee.isActive) {
+      return res.status(401).json({ error: "User not verified" });
+    }
     if (!employee) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
-    if (!employee.comparePassword(password)) {
+    if (!await employee.comparePassword(password)) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
@@ -83,7 +83,16 @@ const authProfile = async (req, res) => {
   try {
     const token = req.headers.authorization.split(" ")[1];
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    const employee = await Employee.findByPk(decodedToken.id);
+    const employee = await Employee.findByPk(decodedToken.id, {
+      include: [
+        {
+          model: Role,
+          as: "roles", 
+          through: { attributes: [] }, 
+          attributes: ["id", "name"]
+        }
+      ]
+    });
 
     if (!employee) {
       return res.status(404).json({
