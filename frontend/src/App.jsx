@@ -9,9 +9,9 @@ import Doctors from "./page/Patient/Doctors";
 import PatientEdit from "./page/Patient/PatientEdit";
 import PatientProfile from "./page/Patient/PatientProfile";
 import PatientLayout from "./layout/PatientLayout";
-import PatientAppointments from "./page/Patient/PatientAppointments";
-import PatientBooking from "./page/Patient/PatientBooking";
-import PatientRecords from "./page/Patient/PatientRecords";
+import AppointmentPage from "./page/Patient/AppointmentPage";
+import BookPage from "./page/Patient/BookPage";
+import MedicalRecordPage from "./page/Patient/MedicalRecordPage";
 import Login from "./page/Auth/Login";
 import Register from "./page/Auth/Register";
 import VerifyPage from "./page/Auth/VerifyPage";
@@ -57,6 +57,9 @@ function App() {
           <Route path=":id/profile" element={<PatientProfile />} />
           <Route element={<PatientOnly />}>
             <Route path=":id" element={<PatientDashboard />} />
+            <Route path=":id/appointments" element={<AppointmentPage />} />
+            <Route path=":id/book" element={<BookPage />} />
+            <Route path=":id/records" element={<MedicalRecordPage />} />
           </Route>
         </Route>
 

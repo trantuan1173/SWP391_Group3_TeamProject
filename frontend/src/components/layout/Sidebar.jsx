@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import { Home, Users } from "lucide-react";
+import { Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 
@@ -31,12 +32,27 @@ const PatientSidebar = ({ patient }) => {
 
   const navigationItems = [
     {
-      title: "Patients Page",
+      title: "Trang cá nhân",
       url: user?.id ? `/patient/${user.id}` : "/patient",
       icon: Home,
     },
     {
-      title: "Doctor List",
+      title: "Lịch khám",
+      url: user?.id ? `/patient/${user.id}/appointments` : "/patient/appointments",
+      icon: Clock,
+    },
+    {
+      title: "Đặt lịch",
+      url: user?.id ? `/patient/${user.id}/book` : "/patient/book",
+      icon: Users,
+    },
+    {
+      title: "Hồ sơ y tế",
+      url: user?.id ? `/patient/${user.id}/records` : "/patient/records",
+      icon: Users,
+    },
+    {
+      title: "Danh sách bác sĩ",
       url: "/patient/doctors",
       icon: Users,
     },
@@ -89,7 +105,7 @@ const PatientSidebar = ({ patient }) => {
           </SidebarContent>
 
           {/* Footer */}
-          <SidebarFooter className="p-4 bg-[#00A646] border-t border-white/20">
+          <SidebarFooter className="p-4 bg-[#00A646] /20">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 bg-white/30 rounded-full flex items-center justify-center font-bold text-green-900">
                 {name?.charAt(0).toUpperCase() || "P"}
