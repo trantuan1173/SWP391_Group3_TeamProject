@@ -82,7 +82,9 @@ export default function PatientDashboard() {
   useEffect(() => {
     async function fetchAppointments() {
       try {
-        const res = await axios.get(API_ENDPOINTS.GET_APPOINTMENTS_BY_PATIENT(id));
+        const token = localStorage.getItem("token");
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const res = await axios.get(API_ENDPOINTS.GET_APPOINTMENTS_BY_PATIENT(id), { headers });
         const data = res.data;
         setAppointments(Array.isArray(data) ? data : (data && Array.isArray(data.appointments) ? data.appointments : []));
       } catch (err) {
@@ -216,35 +218,48 @@ export default function PatientDashboard() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {appointments.map((a) => {
                       const { day, month } = formatDayMonth(a.date);
-                      return (
-                        <div key={a.id} className="bg-white p-4 rounded-xl shadow hover:shadow-md transition flex items-center gap-4">
-                          <div className="w-14 h-14 rounded-lg bg-green-50 flex flex-col items-center justify-center text-green-700">
-                            <div className="text-lg font-bold">{day}</div>
-                            <div className="text-xs">{month}</div>
+                        // Hiển thị trạng thái lịch khám rõ ràng
+                        let statusLabel = '';
+                        let statusColor = '';
+                        switch (a.status) {
+                          case 'pending':
+                            statusLabel = 'Chờ xác nhận'; statusColor = 'text-yellow-600'; break;
+                          case 'confirmed':
+                            statusLabel = 'Đã xác nhận'; statusColor = 'text-green-600'; break;
+                          case 'completed':
+                            statusLabel = 'Đã khám'; statusColor = 'text-blue-600'; break;
+                          case 'cancelled':
+                            statusLabel = 'Đã hủy'; statusColor = 'text-red-600'; break;
+                          default:
+                            statusLabel = a.status; statusColor = 'text-gray-600';
+                        }
+                        return (
+                          <div key={a.id} className="bg-white p-4 rounded-xl shadow hover:shadow-md transition flex items-center gap-4">
+                            <div className="w-14 h-14 rounded-lg bg-green-50 flex flex-col items-center justify-center text-green-700">
+                              <div className="text-lg font-bold">{day}</div>
+                              <div className="text-xs">{month}</div>
+                            </div>
+                            <div className="flex-1">
+                              <div className="font-semibold text-gray-800">{a.Employee?.name || a.doctorName || "Chưa rõ bác sĩ"}</div>
+                              <div className="text-sm text-gray-500">{formatDateTime(a.date)}</div>
+                              <div className="text-sm text-gray-500">{a.startTime} — {a.endTime} • {a.Room?.name || 'N/A'}</div>
+                            </div>
+                            <div className="flex flex-col items-end gap-2">
+                              <div className={`text-sm font-medium ${statusColor}`}>{statusLabel}</div>
+                              {a.status === 'pending' || a.status === 'confirmed' ? (
+                                <button
+                                  onClick={async () => {
+                                    if (!confirm('Bạn có chắc muốn hủy lịch này?')) return;
+                                    await cancelAppointment(a.id);
+                                  }}
+                                  className="text-xs text-red-600 hover:underline"
+                                >
+                                  Hủy
+                                </button>
+                              ) : null}
+                            </div>
                           </div>
-                          <div className="flex-1">
-                            <div className="font-semibold text-gray-800">{a.Employee?.name || a.doctorName || "Chưa rõ bác sĩ"}</div>
-                            <div className="text-sm text-gray-500">{formatDateTime(a.date)}</div>
-                            <div className="text-sm text-gray-500">{a.startTime} — {a.endTime} • {a.Room?.name || 'N/A'}</div>
-                          </div>
-                          <div className="flex flex-col items-end gap-2">
-                            <div className={`text-sm font-medium ${a.status === 'cancelled' ? 'text-red-600' : 'text-green-600'}`}>{a.status === 'cancelled' ? 'Đã hủy' : a.status}</div>
-                            {!(a.status === 'cancelled' || a.status === 'completed') ? (
-                              <button
-                                onClick={async () => {
-                                  if (!confirm('Bạn có chắc muốn hủy lịch này?')) return;
-                                  await cancelAppointment(a.id);
-                                }}
-                                className="text-xs text-red-600 hover:underline"
-                              >
-                                Hủy
-                              </button>
-                            ) : (
-                              <div className="text-xs text-gray-500">{a.status === 'cancelled' ? 'Đã hủy' : 'Hoàn tất'}</div>
-                            )}
-                          </div>
-                        </div>
-                      );
+                        );
                     })}
                   </div>
                 )}

@@ -43,7 +43,9 @@ Role.belongsToMany(Employee, {
   as: "employees",
 });
 
-// Employee.hasMany(EmployeeRole, { foreignKey: 'employeeId', as: 'employeeRoles' }); // fix here
+
+// Sửa lỗi EagerLoadingError: EmployeeRole is not associated to Employee
+Employee.hasMany(EmployeeRole, { foreignKey: 'employeeId', as: 'employeeRoles' });
 
 Employee.hasMany(Appointment, { foreignKey: "doctorId" });
 Appointment.belongsTo(Employee, { foreignKey: "doctorId" });

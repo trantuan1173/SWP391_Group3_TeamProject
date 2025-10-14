@@ -21,9 +21,11 @@ export const AuthProvider = ({ children }) => {
         const res = await axios.get(API_ENDPOINTS.AUTH_PROFILE, {
           headers: { Authorization: `Bearer ${token}` },
         });
-
-        if (res.data.success && res.data.employee) {
-          setUser(res.data.employee);
+        // Nhận diện cả employee và patient
+        if (res.data.employee) {
+          setUser({ ...res.data.employee, type: "employee" });
+        } else if (res.data.patient) {
+          setUser({ ...res.data.patient, type: "patient" });
         } else {
           localStorage.removeItem("token");
         }
