@@ -10,7 +10,53 @@ const DoctorSchedule = () => {
   const [doctorInfo, setDoctorInfo] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [activeMenu, setActiveMenu] = useState('schedule');
+
+  // State cho year và week selector
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedWeek, setSelectedWeek] = useState(getCurrentWeek());
+  
   const navigate = useNavigate();
+
+  // Hàm lấy tuần hiện tại
+  function getCurrentWeek() {
+    const now = new Date();
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+    const days = Math.floor((now - startOfYear) / (24 * 60 * 60 * 1000));
+    return Math.ceil((days + startOfYear.getDay() + 1) / 7);
+  }
+
+  // Hàm tạo danh sách các tuần trong năm
+  const getWeeksInYear = (year) => {
+    const weeks = [];
+    const date = new Date(year, 0, 1);
+    let weekNum = 1;
+    
+    while (date.getFullYear() === year) {
+      const startOfWeek = new Date(date);
+      startOfWeek.setDate(date.getDate() - date.getDay() + 1); // Monday
+      
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6); // Sunday
+      
+      if (startOfWeek.getFullYear() === year || endOfWeek.getFullYear() === year) {
+        weeks.push({
+          weekNum,
+          label: `${startOfWeek.getDate()}/${startOfWeek.getMonth() + 1} To ${endOfWeek.getDate()}/${endOfWeek.getMonth() + 1}`,
+          startDate: new Date(startOfWeek),
+          endDate: new Date(endOfWeek)
+        });
+      }
+      
+      date.setDate(date.getDate() + 7);
+      weekNum++;
+    }
+    
+    return weeks;
+  };
+
+  // Tạo danh sách năm (từ 2020 đến 2030)
+  const years = Array.from({ length: 11 }, (_, i) => 2020 + i);
+  const weeks = getWeeksInYear(selectedYear);
 
   useEffect(() => {
     checkAuthAndFetchData();
@@ -86,10 +132,15 @@ const DoctorSchedule = () => {
     }
   };
 
-  // Hàm nhóm schedules theo ngày trong tuần hiện tại
+  // Hàm nhóm schedules theo tuần đã chọn
   const getWeeklySchedules = () => {
-    const now = new Date();
-    const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 1)); // Monday
+    const selectedWeekData = weeks.find(w => w.weekNum === selectedWeek);
+    
+    if (!selectedWeekData) {
+      return { weekDays: [], groupedSchedules: {} };
+    }
+
+    const startOfWeek = selectedWeekData.startDate;
     const weekDays = [];
     const groupedSchedules = {};
 
@@ -97,11 +148,13 @@ const DoctorSchedule = () => {
       const day = new Date(startOfWeek);
       day.setDate(startOfWeek.getDate() + i);
       const dayKey = day.toISOString().split('T')[0];
+      
       weekDays.push({
         date: day,
         key: dayKey,
-        label: day.toLocaleDateString('vi-VN', { weekday: 'short', day: 'numeric' })
+        label: day.toLocaleDateString('vi-VN', { weekday: 'short', day: 'numeric', month: 'numeric' })
       });
+      
       groupedSchedules[dayKey] = schedules.filter(s => {
         const scheduleDate = new Date(s.date).toISOString().split('T')[0];
         return scheduleDate === dayKey;
@@ -112,6 +165,19 @@ const DoctorSchedule = () => {
   };
 
   const { weekDays, groupedSchedules } = getWeeklySchedules();
+
+  // Handler cho việc thay đổi năm
+  const handleYearChange = (e) => {
+    const newYear = parseInt(e.target.value);
+    setSelectedYear(newYear);
+    setSelectedWeek(1); // Reset về tuần 1 khi đổi năm
+  };
+
+  // Handler cho việc thay đổi tuần
+  const handleWeekChange = (e) => {
+    setSelectedWeek(parseInt(e.target.value));
+  };
+
 
   if (loading) {
     return (
@@ -150,24 +216,42 @@ const DoctorSchedule = () => {
         <div className="bg-white rounded-xl shadow p-6">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-semibold text-gray-800">Lịch Làm Việc</h1>
-            {/* <div className="flex items-center gap-4">
-              <input
-                type="text"
-                placeholder="Search by name or date..."
-                className="px-4 py-2 border rounded-lg w-80 text-sm focus:outline-none focus:ring-2 focus:ring-green-400"
-                onChange={() => {}}
-              />
-              <button
-                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg shadow"
-                onClick={() => alert('Tạo lịch mới')}
-              >
-                Create Schedule
-              </button>
-            </div> */}
           </div>
+           {/* Year Selector */}
+              <div className="flex items-center gap-2 h-[50px]">
+                <label className="text-sm font-medium text-gray-600 bg-blue-50 px-3 py-1 rounded" style={{ height:'40px', justifyContent: 'center', alignContent: 'center'}}>
+                  YEAR
+                </label>
+                <select
+                  value={selectedYear}
+                  onChange={handleYearChange}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white h-[40px]"
+                  style={{ border: "20px" }}
+                >
+                  {years.map(year => (
+                    <option key={year} value={year} >{year}</option>
+                  ))}
+                </select>
+              </div>
 
-          {/* table header similar to image (but we display weekly grid below) */}
-          <div className="mb-4 text-sm text-gray-500">Your Schedule / Tuần hiện tại</div>
+              {/* Week Selector */}
+              <div className="flex items-center gap-2 h-[50px]">
+                <label className="text-sm font-medium text-gray-600 bg-blue-50 px-3 py-1 rounded" style={{ height:'40px', justifyContent: 'center', alignContent: 'center'}}>
+                  WEEK
+                </label>
+                <select
+                  value={selectedWeek}
+                  onChange={handleWeekChange}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white min-w-[120px] h-[40px]"
+                  style={{ border: "20px" }}
+                >
+                  {weeks.map(week => (
+                    <option key={week.weekNum} value={week.weekNum} >
+                      {week.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
           {/* Weekly grid */}
           <div className="bg-gray-50 p-4 rounded-lg">
@@ -198,12 +282,7 @@ const DoctorSchedule = () => {
             </div>
           </div>
 
-          {/* Pagination area similar to image */}
-          <div className="mt-6 flex items-center justify-end gap-3">
-            <button className="text-sm text-blue-600 hover:underline">‹ Previous</button>
-            <div className="px-3 py-1 border rounded-md bg-white text-sm">1</div>
-            <button className="text-sm text-blue-600 hover:underline">Next ›</button>
-          </div>
+          
         </div>
       </div>
     </DoctorLayout>
