@@ -46,15 +46,12 @@ const getAllPatients = async (req, res) => {
   }
 };
 
-// Lấy tất cả hồ sơ khám của một bệnh nhân (không phân biệt bác sĩ)
+// controllers/MedicalRecordController.js
 const getAllMedicalRecordsByPatient = async (req, res) => {
   try {
-    const { patientId } = req.params;
-
-    console.log("Getting all medical records for patientId:", patientId);
-
+    const patientId = parseInt(req.params.patientId); // sửa lại nếu là req.params.id
     const medicalRecords = await MedicalRecord.findAll({
-      where: { patientId: parseInt(patientId) },
+      where: { patientId },
       include: [
         {
           model: Employee,
@@ -68,21 +65,24 @@ const getAllMedicalRecordsByPatient = async (req, res) => {
       order: [['createdAt', 'DESC']]
     });
 
-    console.log("Found medical records:", medicalRecords.length);
-
-    const formattedRecords = medicalRecords.map(record => ({
-      id: record.id,
-      appointmentId: record.appointmentId,
-      symptoms: record.symptoms,
-      diagnosis: record.diagnosis,
-      treatment: record.treatment,
-      orderDetails: typeof record.orderDetails === 'string' 
-        ? JSON.parse(record.orderDetails) 
-        : (record.orderDetails || []),
-      createdAt: record.createdAt,
-      doctor: record.Employee, // Thông tin bác sĩ đã khám
-      appointment: record.Appointment
-    }));
+    const formattedRecords = medicalRecords.map(record => {
+      let orderDetails = [];
+      if (typeof record.orderDetails === 'string') {
+        try {
+          orderDetails = JSON.parse(record.orderDetails);
+        } catch {
+          orderDetails = [];
+        }
+      } else if (Array.isArray(record.orderDetails)) {
+        orderDetails = record.orderDetails;
+      }
+      return {
+        ...record.toJSON(),
+        orderDetails,
+        doctor: record.Employee,
+        appointment: record.Appointment
+      };
+    });
 
     res.status(200).json({
       success: true,
@@ -98,6 +98,8 @@ const getAllMedicalRecordsByPatient = async (req, res) => {
     });
   }
 };
+
+
 
 const getAllMedicalRecordByAppointmentId = async (req, res) => {
     try {
@@ -337,7 +339,7 @@ const getMedicalRecordsByDoctor = async (req, res) => {
   }
 };
 
-const getPatientsByDoctor = async (req, res) => {
+const getPatientsByDoctorV = async (req, res) => {
   try {
     const { doctorId } = req.params;
 
@@ -402,6 +404,94 @@ const getPatientsByDoctor = async (req, res) => {
   }
 };
 
+
+
+    // backend/controllers/MedicalRecordController.js
+
+const getPatientsByDoctor = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+
+    console.log("Getting patients for doctorId:", doctorId);
+
+    // Kiểm tra quyền truy cập
+    if (req.userId && req.userId !== parseInt(doctorId)) {
+      return res.status(403).json({ 
+        success: false,
+        error: "Bạn chỉ có thể xem danh sách bệnh nhân của mình" 
+      });
+    }
+
+    // Lấy danh sách appointments đang active của doctor
+    const appointments = await Appointment.findAll({
+      where: { 
+        doctorId: parseInt(doctorId),
+        status: { [Op.in]: ['confirmed', 'pending'] },
+        date: {
+          [Op.gte]: new Date().toISOString().split('T')[0]
+        }
+      },
+      include: [
+        {
+          model: Patient,
+          attributes: ['id', 'name', 'email', 'phoneNumber', 'dateOfBirth', 'gender'],
+          required: true // Đảm bảo chỉ lấy appointment có patient
+        }
+      ],
+      order: [['date', 'ASC'], ['startTime', 'ASC']]
+    });
+
+    console.log("Found appointments:", appointments.length);
+
+    if (appointments.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "Chưa có lịch hẹn nào",
+        data: []
+      });
+    }
+
+    // Format data - ĐẢM BẢO CÓ ĐẦY ĐỦ THÔNG TIN
+    const patientsWithAppointments = appointments.map(apt => {
+      if (!apt.Patient) {
+        console.error("Missing patient data for appointment:", apt.id);
+        return null;
+      }
+      
+      return {
+        appointmentId: apt.id,
+        appointmentDate: apt.date,
+        appointmentTime: `${apt.startTime} - ${apt.endTime}`,
+        appointmentStatus: apt.status,
+        patientId: apt.Patient.id,
+        patientName: apt.Patient.name || 'Không có tên',
+        patientEmail: apt.Patient.email || '',
+        patientPhone: apt.Patient.phoneNumber || '',
+        patientDOB: apt.Patient.dateOfBirth || '',
+        patientGender: apt.Patient.gender || ''
+      };
+    }).filter(item => item !== null); // Loại bỏ các item null
+
+    console.log("Formatted patients:", patientsWithAppointments);
+
+    res.status(200).json({
+      success: true,
+      message: "Lấy danh sách bệnh nhân thành công",
+      data: patientsWithAppointments
+    });
+  } catch (error) {
+    console.error("Error in getPatientsByDoctor:", error);
+    res.status(500).json({ 
+      success: false,
+      error: "Failed to get patients",
+      details: error.message 
+    });
+  }
+};
+
+
+
+
 module.exports = {
     getAllPatients,
     getAllMedicalRecordByPatientId,
@@ -411,6 +501,7 @@ module.exports = {
     updateMedicalRecord,
     deleteMedicalRecord,
     getMedicalRecordsByDoctor,
+    getPatientsByDoctorV,
     getPatientsByDoctor,
     getAllMedicalRecordsByPatient
 };
