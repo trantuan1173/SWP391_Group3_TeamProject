@@ -8,6 +8,7 @@ export default function PatientForm({ initial = {}, onSaved }) {
     email: '',
     phoneNumber: '',
     address: '',
+    dateOfBirth: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -52,6 +53,10 @@ export default function PatientForm({ initial = {}, onSaved }) {
         <input value={form.email} onChange={handleChange('email')} placeholder="Email" className="border px-3 py-2 rounded" />
         <input value={form.phoneNumber} onChange={handleChange('phoneNumber')} placeholder="Số điện thoại" className="border px-3 py-2 rounded" />
         <input value={form.address} onChange={handleChange('address')} placeholder="Địa chỉ" className="border px-3 py-2 rounded" />
+        <label className="flex flex-col gap-1">
+          <span className="text-sm text-gray-600"></span>
+          <input type="date" value={form.dateOfBirth ? form.dateOfBirth.slice(0,10) : ''} onChange={handleChange('dateOfBirth')} className="border px-3 py-2 rounded" />
+        </label>
       </div>
 
       <div className="mt-4 flex items-center gap-2">
