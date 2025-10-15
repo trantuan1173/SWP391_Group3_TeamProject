@@ -1,5 +1,4 @@
 const Employee = require("../models/Employee");
-
 const Patient = require("../models/Patient");
 const { Staff } = require("../models");
 const { Op } = require("sequelize");
@@ -30,10 +29,32 @@ const createRole = async (req, res) => {
 //Get all roles
 const getRoles = async (req, res) => {
   try {
-    const roles = await Role.findAll();
-    res.json(roles);
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const search = req.query.search ? req.query.search.trim() : "";
+
+    const offset = (page - 1) * pageSize;
+
+    const whereCondition = {};
+    if (search) {
+      whereCondition.name = { [Op.like]: `%${search}%` };
+    }
+
+    const { rows: roles, count: total } = await Role.findAndCountAll({
+      where: whereCondition,
+      limit: pageSize,
+      offset,
+      order: [["createdAt", "DESC"]],
+    });
+
+    res.json({
+      roles,
+      total,
+      totalPages: Math.ceil(total / pageSize),
+      currentPage: page,
+    });
   } catch (error) {
-    console.error(error);
+    console.error("getRoles error:", error);
     res.status(500).json({ error: "Failed to fetch roles" });
   }
 };
@@ -72,6 +93,19 @@ const deleteRole = async (req, res) => {
   }
 };
 
+const getRoleById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const role = await Role.findByPk(id);
+    if (!role) {
+      return res.status(404).json({ error: "Role not found" });
+    }
+    res.json(role);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch role" });
+  }
+};
 //Create employee
 const createEmployee = async (req, res) => {
   try {
@@ -388,7 +422,240 @@ const updateEmployee = async (req, res) => {
   }
 };
 
+// ===== Create Patient =====
+const createPatient = async (req, res) => {
+  try {
+    const {
+      name,
+      email,
+      password,
+      identityNumber,
+      phoneNumber,
+      address,
+      dateOfBirth,
+      gender,
+    } = req.body;
+
+    // Validate required fields
+    if (!name || !identityNumber) {
+      return res
+        .status(400)
+        .json({ error: "Name and Identity Number are required" });
+    }
+
+    // Check for duplicates
+    const existingIdentity = await Patient.findOne({
+      where: { identityNumber },
+    });
+    if (existingIdentity) {
+      return res.status(409).json({ error: "Identity number already exists" });
+    }
+
+    const existingEmail = email
+      ? await Patient.findOne({ where: { email } })
+      : null;
+    if (existingEmail) {
+      return res.status(409).json({ error: "Email already exists" });
+    }
+
+    const existingPhone = phoneNumber
+      ? await Patient.findOne({ where: { phoneNumber } })
+      : null;
+    if (existingPhone) {
+      return res.status(409).json({ error: "Phone number already exists" });
+    }
+
+    // Create patient
+    const patient = await Patient.create({
+      name,
+      email,
+      password,
+      identityNumber,
+      phoneNumber,
+      address,
+      dateOfBirth,
+      gender,
+      isActive: true,
+    });
+
+    const cleanPatient = patient.get({ plain: true });
+    delete cleanPatient.password; // không gửi password về client
+
+    res.status(201).json({
+      message: "Patient created successfully",
+      patient: cleanPatient,
+    });
+  } catch (error) {
+    console.error("createPatient error:", error);
+    res.status(500).json({ error: "Failed to create patient" });
+  }
+};
+
+// ===== Get All Patients (with pagination + search) =====
+const getPatients = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const search = req.query.search ? req.query.search.trim() : "";
+
+    const offset = (page - 1) * pageSize;
+
+    const whereCondition = {};
+
+    if (search) {
+      whereCondition[Op.or] = [
+        { name: { [Op.like]: `%${search}%` } },
+        { email: { [Op.like]: `%${search}%` } },
+        { phoneNumber: { [Op.like]: `%${search}%` } },
+        { identityNumber: { [Op.like]: `%${search}%` } },
+      ];
+    }
+
+    const { rows: patients, count: total } = await Patient.findAndCountAll({
+      where: whereCondition,
+      attributes: { exclude: ["password"] },
+      order: [["createdAt", "DESC"]],
+      limit: pageSize,
+      offset,
+    });
+
+    res.json({
+      patients,
+      total,
+      totalPages: Math.ceil(total / pageSize),
+      currentPage: page,
+    });
+  } catch (error) {
+    console.error("getPatients error:", error);
+    res.status(500).json({ error: "Failed to fetch patients" });
+  }
+};
+
+// ===== Get Patient By ID =====
+const getPatientById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const patient = await Patient.findByPk(id, {
+      attributes: { exclude: ["password"] },
+    });
+    if (!patient) {
+      return res.status(404).json({ error: "Patient not found" });
+    }
+    res.json(patient);
+  } catch (error) {
+    console.error("getPatientById error:", error);
+    res.status(500).json({ error: "Failed to fetch patient" });
+  }
+};
+
+// ===== Update Patient =====
+const updatePatient = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      name,
+      email,
+      password,
+      identityNumber,
+      phoneNumber,
+      address,
+      dateOfBirth,
+      gender,
+      isActive,
+    } = req.body;
+
+    const patient = await Patient.findByPk(id);
+    if (!patient) return res.status(404).json({ error: "Patient not found" });
+
+    // kiểm tra trùng email, sđt, CCCD (trừ chính nó)
+    if (identityNumber && identityNumber !== patient.identityNumber) {
+      const existingIdentity = await Patient.findOne({
+        where: { identityNumber },
+      });
+      if (existingIdentity)
+        return res
+          .status(409)
+          .json({ error: "Identity number already exists" });
+    }
+
+    if (email && email !== patient.email) {
+      const existingEmail = await Patient.findOne({ where: { email } });
+      if (existingEmail)
+        return res.status(409).json({ error: "Email already exists" });
+    }
+
+    if (phoneNumber && phoneNumber !== patient.phoneNumber) {
+      const existingPhone = await Patient.findOne({ where: { phoneNumber } });
+      if (existingPhone)
+        return res.status(409).json({ error: "Phone number already exists" });
+    }
+
+    if (password && password.trim() !== "") {
+      patient.password = password;
+    }
+
+    Object.assign(patient, {
+      name,
+      email,
+      identityNumber,
+      phoneNumber,
+      address,
+      dateOfBirth,
+      gender,
+      isActive: isActive !== undefined ? isActive : patient.isActive,
+    });
+
+    await patient.save();
+    const updated = patient.get({ plain: true });
+    delete updated.password;
+
+    res.json({ message: "Patient updated successfully", patient: updated });
+  } catch (error) {
+    console.error("updatePatient error:", error);
+    res.status(500).json({ error: "Failed to update patient" });
+  }
+};
+
+// ===== Delete Patient =====
+const deletePatient = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const patient = await Patient.findByPk(id);
+    if (!patient) return res.status(404).json({ error: "Patient not found" });
+
+    await patient.destroy();
+    res.json({ message: "Patient deleted successfully" });
+  } catch (error) {
+    console.error("deletePatient error:", error);
+    res.status(500).json({ error: "Failed to delete patient" });
+  }
+};
+
+const updatePatientStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isActive } = req.body;
+
+    const patient = await Patient.findByPk(id);
+    if (!patient) {
+      return res.status(404).json({ error: "Patient not found" });
+    }
+
+    patient.isActive = isActive === true || isActive === "true";
+    await patient.save();
+
+    res.json({
+      message: "Patient status updated successfully",
+      isActive: patient.isActive,
+    });
+  } catch (err) {
+    console.error("updatePatientStatus error:", err);
+    res.status(500).json({ error: "Failed to update patient status" });
+  }
+};
+
 module.exports = {
+  updatePatientStatus,
   createRole,
   getRoles,
   updateRole,
@@ -399,4 +666,10 @@ module.exports = {
   getEmployeeById,
   updateActiveStatus,
   updateEmployee,
+  getRoleById,
+  createPatient,
+  getPatients,
+  getPatientById,
+  updatePatient,
+  deletePatient,
 };

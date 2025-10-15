@@ -170,7 +170,7 @@ export default function UserManagement() {
       <div className="bg-white h-full p-5 rounded-lg shadow-md">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <h4 className="text-xl font-bold">User Management</h4>
+          <h4 className="text-xl font-bold">Employee Management</h4>
           {/* Nút Create User */}
           <Button
             onClick={() => setDialogOpen(true)}
@@ -196,7 +196,7 @@ export default function UserManagement() {
 
         {/* Table */}
         <Table>
-          <TableCaption>User List</TableCaption>
+          <TableCaption>Employee List</TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead>ID</TableHead>

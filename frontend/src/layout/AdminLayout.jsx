@@ -20,6 +20,9 @@ import {
   Users,
   ShoppingCart,
   FlaskConical,
+  UsersRoundIcon,
+  UserCheck,
+  KeyRoundIcon,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -31,19 +34,20 @@ const navigationItems = [
     icon: LayoutDashboard,
   },
   {
-    title: "Users",
+    title: "Employees",
     url: "/admin/user",
     icon: Users,
   },
+
   {
-    title: "Orders",
-    url: "/admin/orders",
-    icon: ShoppingCart,
+    title: "Patients",
+    url: "/admin/patients",
+    icon: UserCheck,
   },
   {
-    title: "Laboratory",
-    url: "/admin/labs",
-    icon: FlaskConical,
+    title: "Roles & Permissions",
+    url: "/admin/roles",
+    icon: KeyRoundIcon,
   },
 ];
 
@@ -54,8 +58,8 @@ export default function AdminLayout({ children }) {
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
         {/* Sidebar với background xanh lá */}
-        <Sidebar className={"border-0 h-screen bg-[#00A646]"}>
-          <SidebarHeader className="border-b border-green-500 p-4 bg-[#00A646]">
+        <Sidebar className={"border-0 h-screen bg-[#3de484]"}>
+          <SidebarHeader className="border-b border-green-500 p-4 bg-[#3de484]">
             <img
               src="/icon/logo.png"
               alt="Healthy People Logo"
@@ -63,7 +67,7 @@ export default function AdminLayout({ children }) {
             />
           </SidebarHeader>
 
-          <SidebarContent className="bg-[#00A646]">
+          <SidebarContent className="bg-[#3de484]">
             <SidebarGroup>
               <SidebarGroupContent>
                 <SidebarMenu className="!p-0">
@@ -72,7 +76,7 @@ export default function AdminLayout({ children }) {
                       <SidebarMenuButton variant="admin" asChild>
                         <button
                           onClick={() => navigate(item.url)}
-                          className="flex w-full items-center !p-6 !rounded-md hover:!bg-purple-700 hover:!text-white active:!bg-purple-800 text-black transition-colors font-bold"
+                          className="flex w-full items-center !p-6 !rounded-md hover:!bg-green-400 hover:!text-white active:!bg-purple-800 text-black transition-colors font-bold"
                         >
                           <item.icon className="h-4 w-4" />
                           <span>{item.title}</span>
@@ -85,7 +89,7 @@ export default function AdminLayout({ children }) {
             </SidebarGroup>
           </SidebarContent>
 
-          <SidebarFooter className="border-t border-green-500 p-4 bg-[#00A646] md:rounded-br-[50px]">
+          <SidebarFooter className="border-t border-green-500 p-4 bg-[#3de484] md:rounded-br-[50px]">
             {user ? (
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-2">
