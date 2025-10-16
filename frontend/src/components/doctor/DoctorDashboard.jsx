@@ -32,9 +32,9 @@ export default function DoctorDashboard({ children, activeMenu, setActiveMenu, d
 
             <nav className="mt-2 space-y-3">
               <button
-                onClick={() => setActiveMenu('schedule')}
+                onClick={() => { setActiveMenu('doctor'); navigate('/doctor/schedule'); }}
                 className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg transition ${
-                  activeMenu === 'schedule' 
+                  activeMenu === 'doctor' 
                     ? 'bg-white text-green-600 font-semibold' 
                     : 'text-white hover:bg-green-500/30'
                 }`}
@@ -57,16 +57,16 @@ export default function DoctorDashboard({ children, activeMenu, setActiveMenu, d
               </button>
 
               <button
-                onClick={() => setActiveMenu('settings')}
+                onClick={() => { setActiveMenu('patients'); navigate('/doctor/create-records'); }}
                 className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg transition ${
-                  activeMenu === 'settings' 
+                  activeMenu === 'patients' 
                     ? 'bg-white text-green-600 font-semibold' 
                     : 'text-white hover:bg-green-500/30'
                 }`}
                 style={{ borderRadius: "20px", marginBottom: "10px" }}
               >
                 <span className="text-lg"></span>
-                <span>gernerate</span>
+                <span>Generate</span>
               </button>
             </nav>
           </div>

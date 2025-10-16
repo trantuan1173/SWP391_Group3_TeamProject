@@ -2,11 +2,21 @@ const { Service } = require("../models");
 
 const getAllService = async (req, res) => {
     try {
-        const services = await Service.findAll();
-        res.json(services);
+        const services = await Service.findAll({
+            attributes: ['id', 'name', 'description', 'price'],
+            order: [['name', 'ASC']]
+        });
+        res.status(200).json({
+            success: true,
+            message: "Lấy danh sách dịch vụ thành công",
+            data: services
+        });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).json({ 
+            success: false,
+            error: "Internal Server Error" 
+        });
     }
 };
 

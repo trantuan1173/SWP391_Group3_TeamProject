@@ -25,7 +25,10 @@ export const API_ENDPOINTS = {
   CREATE_APPOINTMENT_WITHOUT_LOGIN: `${baseUrl}/api/patients/appointmentsWithoutLogin`,
   CONFIRM_APPOINTMENT: `${baseUrl}/api/patients/confirmAppointment`,
   GET_MEDICAL_RECORDS_BY_DOCTOR: (doctorId, patientId = null) => `${baseUrl}/api/medical-records/doctor/${doctorId}${patientId ? `?patientId=${patientId}` : ''}`,
+  GET_ALL_PATIENTS: `${baseUrl}/api/medical-records/patients`,
+  GET_MEDICAL_RECORDS_BY_PATIENT: (patientId) => `${baseUrl}/api/medical-records/patient/${patientId}`,
   GET_PATIENTS_BY_DOCTOR: (doctorId) => `${baseUrl}/api/medical-records/doctor/${doctorId}/patients`,
+  GET_PATIENT_BY_DOCTOR: (doctorId) => `${baseUrl}/api/medical-records/doctor/${doctorId}/patient`,
   GET_EMPLOYEE_WITH_ROLE: (employeeId) => `${baseUrl}/api/employees/${employeeId}/with-role`,
   GET_APPOINTMENTS_BY_PATIENT: (patientId) => `${baseUrl}/api/appointments/patient/${patientId}`,
   APPOINTMENT_BY_ID: (appointmentId) => `${baseUrl}/api/appointments/${appointmentId}`,
@@ -38,4 +41,6 @@ export const API_ENDPOINTS = {
   DELETE_NEWS: (newsId) => `${baseUrl}/api/news/${newsId}`,
   GET_NEWS: `${baseUrl}/api/news`,
   GET_NEWS_BY_ID: (newsId) => `${baseUrl}/api/news/${newsId}`,
+  GET_SERVICES: `${baseUrl}/api/services`,
+  CREATE_MEDICAL_RECORD: `${baseUrl}/api/medical-records`,
 };

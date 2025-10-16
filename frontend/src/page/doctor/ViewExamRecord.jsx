@@ -179,7 +179,7 @@ const ViewExamRecord = () => {
         </div>
 
         {/* Main Content */}
-        <div className="bg-white rounded-xl shadow p-6">
+        <div className="bg-white rounded-xl shadow p-6 h-[800px]">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-semibold text-gray-800">Lịch Sử Khám Bệnh</h1>
             <input

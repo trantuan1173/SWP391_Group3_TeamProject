@@ -23,6 +23,7 @@ import PatientOnly from "./context/PatientOnly";
 import LandingPage from "./page/guest/LandingPage";
 import ContactUs from "./page/guest/ContactUs";
 import ViewExamRecord from "./page/doctor/ViewExamRecord";
+import CreateMedicalRecord from "./page/doctor/CreateMedicalRecord";
 import ReceptionistSideBar from "./components/Receptionnist/ReceptionistSideBar";
 import ReceptionistDashboard from "./page/Receptionist/ReceptionistDashboard";
 import ReceptionistPatient from "./page/Receptionist/ReceptionistPatient";
@@ -79,6 +80,7 @@ function App() {
         {/* Doctor Dashboard routes */}
         <Route path="/doctor/schedule" element={<DoctorSchedule />} />
         <Route path="/doctor/exam-records" element={<ViewExamRecord />} />
+        <Route path="/doctor/create-records" element={<CreateMedicalRecord />} />
 
         {/* Admin routes */}
         <Route path="/admin/user" element={<UserManagement />}></Route>

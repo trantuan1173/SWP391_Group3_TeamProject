@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { getAllMedicalRecordByPatientId, getAllMedicalRecordByAppointmentId, getMedicalRecordById, createMedicalRecord, updateMedicalRecord, deleteMedicalRecord,getMedicalRecordsByDoctor,getPatientsByDoctor } = require("../controllers/MedicalRecordController");
+const { getAllMedicalRecordByPatientId, getAllMedicalRecordByAppointmentId, getMedicalRecordById, createMedicalRecord, updateMedicalRecord, deleteMedicalRecord,getMedicalRecordsByDoctor,getPatientsByDoctorV ,getPatientsByDoctor , getAllPatients } = require("../controllers/MedicalRecordController");
 const { protect, authorize } = require("../middleware/authMiddleware");
 
 /**
@@ -42,7 +42,11 @@ router.get("/doctor/:doctorId", protect, authorize("Doctor", "Admin"), getMedica
  *       200:
  *         description: Danh sách bệnh nhân
  */
-router.get("/doctor/:doctorId/patients", protect, authorize("Doctor", "Admin"), getPatientsByDoctor);
+router.get("/doctor/:doctorId/patients", protect, authorize("Doctor", "Admin"), getPatientsByDoctorV);
+
+router.get("/doctor/:doctorId/patient", protect, authorize("Doctor", "Admin"), getPatientsByDoctor);
+
+router.get("/patients", protect, authorize("Doctor", "Admin"), getAllPatients);
 
 /**
  * @swagger
