@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { API_ENDPOINTS } from "../../config";
-import { View, Pencil } from "lucide-react";
+import { View, Pencil, LoaderCircle } from "lucide-react";
+
 
 const ReceptionistNews = () => {
   const [news, setNews] = useState([]);
@@ -14,11 +15,11 @@ const ReceptionistNews = () => {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterTag, setFilterTag] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingNewsId, setEditingNewsId] = useState(null);
-
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const itemsPerPage = 8;
   const token = localStorage.getItem("token");
 
@@ -33,21 +34,47 @@ const ReceptionistNews = () => {
   };
 
   // Fetch all news
+  // const fetchNews = async () => {
+  //   try {
+  //     const res = await axios.get(API_ENDPOINTS.GET_NEWS, {
+  //       params: {
+  //         page: currentPage,
+  //         limit: itemsPerPage,
+  //       },
+  //     });
+  //     const sorted = res.data.sort(
+  //       (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  //     );
+  //     setNews(sorted);
+  //   } catch (error) {
+  //     console.error("Failed to fetch news:", error);
+  //   }
+  // };
+
   const fetchNews = async () => {
     try {
-      const res = await axios.get(API_ENDPOINTS.GET_NEWS);
-      const sorted = res.data.sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-      );
-      setNews(sorted);
+      setLoading(true);
+      const res = await axios.get(API_ENDPOINTS.GET_NEWS, {
+        params: {
+          page: currentPage,
+          limit: itemsPerPage,
+          search: searchTerm || "",
+        },
+      });
+
+      setNews(res.data.data);
+      setTotalPages(res.data.totalPages);
+      setTotalItems(res.data.totalItems);
     } catch (error) {
       console.error("Failed to fetch news:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchNews();
-  }, []);
+  }, [currentPage, searchTerm]);
 
   // Create or Update news
   const handleSubmit = async (e) => {
@@ -121,23 +148,8 @@ const ReceptionistNews = () => {
     }
   };
 
-  // Filtering + Pagination
-  const filteredNews = news.filter((item) => {
-    const matchesTitle = item.title
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesTag = filterTag ? item.tag === filterTag : true;
-    return matchesTitle && matchesTag;
-  });
+  const paginatedNews = news;
 
-  const totalPages = Math.ceil(filteredNews.length / itemsPerPage);
-  const paginatedNews = filteredNews.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-  const uniqueTags = Array.from(
-    new Set(news.map((item) => item.tag))
-  ).filter((tag) => tag);
 
   return (
     <div className="p-6">
@@ -166,25 +178,14 @@ const ReceptionistNews = () => {
           }}
           className="border p-2 rounded flex-grow max-w-xs"
         />
-
-        <select
-          value={filterTag}
-          onChange={(e) => {
-            setFilterTag(e.target.value);
-            setCurrentPage(1);
-          }}
-          className="border p-2 rounded"
-        >
-          <option value="">All Tags</option>
-          {uniqueTags.map((tag) => (
-            <option key={tag} value={tag}>
-              {tag}
-            </option>
-          ))}
-        </select>
       </div>
 
       {/* Grid */}
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <LoaderCircle className="animate-spin text-blue-600 w-12 h-12" />
+        </div>
+      ) : (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         {paginatedNews.map((item) => (
           <div key={item.id} className="border p-4 rounded-md flex flex-col">
@@ -208,17 +209,17 @@ const ReceptionistNews = () => {
           </div>
         ))}
       </div>
+      )}
 
       {/* Pagination */}
       <div className="flex justify-center items-center mt-6 space-x-4">
         <button
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
           disabled={currentPage === 1}
-          className={`px-4 py-2 rounded ${
-            currentPage === 1
-              ? "bg-gray-300 cursor-not-allowed"
-              : "bg-blue-600 text-white hover:bg-blue-700"
-          }`}
+          className={`px-4 py-2 rounded ${currentPage === 1
+            ? "bg-gray-300 cursor-not-allowed"
+            : "bg-blue-600 text-white hover:bg-blue-700"
+            }`}
         >
           Previous
         </button>
@@ -228,15 +229,15 @@ const ReceptionistNews = () => {
         <button
           onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
           disabled={currentPage === totalPages || totalPages === 0}
-          className={`px-4 py-2 rounded ${
-            currentPage === totalPages || totalPages === 0
-              ? "bg-gray-300 cursor-not-allowed"
-              : "bg-blue-600 text-white hover:bg-blue-700"
-          }`}
+          className={`px-4 py-2 rounded ${currentPage === totalPages || totalPages === 0
+            ? "bg-gray-300 cursor-not-allowed"
+            : "bg-blue-600 text-white hover:bg-blue-700"
+            }`}
         >
           Next
         </button>
       </div>
+      
 
       {/* Modal */}
       {modalOpen && (
@@ -304,7 +305,7 @@ const ReceptionistNews = () => {
                 />
               </div>
 
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Upload Image
                 </label>
@@ -313,24 +314,54 @@ const ReceptionistNews = () => {
                   accept="image/*"
                   onChange={(e) => setFile(e.target.files[0])}
                   className="w-full text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700 transition"
-                  required
+                  required={!editingNewsId}
                 />
+              </div> */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Upload Image
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const selectedFile = e.target.files[0];
+                    setFile(selectedFile);
+                    if (selectedFile) {
+                      const previewUrl = URL.createObjectURL(selectedFile);
+                      setForm((prev) => ({ ...prev, image: previewUrl }));
+                    }
+                  }}
+                  className="w-full text-gray-600 file:mr-4 file:py-2 file:px-4 
+              file:rounded-lg file:border-0 file:bg-blue-600 
+              file:text-white hover:file:bg-blue-700 transition"
+                  required={!editingNewsId}
+                />
+
+                {form.image && (
+                  <div className="mt-3">
+                    <img
+                      src={form.image}
+                      alt="Preview"
+                      className="w-full h-48 object-cover rounded-lg border"
+                    />
+                  </div>
+                )}
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full py-3 rounded-lg font-semibold text-white transition ${
-                  loading
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700"
-                }`}
+                className={`w-full py-3 rounded-lg font-semibold text-white transition ${loading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+                  }`}
               >
                 {loading
                   ? "Saving..."
                   : editingNewsId
-                  ? "Update News"
-                  : "Create News"}
+                    ? "Update News"
+                    : "Create News"}
               </button>
 
               {editingNewsId && (

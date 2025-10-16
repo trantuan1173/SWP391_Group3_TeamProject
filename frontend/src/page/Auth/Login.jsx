@@ -46,7 +46,7 @@ export default function Login() {
                           navigate("/doctor/schedule");
                           break;
                       case "Receptionist":
-                          navigate("/receptionist");
+                          navigate("/receptionist/dashboard");
                           break;
                       case "Admin":
                           navigate("/admin/user");

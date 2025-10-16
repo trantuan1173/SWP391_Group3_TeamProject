@@ -26,8 +26,10 @@ const { protect } = require("../middleware/authMiddleware");
  *             properties:
  *               email:
  *                 type: string
+ *                 example: trantuan1172003@gmail.com
  *               password:
  *                 type: string
+ *                 example: 123456
  *     responses:
  *       200:
  *         description: User logged in successfully

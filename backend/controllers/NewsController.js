@@ -1,13 +1,34 @@
 const { News } = require("../models");
 const jwt = require("jsonwebtoken");
+const { Op } = require("sequelize");
 const getNews = async (req, res) => {
-    try {
-        const news = await News.findAll();
-        res.status(200).json(news);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Failed to get news" });
-    }
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+    const search = req.query.search || "";
+
+    const { count, rows } = await News.findAndCountAll({
+      offset,
+      limit,
+      where: {
+        title: {
+          [Op.like]: `%${search}%`,
+        },
+      },
+      order: [["createdAt", "DESC"]],
+    });
+
+    res.status(200).json({
+      data: rows,
+      totalItems: count,
+      totalPages: Math.ceil(count / limit),
+      currentPage: page,
+    });
+  } catch (error) {
+    console.error("Failed to get news:", error);
+    res.status(500).json({ error: "Failed to get news" });
+  }
 };
 const createNews = async (req, res) => {
     try {
@@ -64,4 +85,17 @@ const deleteNews = async (req, res) => {
     }
 };
 
-module.exports = { getNews, createNews, updateNews, deleteNews };
+const getNewsById = async (req, res) => {
+    try {
+        const news = await News.findByPk(req.params.id);
+        if (!news) {
+            return res.status(404).json({ error: "News not found" });
+        }
+        res.status(200).json(news);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to get news by id" });
+    }
+};
+
+module.exports = { getNews, createNews, updateNews, deleteNews, getNewsById };

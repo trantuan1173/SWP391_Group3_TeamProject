@@ -37,4 +37,5 @@ export const API_ENDPOINTS = {
   UPDATE_NEWS: (newsId) => `${baseUrl}/api/news/${newsId}`,
   DELETE_NEWS: (newsId) => `${baseUrl}/api/news/${newsId}`,
   GET_NEWS: `${baseUrl}/api/news`,
+  GET_NEWS_BY_ID: (newsId) => `${baseUrl}/api/news/${newsId}`,
 };

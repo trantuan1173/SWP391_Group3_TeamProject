@@ -5,54 +5,39 @@ import { API_ENDPOINTS } from "../../config";
 export default function Appointments() {
   const [appointments, setAppointments] = useState([]);
   const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedDate, setSelectedDate] = useState("");
-  const [selectedMonth, setSelectedMonth] = useState("");
+  const [apiFilter, setApiFilter] = useState("today");
+  const [searchPhone, setSearchPhone] = useState("");
 
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
-        const res = await axios.get(API_ENDPOINTS.GET_ALL_APPOINTMENTS,
-            {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            }
-        );
+        let url =
+          apiFilter === "today"
+            ? API_ENDPOINTS.GET_TODAY_APPOINTMENTS
+            : API_ENDPOINTS.GET_ALL_APPOINTMENTS;
+
+        const res = await axios.get(url, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
         setAppointments(res.data);
       } catch (error) {
         console.error("Failed to fetch appointments:", error);
       }
     };
+
     fetchAppointments();
-  }, []);
+  }, [apiFilter]); 
 
-  const now = new Date();
   const filteredAppointments = appointments.filter((a) => {
-    const appointmentDate = new Date(a.date);
-
     if (statusFilter !== "all" && a.status !== statusFilter) return false;
-
-    if (selectedDate) {
-      const filterDate = new Date(selectedDate);
-      return (
-        appointmentDate.getFullYear() === filterDate.getFullYear() &&
-        appointmentDate.getMonth() === filterDate.getMonth() &&
-        appointmentDate.getDate() === filterDate.getDate()
-      );
-    }
-
-    if (!selectedMonth && appointmentDate < new Date(now.setHours(0, 0, 0, 0))) {
+    if (
+      searchPhone &&
+      !a.Patient?.phoneNumber?.toLowerCase().includes(searchPhone.toLowerCase())
+    )
       return false;
-    }
-
-    if (selectedMonth) {
-      const [year, month] = selectedMonth.split("-");
-      return (
-        appointmentDate.getFullYear() === parseInt(year) &&
-        appointmentDate.getMonth() + 1 === parseInt(month)
-      );
-    }
-
     return true;
   });
 
@@ -64,6 +49,13 @@ export default function Appointments() {
         </h1>
 
         <div className="flex gap-3 flex-wrap">
+          <input
+            type="text"
+            placeholder="Search by phone..."
+            value={searchPhone}
+            onChange={(e) => setSearchPhone(e.target.value)}
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+          />
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -76,33 +68,22 @@ export default function Appointments() {
             <option value="completed">Completed</option>
           </select>
 
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => {
-              setSelectedDate(e.target.value);
-              setSelectedMonth("");
-            }}
+          <select
+            value={apiFilter}
+            onChange={(e) => setApiFilter(e.target.value)}
             className="border border-gray-300 rounded-md px-3 py-2 text-sm"
-          />
-
-          <input
-            type="month"
-            value={selectedMonth}
-            onChange={(e) => {
-              setSelectedMonth(e.target.value);
-              setSelectedDate("");
-            }}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm"
-          />
+          >
+            <option value="today">Today</option>
+            <option value="all">All</option>
+          </select>
         </div>
       </div>
 
       <table className="min-w-full border border-gray-200 text-sm">
         <thead className="bg-gray-100">
           <tr>
-            <th className="p-3 text-left border-b">ID</th>
-            <th className="p-3 text-left border-b">Patient ID</th>
+            <th className="p-3 text-left border-b">No.</th>
+            <th className="p-3 text-left border-b">Patient</th>
             <th className="p-3 text-left border-b">Date</th>
             <th className="p-3 text-left border-b">Time</th>
             <th className="p-3 text-left border-b">Status</th>
@@ -118,7 +99,7 @@ export default function Appointments() {
                 className="hover:bg-gray-50 border-b transition-colors"
               >
                 <td className="p-3">{index + 1}</td>
-                <td className="p-3">{a.Patient.name}</td>
+                <td className="p-3">{a.Patient?.name || "-"}</td>
                 <td className="p-3">
                   {new Date(a.date).toLocaleDateString("vi-VN")}
                 </td>

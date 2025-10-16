@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { getNews, createNews, updateNews, deleteNews } = require("../controllers/NewsController");
+const { getNews, createNews, updateNews, deleteNews, getNewsById } = require("../controllers/NewsController");
 const { protect, authorize } = require("../middleware/authMiddleware");
 
 /**
@@ -114,6 +114,41 @@ router.post("/", protect, authorize("Admin", "Receptionist"), createNews);
  *                   type: string
  */
 router.put("/:id", protect, authorize("Admin", "Receptionist"), updateNews);
+
+/**
+ * @swagger
+ * /news/{id}:
+ *   get:
+ *     summary: Get a news by ID
+ *     tags: [News]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: News retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 title:
+ *                   type: string
+ *                 image:
+ *                   type: string
+ *                 createdBy:
+ *                   type: integer
+ *                 tag:
+ *                   type: string
+ *                 content:
+ *                   type: string
+ */
+router.get("/:id", getNewsById);
 
 /**
  * @swagger

@@ -1,28 +1,24 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { API_ENDPOINTS } from "../../config";
-import { CalendarDays, CreditCard } from "lucide-react";
+import { CalendarDays, CreditCard, Check, Loader } from "lucide-react";
 
 export default function ReceptionistDashboard() {
   const [appointments, setAppointments] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchTodayAppointments = async () => {
       try {
-        const res = await axios.get(API_ENDPOINTS.GET_ALL_APPOINTMENTS,
+        const res = await axios.get(API_ENDPOINTS.GET_TODAY_APPOINTMENTS,
             {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
             }
         );
-        const today = new Date();
-        const filteredAppointments = res.data.filter(a => {
-          const appointmentDate = new Date(a.date);
-          return (appointmentDate >= today || a.status !== "completed");
-        });
-        setAppointments(filteredAppointments || []);
+        setAppointments(res.data || []);
+        console.log(appointments);
       } catch (error) {
         console.error("Failed to fetch today's appointments:", error);
       } finally {
@@ -32,16 +28,14 @@ export default function ReceptionistDashboard() {
     fetchTodayAppointments();
   }, []);
 
-  if (loading) {
-    return <div className="p-6 text-gray-500">Loading dashboard...</div>;
-  }
 
   const totalAppointments = appointments.length;
   const toPaymentCount = appointments.filter(
     (a) => a.status === "to-payment"
   ).length;
   const pendingCount = appointments.filter(a => a.status === "pending").length;
-
+  const completedCount = appointments.filter(a => a.status === "completed").length;
+  const confirmedCount = appointments.filter(a => a.status === "confirmed").length;
   return (
     <div className="p-8">
       <h1 className="text-2xl font-semibold mb-6 text-gray-800">
@@ -58,9 +52,38 @@ export default function ReceptionistDashboard() {
               Total Appointments
             </h2>
             <p className="text-3xl font-bold text-blue-700">
-              {totalAppointments}
+              {loading ? <Loader className="animate-spin" /> : totalAppointments}
             </p>
             <p className="text-sm text-gray-500 mt-1">For today</p>
+          </div>
+        </div>
+        <div className="bg-violet-100 border border-violet-300 rounded-lg shadow-sm p-6 flex items-center gap-4">
+          <div className="bg-violet-500 text-white p-3 rounded-full">
+            <CalendarDays className="h-6 w-6" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-700">
+              Confirmed Appointments
+            </h2>
+            <p className="text-3xl font-bold text-violet-700">
+              {loading ? <Loader className="animate-spin" /> : confirmedCount}
+            </p>
+            <p className="text-sm text-gray-500 mt-1">For today</p>
+          </div>
+        </div>
+
+        <div className="bg-orange-100 border border-orange-300 rounded-lg shadow-sm p-6 flex items-center gap-4">
+          <div className="bg-orange-500 text-white p-3 rounded-full">
+            <CalendarDays className="h-6 w-6" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-700">
+              Pending Appointments
+            </h2>
+            <p className="text-3xl font-bold text-orange-700">
+              {loading ? <Loader className="animate-spin" /> : pendingCount}
+            </p>
+            <p className="text-sm text-gray-500 mt-1">Waiting for confirmation</p>
           </div>
         </div>
 
@@ -73,7 +96,7 @@ export default function ReceptionistDashboard() {
               Awaiting Payment
             </h2>
             <p className="text-3xl font-bold text-yellow-700">
-              {toPaymentCount}
+              {loading ? <Loader className="animate-spin" /> : toPaymentCount}
             </p>
             <p className="text-sm text-gray-500 mt-1">Completed & Unpaid</p>
           </div>
@@ -81,16 +104,16 @@ export default function ReceptionistDashboard() {
 
         <div className="bg-green-100 border border-green-300 rounded-lg shadow-sm p-6 flex items-center gap-4">
           <div className="bg-green-500 text-white p-3 rounded-full">
-            <CalendarDays className="h-6 w-6" />
+            <Check className="h-6 w-6" />
           </div>
           <div>
             <h2 className="text-lg font-semibold text-gray-700">
-              Pending Appointments
+              Completed Appointments
             </h2>
             <p className="text-3xl font-bold text-green-700">
-              {pendingCount}
+              {loading ? <Loader className="animate-spin" /> : completedCount}
             </p>
-            <p className="text-sm text-gray-500 mt-1">Waiting for confirmation</p>
+            <p className="text-sm text-gray-500 mt-1">Completed Appointments</p>
           </div>
         </div>
       </div>
