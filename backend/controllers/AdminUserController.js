@@ -654,6 +654,94 @@ const updatePatientStatus = async (req, res) => {
   }
 };
 
+const getTotalPatients = async (req, res) => {
+  try {
+    const total = await Patient.count();
+    res.json({ total });
+  } catch (error) {
+    console.error("getTotalPatients error:", error);
+    res.status(500).json({ error: "Failed to get total patients" });
+  }
+};
+
+const getActivePatients = async (req, res) => {
+  try {
+    const active = await Patient.count({ where: { isActive: true } });
+    res.json({ active });
+  } catch (error) {
+    console.error("getActivePatients error:", error);
+    res.status(500).json({ error: "Failed to get active patients" });
+  }
+};
+
+const getTotalEmployees = async (req, res) => {
+  try {
+    const total = await Employee.count();
+    res.json({ total });
+  } catch (error) {
+    console.error("getTotalEmployees error:", error);
+    res.status(500).json({ error: "Failed to get total employees" });
+  }
+};
+
+const getAvailableRoles = async (req, res) => {
+  try {
+    const roles = await Role.findAll({ attributes: ["id", "name"] });
+    res.json({
+      total: roles.length,
+      roles: roles.map((r) => r.name),
+    });
+  } catch (error) {
+    console.error("getAvailableRoles error:", error);
+    res.status(500).json({ error: "Failed to get available roles" });
+  }
+};
+
+const getRecentPatients = async (req, res) => {
+  try {
+    const patients = await Patient.findAll({
+      attributes: ["id", "name", "email", "gender", "isActive"],
+      order: [["createdAt", "DESC"]],
+      limit: 5,
+    });
+
+    res.status(200).json({ patients });
+  } catch (error) {
+    console.error("getRecentPatients error:", error);
+    res.status(500).json({ error: "Failed to get recent patients" });
+  }
+};
+
+const getRecentEmployees = async (req, res) => {
+  try {
+    const employees = await Employee.findAll({
+      attributes: ["id", "name", "email"],
+      include: [
+        {
+          model: Role,
+          as: "roles",
+          attributes: ["name"],
+          through: { attributes: [] },
+        },
+      ],
+      order: [["id", "DESC"]],
+      limit: 5,
+    });
+
+    const formatted = employees.map((emp) => ({
+      id: emp.id,
+      name: emp.name,
+      email: emp.email,
+      role: emp.roles && emp.roles.length > 0 ? emp.roles[0].name : "Unknown",
+    }));
+
+    res.status(200).json({ employees: formatted });
+  } catch (error) {
+    console.error("getRecentEmployees error:", error);
+    res.status(500).json({ error: "Failed to get recent employees" });
+  }
+};
+
 module.exports = {
   updatePatientStatus,
   createRole,
@@ -672,4 +760,10 @@ module.exports = {
   getPatientById,
   updatePatient,
   deletePatient,
+  getTotalPatients,
+  getActivePatients,
+  getTotalEmployees,
+  getAvailableRoles,
+  getRecentPatients,
+  getRecentEmployees,
 };

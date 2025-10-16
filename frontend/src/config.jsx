@@ -32,6 +32,13 @@ export const API_ENDPOINTS = {
   CREATE_PATIENT: `${baseUrl}/api/admin/patients`,
   UPDATE_PATIENT: (id) => `${baseUrl}/api/admin/patients/${id}`,
   DELETE_PATIENT: (id) => `${baseUrl}/api/admin/patients/${id}`,
+  //admin dashboard
+  GET_TOTAL_PATIENTS: `${baseUrl}/api/admin/dashboard/total-patients`,
+  GET_ACTIVE_PATIENTS: `${baseUrl}/api/admin/dashboard/active-patients`,
+  GET_TOTAL_EMPLOYEES: `${baseUrl}/api/admin/dashboard/total-employees`,
+  GET_AVAILABLE_ROLES: `${baseUrl}/api/admin/dashboard/available-roles`,
+  GET_RECENT_PATIENTS: `${baseUrl}/api/admin/dashboard/recent-patients`,
+  GET_RECENT_EMPLOYEES: `${baseUrl}/api/admin/dashboard/recent-employees`,
   //appointments
   CREATE_APPOINTMENT: `${baseUrl}/api/patients/appointments`,
   CREATE_APPOINTMENT_WITHOUT_LOGIN: `${baseUrl}/api/patients/appointmentsWithoutLogin`,

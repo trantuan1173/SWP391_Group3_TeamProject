@@ -76,7 +76,7 @@ export default function AdminLayout({ children }) {
                       <SidebarMenuButton variant="admin" asChild>
                         <button
                           onClick={() => navigate(item.url)}
-                          className="flex w-full items-center !p-6 !rounded-md hover:!bg-green-400 hover:!text-white active:!bg-purple-800 text-black transition-colors font-bold"
+                          className="flex w-full items-center !p-6 !rounded-md hover:!bg-green-400 hover:!text-white active:!bg-green-300 active:!text-black text-black transition-colors font-bold"
                         >
                           <item.icon className="h-4 w-4" />
                           <span>{item.title}</span>

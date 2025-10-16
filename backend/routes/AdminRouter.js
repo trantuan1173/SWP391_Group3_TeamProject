@@ -22,6 +22,12 @@ const {
   updatePatient,
   deletePatient,
   updatePatientStatus,
+  getTotalPatients,
+  getTotalEmployees,
+  getActivePatients,
+  getAvailableRoles,
+  getRecentPatients,
+  getRecentEmployees,
 } = require("../controllers/AdminUserController.js");
 
 // ================== Multer config ==================
@@ -222,6 +228,13 @@ router.get("/patients/:id", getPatientById);
 router.put("/patients/:id", updatePatient);
 router.delete("/patients/:id", deletePatient);
 router.put("/patients/update-status/:id", updatePatientStatus);
+
+router.get("/dashboard/total-patients", getTotalPatients);
+router.get("/dashboard/total-employees", getTotalEmployees);
+router.get("/dashboard/active-patients", getActivePatients);
+router.get("/dashboard/available-roles", getAvailableRoles);
+router.get("/dashboard/recent-patients", getRecentPatients);
+router.get("/dashboard/recent-employees", getRecentEmployees);
 
 // router.get("/users/:id", protect, authorize("admin"), getUserById);
 // router.delete("/users/:id", protect, authorize("admin"), deleteUser);
