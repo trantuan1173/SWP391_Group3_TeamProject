@@ -89,7 +89,7 @@ export default function AdminDashboard() {
               asChild
               className="bg-blue-600 text-white hover:bg-blue-700"
             >
-              <Link className="text-decoration-none" to="/admin/patients">
+              <Link className="text-decoration-none" to="/admin/user">
                 Go to Employee
               </Link>
             </Button>

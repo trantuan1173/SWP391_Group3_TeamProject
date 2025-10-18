@@ -82,3 +82,20 @@ export const updateUserStatus = async (id, isActive) => {
   );
   return res.data;
 };
+
+export const updateDoctorSpeciality = async (id, speciality) => {
+  const res = await axios.put(
+    `http://localhost:1118/api/admin/employees/update-speciality/${id}`,
+    {
+      speciality,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${
+          localStorage.getItem("token") || sessionStorage.getItem("token")
+        }`,
+      },
+    }
+  );
+  return res.data;
+};

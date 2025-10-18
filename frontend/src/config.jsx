@@ -21,13 +21,15 @@ export const API_ENDPOINTS = {
   DELETE_USER: (userId) => `${baseUrl}/api/admin/employees/${userId}`,
   UPDATE_USER: (userId) => `${baseUrl}/api/admin/employees/${userId}`,
   CREATE_USER: `${baseUrl}/api/admin/create-employee`,
+  GET_ALL_PATIENTS: `${baseUrl}/api/admin/patients`,
   //roles
   GET_ROLES: `${baseUrl}/api/admin/roles`,
   GET_ROLE_BY_ID: (roleId) => `${baseUrl}/api/admin/roles/${roleId}`,
   CREATE_ROLE: `${baseUrl}/api/admin/create-role`,
   UPDATE_ROLE: (roleId) => `${baseUrl}/api/admin/roles/${roleId}`,
+  DELETE_ROLE: (roleId) => `${baseUrl}/api/admin/roles/${roleId}`,
   //patients
-  GET_ALL_PATIENTS: `${baseUrl}/api/admin/patients`,
+  ADMIN_GET_ALL_PATIENTS: `${baseUrl}/api/admin/patients/get-all`,
   GET_PATIENT_BY_ID: (id) => `${baseUrl}/api/admin/patients/${id}`,
   CREATE_PATIENT: `${baseUrl}/api/admin/patients`,
   UPDATE_PATIENT: (id) => `${baseUrl}/api/admin/patients/${id}`,
@@ -43,14 +45,23 @@ export const API_ENDPOINTS = {
   CREATE_APPOINTMENT: `${baseUrl}/api/patients/appointments`,
   CREATE_APPOINTMENT_WITHOUT_LOGIN: `${baseUrl}/api/patients/appointmentsWithoutLogin`,
   CONFIRM_APPOINTMENT: `${baseUrl}/api/patients/confirmAppointment`,
-  GET_MEDICAL_RECORDS_BY_DOCTOR: (doctorId, patientId = null) => `${baseUrl}/api/medical-records/doctor/${doctorId}${patientId ? `?patientId=${patientId}` : ''}`,
+  GET_MEDICAL_RECORDS_BY_DOCTOR: (doctorId, patientId = null) =>
+    `${baseUrl}/api/medical-records/doctor/${doctorId}${
+      patientId ? `?patientId=${patientId}` : ""
+    }`,
   GET_ALL_PATIENTS: `${baseUrl}/api/medical-records/patients`,
-  GET_MEDICAL_RECORDS_BY_PATIENT: (patientId) => `${baseUrl}/api/medical-records/patient/${patientId}`,
-  GET_PATIENTS_BY_DOCTOR: (doctorId) => `${baseUrl}/api/medical-records/doctor/${doctorId}/patients`,
-  GET_PATIENT_BY_DOCTOR: (doctorId) => `${baseUrl}/api/medical-records/doctor/${doctorId}/patient`,
-  GET_EMPLOYEE_WITH_ROLE: (employeeId) => `${baseUrl}/api/employees/${employeeId}/with-role`,
-  GET_APPOINTMENTS_BY_PATIENT: (patientId) => `${baseUrl}/api/appointments/patient/${patientId}`,
-  APPOINTMENT_BY_ID: (appointmentId) => `${baseUrl}/api/appointments/${appointmentId}`,
+  GET_MEDICAL_RECORDS_BY_PATIENT: (patientId) =>
+    `${baseUrl}/api/medical-records/patient/${patientId}`,
+  GET_PATIENTS_BY_DOCTOR: (doctorId) =>
+    `${baseUrl}/api/medical-records/doctor/${doctorId}/patients`,
+  GET_PATIENT_BY_DOCTOR: (doctorId) =>
+    `${baseUrl}/api/medical-records/doctor/${doctorId}/patient`,
+  GET_EMPLOYEE_WITH_ROLE: (employeeId) =>
+    `${baseUrl}/api/employees/${employeeId}/with-role`,
+  GET_APPOINTMENTS_BY_PATIENT: (patientId) =>
+    `${baseUrl}/api/appointments/patient/${patientId}`,
+  APPOINTMENT_BY_ID: (appointmentId) =>
+    `${baseUrl}/api/appointments/${appointmentId}`,
   PATIENT_BY_ID: (patientId) => `${baseUrl}/api/patients/${patientId}`,
   GET_ALL_APPOINTMENTS: `${baseUrl}/api/appointments`,
   GET_APPOINTMENT_BY_ID: (appointmentId) =>
