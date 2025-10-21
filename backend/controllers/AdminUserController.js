@@ -201,12 +201,14 @@ const getEmployees = async (req, res) => {
     const page = parseInt(req.query.page) || 1; // trang hiện tại
     const pageSize = parseInt(req.query.pageSize) || 10; // số record mỗi trang
     const search = req.query.search ? req.query.search.trim() : ""; // từ khóa tìm kiếm
-
+    const role = req.query.role ? req.query.role.trim() : "";
     const offset = (page - 1) * pageSize;
 
     // Điều kiện where cho search
     const whereCondition = {};
-
+    const roleCondition = role
+      ? { name: { [Op.like]: `%${role}%` } }
+      : undefined;
     if (search) {
       whereCondition[Op.or] = [
         { name: { [Op.like]: `%${search}%` } },
@@ -231,7 +233,15 @@ const getEmployees = async (req, res) => {
         "identityNumber",
         "speciality",
       ],
-      include: [{ model: Role, as: "roles" }],
+      include: [
+        {
+          model: Role,
+          as: "roles",
+          where: roleCondition,
+          through: { attributes: [] },
+          required: !!roleCondition,
+        },
+      ],
       where: whereCondition,
       limit: pageSize,
       offset,

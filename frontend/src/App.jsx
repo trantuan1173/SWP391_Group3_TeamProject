@@ -35,6 +35,7 @@ import NewsDetail from "./page/guest/NewsDetail";
 import RoleManagement from "./page/AdminRoles/RoleManagement";
 import AdminPatients from "./page/AdminPatient/AdminPatients";
 import PatientDetailManagement from "./page/AdminPatient/PatientDetailManagement";
+import AdminProfile from "./page/AdminDashboard/AdminProfile";
 
 function App() {
   const RedirectPatientId = () => {
@@ -83,7 +84,10 @@ function App() {
         {/* Doctor Dashboard routes */}
         <Route path="/doctor/schedule" element={<DoctorSchedule />} />
         <Route path="/doctor/exam-records" element={<ViewExamRecord />} />
-        <Route path="/doctor/create-records" element={<CreateMedicalRecord />} />
+        <Route
+          path="/doctor/create-records"
+          element={<CreateMedicalRecord />}
+        />
 
         {/* Admin routes */}
         <Route>
@@ -93,6 +97,7 @@ function App() {
             element={<UserDetailManagement />}
           ></Route>
           <Route path="/admin/dashboard" element={<AdminDashboard />}></Route>
+          <Route path="/admin/profile" element={<AdminProfile />}></Route>
           <Route path="/admin/user" element={<UserManagement />}></Route>
           <Route path="/admin/roles" element={<RoleManagement />}></Route>
           <Route path="/admin/patients" element={<AdminPatients />}></Route>

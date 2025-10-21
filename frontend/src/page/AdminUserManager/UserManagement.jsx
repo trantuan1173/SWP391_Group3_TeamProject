@@ -98,7 +98,7 @@ export default function UserManagement() {
 
   useEffect(() => {
     loadUsers();
-  }, [currentPage, search]);
+  }, [currentPage, search, pageSize]);
 
   // ===== CREATE USER =====
   const handleCreateUser = async (data) => {
@@ -228,12 +228,27 @@ export default function UserManagement() {
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h4 className="text-xl font-bold">Employee Management</h4>
-          <Button
-            onClick={() => setDialogOpen(true)}
-            className="bg-green-500 text-white hover:bg-green-600 !rounded-md"
-          >
-            Create User
-          </Button>
+          <div className="flex gap-3">
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="border border-gray-300 rounded-md p-2"
+            >
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+            </select>
+
+            <Button
+              onClick={() => setDialogOpen(true)}
+              className="bg-green-500 text-white hover:bg-green-600 !rounded-md"
+            >
+              Create User
+            </Button>
+          </div>
         </div>
 
         {/* Search */}

@@ -7,13 +7,18 @@ const getAuthHeaders = () => ({
   }`,
 });
 
-export const fetchUsers = async (page = 1, pageSize = 10, search = "") => {
+export const fetchUsers = async (
+  page = 1,
+  pageSize = 10,
+  search = "",
+  role = ""
+) => {
   console.log("called");
   const res = await axios.get(API_ENDPOINTS.GET_ALL_USERS, {
-    params: { page, pageSize, search }, // truyền query params
+    params: { page, pageSize, search, role },
     headers: getAuthHeaders(),
   });
-  return res.data; // { users, total, totalPages, currentPage }
+  return res.data;
 };
 
 export const fetchUserById = async (userId) => {
@@ -27,7 +32,7 @@ export const fetchRoles = async () => {
   const res = await axios.get(API_ENDPOINTS.GET_ROLES, {
     headers: getAuthHeaders(),
   });
-  return res.data; // [{ id: 1, name: "admin" }, ...]
+  return res.data;
 };
 
 export const createUser = async (data) => {

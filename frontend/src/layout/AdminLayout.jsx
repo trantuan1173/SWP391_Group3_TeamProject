@@ -93,7 +93,11 @@ export default function AdminLayout({ children }) {
             {user ? (
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-gradient-to-br from-green-300 to-green-100 rounded-lg flex items-center justify-center">
+                  <div
+                    onClick={() => navigate("/admin/profile")}
+                    className="w-8 h-8 bg-gradient-to-br from-green-300 to-green-100 rounded-lg flex items-center justify-center cursor-pointer hover:scale-105 transition-transform"
+                    title="View profile"
+                  >
                     <span className="text-green-800 font-bold text-sm">
                       {user.name?.charAt(0).toUpperCase() || "U"}
                     </span>
