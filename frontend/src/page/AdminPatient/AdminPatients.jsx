@@ -177,12 +177,14 @@ export default function AdminPatients() {
           </TableHeader>
           <TableBody>
             {patients.length > 0 ? (
-              patients.map((p) => (
+              patients.map((p, index) => (
                 <TableRow
                   key={p.id}
                   className="hover:bg-gray-50 border-b border-gray-100 transition"
                 >
-                  <TableCell>{p.id}</TableCell>
+                  <TableCell>
+                    {(currentPage - 1) * pageSize + index + 1}
+                  </TableCell>
                   <TableCell>
                     <Avatar className="h-10 w-10 rounded-2xl">
                       <AvatarImage

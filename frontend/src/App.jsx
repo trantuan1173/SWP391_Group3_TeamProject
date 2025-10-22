@@ -36,6 +36,7 @@ import RoleManagement from "./page/AdminRoles/RoleManagement";
 import AdminPatients from "./page/AdminPatient/AdminPatients";
 import PatientDetailManagement from "./page/AdminPatient/PatientDetailManagement";
 import AdminProfile from "./page/AdminDashboard/AdminProfile";
+import AdminService from "./page/AdminServices/AdminService";
 
 function App() {
   const RedirectPatientId = () => {
@@ -110,6 +111,7 @@ function App() {
             element={<PatientDetailManagement />}
           ></Route>
           <Route path="/admin/dashboard" element={<AdminDashboard />}></Route>
+          <Route path="/admin/services" element={<AdminService />}></Route>
         </Route>
         <Route element={<RequireAuth allowedRoles={["Receptionist"]} />}>
           <Route path="/receptionist" element={<ReceptionistSideBar />}>

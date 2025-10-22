@@ -281,9 +281,11 @@ export default function UserManagement() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users.map((user) => (
+            {users.map((user, index) => (
               <TableRow key={user.id}>
-                <TableCell>{user.id}</TableCell>
+                <TableCell>
+                  {(currentPage - 1) * pageSize + index + 1}
+                </TableCell>
                 <TableCell>
                   <Avatar className="h-10 w-10 rounded-2xl">
                     <AvatarImage
@@ -295,7 +297,7 @@ export default function UserManagement() {
                     </AvatarFallback>
                   </Avatar>
                 </TableCell>
-                <TableCell>{user.name}</TableCell>
+                <TableCell className="font-bold">{user.name}</TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>
                   {user.roles && user.roles.length > 0 ? (

@@ -34,20 +34,25 @@ const navigationItems = [
     icon: LayoutDashboard,
   },
   {
-    title: "Employees",
+    title: "Nhân viên",
     url: "/admin/user",
     icon: Users,
   },
 
   {
-    title: "Patients",
+    title: "Bệnh nhân",
     url: "/admin/patients",
     icon: UserCheck,
   },
   {
-    title: "Roles & Permissions",
+    title: "Vai trò",
     url: "/admin/roles",
     icon: KeyRoundIcon,
+  },
+  {
+    title: "Dịch vụ",
+    url: "/admin/services",
+    icon: ShoppingCart,
   },
 ];
 

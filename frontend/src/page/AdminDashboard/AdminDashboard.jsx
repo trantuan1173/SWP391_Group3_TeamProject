@@ -21,8 +21,10 @@ import {
   fetchRecentPatients,
   fetchRecentEmployees,
 } from "@/api/dashboardApi";
+import { useAuth } from "@/context/AuthContext";
 
 export default function AdminDashboard() {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalPatients: 0,
@@ -83,7 +85,7 @@ export default function AdminDashboard() {
       <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <h2 className="!text-3xl !font-bold">Welcome!</h2>
+          <h2 className="!text-3xl !font-bold">Welcome, {user.name}!</h2>
           <div className="flex gap-2">
             <Button
               asChild

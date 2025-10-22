@@ -41,6 +41,13 @@ export const API_ENDPOINTS = {
   GET_AVAILABLE_ROLES: `${baseUrl}/api/admin/dashboard/available-roles`,
   GET_RECENT_PATIENTS: `${baseUrl}/api/admin/dashboard/recent-patients`,
   GET_RECENT_EMPLOYEES: `${baseUrl}/api/admin/dashboard/recent-employees`,
+  //services
+  ADMIN_GET_ALL_SERVICES: `${baseUrl}/api/admin/services`,
+  ADMIN_GET_ALL_SERVICES_PAGINATION: `${baseUrl}/api/services/get-all`,
+  GET_SERVICE_BY_ID: (id) => `${baseUrl}/api/services/${id}`,
+  CREATE_SERVICE: `${baseUrl}/api/services`,
+  UPDATE_SERVICE: (id) => `${baseUrl}/api/services/${id}`,
+  DELETE_SERVICE: (id) => `${baseUrl}/api/services/${id}`,
   //appointments
   CREATE_APPOINTMENT: `${baseUrl}/api/patients/appointments`,
   CREATE_APPOINTMENT_WITHOUT_LOGIN: `${baseUrl}/api/patients/appointmentsWithoutLogin`,
