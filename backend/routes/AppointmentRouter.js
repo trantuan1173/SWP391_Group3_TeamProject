@@ -3,6 +3,7 @@
 const express = require("express");
 const router = express.Router();
 const { getAppointment, getAppointmentById, updateAppointment, deleteAppointment, getAppointmentByPatientId, getAppointmentByDoctorId, getAppointmentByStatus, getAppointmentToday } = require("../controllers/AppointmentController");
+const { createFeedback, getFeedbackForAppointment } = require('../controllers/FeedbackController');
 const { protect, authorize } = require("../middleware/authMiddleware");
 /**
  * @swagger
@@ -204,3 +205,7 @@ router.get("/doctor/:id", protect, authorize("Admin", "Receptionist", "Doctor"),
 router.get("/status/:status", protect, authorize("Admin", "Receptionist", "Doctor"), getAppointmentByStatus);
 
 module.exports = router;
+
+// Feedback endpoints for appointments
+router.post('/:id/feedback', protect, createFeedback);
+router.get('/:id/feedback', protect, getFeedbackForAppointment);

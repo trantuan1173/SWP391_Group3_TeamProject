@@ -1,18 +1,28 @@
 import React from 'react';
-import { Navigate, Outlet, useParams } from 'react-router-dom';
+import { Navigate, Outlet, useParams, useLocation } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 
 export default function PatientOnly() {
   const { user, loading } = useAuth();
   const params = useParams();
+  const location = useLocation();
+
+  try {
+    console.log('[PatientOnly] loading=', loading, 'user=', user, 'params=', params, 'pathname=', location.pathname);
+  } catch (e) {
+  }
 
   if (loading) return <div>Loading...</div>;
   if (!user) return <Navigate to="/login" replace />;
 
-  // If logged-in user is a patient, ensure they can only access their own id
   const userId = user.id || user.ID || user.patientId;
-  if (userId && params.id && parseInt(userId) !== parseInt(params.id)) {
-    // Instead of redirecting to home, show a friendly forbidden message.
+
+  const cleaned = String(location.pathname || '').replace(/^\/+/, ''); 
+  const parts = cleaned.split('/'); 
+  const afterPatient = parts[1] || '';
+  const isPatientSegmentNumeric = /^\d+$/.test(String(afterPatient));
+
+  if (userId && isPatientSegmentNumeric && parseInt(userId, 10) !== parseInt(afterPatient, 10)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="bg-white p-8 rounded-2xl shadow-md text-center max-w-md">

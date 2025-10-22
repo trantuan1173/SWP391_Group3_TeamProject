@@ -16,7 +16,7 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
-import { Home, Users } from "lucide-react";
+import { Home, ScrollTextIcon, Users } from "lucide-react";
 import { Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
@@ -55,6 +55,11 @@ const PatientSidebar = ({ patient }) => {
       title: "Danh sách bác sĩ",
       url: "/patient/doctors",
       icon: Users,
+    },
+     {
+      title: "Trang Tin tức",
+      url: "/patient/news",
+      icon: ScrollTextIcon,
     },
   ];
 

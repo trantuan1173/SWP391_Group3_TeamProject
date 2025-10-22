@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from '../../lib/axios';
 import { API_ENDPOINTS } from '../../config';
+import PatientForm from './components/PatientForm';
 
 export default function PatientProfile() {
   const { id } = useParams();
@@ -9,6 +10,7 @@ export default function PatientProfile() {
   const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Lấy thông tin bệnh nhân
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -29,15 +31,27 @@ export default function PatientProfile() {
   if (!patient) return <div className="p-6">Không tìm thấy bệnh nhân</div>;
 
   return (
-    <div className="p-6">
+    <div className="p-6 relative">
+      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Hồ sơ bệnh nhân</h1>
         <div className="flex gap-2">
-          <button onClick={() => navigate(-1)} className="px-3 py-1 border rounded">Quay lại</button>
-          <button onClick={() => navigate(`/patient/${id}/edit`)} className="px-3 py-1 bg-green-600 text-white rounded">Chỉnh sửa</button>
+          <button
+            onClick={() => navigate(-1)}
+            className="px-3 py-1 border rounded"
+          >
+            Quay lại
+          </button>
+          <button
+            onClick={() => navigate(`/patient/${id}/edit`)}
+            className="px-3 py-1 bg-green-600 text-white rounded"
+          >
+            Chỉnh sửa
+          </button>
         </div>
       </div>
-
+      {/* Editing now navigates to the full-page form */}
+      {/* Profile content */}
       <div className="bg-white rounded-2xl shadow-sm p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
           <div>
@@ -48,7 +62,6 @@ export default function PatientProfile() {
             <div className="text-sm font-semibold">Email</div>
             <div className="mt-1">{patient.email || '-'}</div>
           </div>
-
           <div>
             <div className="text-sm font-semibold">Số điện thoại</div>
             <div className="mt-1">{patient.phoneNumber || '-'}</div>
@@ -57,10 +70,13 @@ export default function PatientProfile() {
             <div className="text-sm font-semibold">Địa chỉ</div>
             <div className="mt-1">{patient.address || '-'}</div>
           </div>
-
           <div>
             <div className="text-sm font-semibold">Ngày sinh</div>
-            <div className="mt-1">{patient.dateOfBirth ? new Date(patient.dateOfBirth).toLocaleDateString() : '-'}</div>
+            <div className="mt-1">
+              {patient.dateOfBirth
+                ? new Date(patient.dateOfBirth).toLocaleDateString()
+                : '-'}
+            </div>
           </div>
           <div>
             <div className="text-sm font-semibold">Giới tính</div>
@@ -68,6 +84,7 @@ export default function PatientProfile() {
           </div>
         </div>
       </div>
+      
     </div>
   );
 }
