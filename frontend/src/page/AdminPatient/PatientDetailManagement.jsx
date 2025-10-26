@@ -17,7 +17,7 @@ export default function PatientDetailManagement() {
         const data = await fetchPatientById(id);
         setPatient(data);
       } catch (error) {
-        console.error("Error fetching patient:", error);
+        console.error("Lỗi khi lấy thông tin bệnh nhân:", error);
       }
     };
     loadPatient();
@@ -26,7 +26,7 @@ export default function PatientDetailManagement() {
   if (!patient) {
     return (
       <AdminLayout>
-        <p className="text-center py-10">Loading...</p>
+        <p className="text-center py-10">Đang tải dữ liệu...</p>
       </AdminLayout>
     );
   }
@@ -34,16 +34,16 @@ export default function PatientDetailManagement() {
   return (
     <AdminLayout>
       <div className="p-6 bg-gray-100 rounded-md h-full">
-        {/* Back Button */}
+        {/* Nút quay lại */}
         <Button
           className="!mb-6 !rounded-md"
           onClick={() => navigate("/admin/patients")}
         >
-          Back To Patients
+          Quay lại danh sách bệnh nhân
         </Button>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Avatar & Basic Info */}
+          {/* Avatar & Thông tin cơ bản */}
           <Card className="col-span-1 flex flex-col items-center p-6">
             <Avatar className="w-40 h-40">
               <AvatarImage
@@ -64,21 +64,21 @@ export default function PatientDetailManagement() {
                   : "bg-gray-400 text-white"
               }`}
             >
-              {patient.isActive ? "ACTIVE" : "INACTIVE"}
+              {patient.isActive ? "ĐANG HOẠT ĐỘNG" : "TẠM KHÓA"}
             </div>
           </Card>
 
-          {/* Detailed Info */}
+          {/* Thông tin chi tiết */}
           <Card className="col-span-3 p-10">
             <CardHeader>
               <CardTitle className="text-2xl font-bold">
-                Patient Information
+                Thông tin bệnh nhân
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid p-3 grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <p className="font-medium text-gray-600">Name</p>
+                  <p className="font-medium text-gray-600">Họ và tên</p>
                   <p>{patient.name || "-"}</p>
                 </div>
                 <div>
@@ -86,39 +86,49 @@ export default function PatientDetailManagement() {
                   <p>{patient.email || "-"}</p>
                 </div>
                 <div>
-                  <p className="font-medium text-gray-600">Identity Number</p>
+                  <p className="font-medium text-gray-600">Số CCCD / CMND</p>
                   <p>{patient.identityNumber || "-"}</p>
                 </div>
                 <div>
-                  <p className="font-medium text-gray-600">Phone Number</p>
+                  <p className="font-medium text-gray-600">Số điện thoại</p>
                   <p>{patient.phoneNumber || "-"}</p>
                 </div>
                 <div>
-                  <p className="font-medium text-gray-600">Address</p>
+                  <p className="font-medium text-gray-600">Địa chỉ</p>
                   <p>{patient.address || "-"}</p>
                 </div>
                 <div>
-                  <p className="font-medium text-gray-600">Date of Birth</p>
+                  <p className="font-medium text-gray-600">Ngày sinh</p>
                   <p>
                     {patient.dateOfBirth
-                      ? new Date(patient.dateOfBirth).toLocaleDateString()
+                      ? new Date(patient.dateOfBirth).toLocaleDateString(
+                          "vi-VN"
+                        )
                       : "-"}
                   </p>
                 </div>
                 <div>
-                  <p className="font-medium text-gray-600">Gender</p>
-                  <p className="capitalize">{patient.gender || "-"}</p>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-600">Created At</p>
-                  <p>
-                    {new Date(patient.createdAt).toLocaleDateString("en-GB")}
+                  <p className="font-medium text-gray-600">Giới tính</p>
+                  <p className="capitalize">
+                    {patient.gender === "male"
+                      ? "Nam"
+                      : patient.gender === "female"
+                      ? "Nữ"
+                      : "Khác"}
                   </p>
                 </div>
                 <div>
-                  <p className="font-medium text-gray-600">Updated At</p>
+                  <p className="font-medium text-gray-600">
+                    Ngày tạo tài khoản
+                  </p>
                   <p>
-                    {new Date(patient.updatedAt).toLocaleDateString("en-GB")}
+                    {new Date(patient.createdAt).toLocaleDateString("vi-VN")}
+                  </p>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-600">Ngày cập nhật</p>
+                  <p>
+                    {new Date(patient.updatedAt).toLocaleDateString("vi-VN")}
                   </p>
                 </div>
               </div>

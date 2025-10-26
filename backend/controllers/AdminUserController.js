@@ -109,8 +109,28 @@ const getRoleById = async (req, res) => {
 //Create employee
 const createEmployee = async (req, res) => {
   try {
-    const { role, ...userData } = req.body;
+    let { roles, ...userData } = req.body;
 
+    // Parse roles nếu là string (từ FormData)
+    if (typeof roles === "string") {
+      roles = roles.split(",").map((r) => r.trim());
+    }
+
+    console.log("Roles parsed:", roles);
+
+    // Validate roles
+    if (!roles || !Array.isArray(roles) || roles.length === 0) {
+      return res.status(400).json({ error: "At least one role is required" });
+    }
+
+    // Validate required fields
+    if (!userData.name || !userData.email || !userData.password) {
+      return res
+        .status(400)
+        .json({ error: "Name, email and password are required" });
+    }
+
+    // Check duplicates
     const existingIdentityNumber = await Employee.findOne({
       where: { identityNumber: userData.identityNumber },
     });
@@ -121,49 +141,50 @@ const createEmployee = async (req, res) => {
       where: { phoneNumber: userData.phoneNumber },
     });
 
-    if (existingIdentityNumber || existingMail || existingPhone) {
-      if (existingIdentityNumber)
-        return res
-          .status(409)
-          .json({ error: "Identity number already exists" });
-      if (existingMail)
-        return res.status(409).json({ error: "Email already exists" });
-      if (existingPhone)
-        return res.status(409).json({ error: "Phone number already exists" });
+    if (existingIdentityNumber) {
+      return res.status(409).json({ error: "Identity number already exists" });
+    }
+    if (existingMail) {
+      return res.status(409).json({ error: "Email already exists" });
+    }
+    if (existingPhone) {
+      return res.status(409).json({ error: "Phone number already exists" });
     }
 
+    // Handle avatar upload
     if (req.file) {
       userData.avatar = `/uploads/avatars/${req.file.filename}`;
     }
-    if (!userData.name || !userData.email || !userData.password) {
-      return res
-        .status(400)
-        .json({ error: "Name, email and password are required" });
-    }
 
+    // Create employee
     const employee = await Employee.create({ ...userData });
-    // if (role === "doctor") {
-    //   await Doctor.create({
-    //     employeeId: employee.id,
-    //     speciality: "",
-    //     workingHours: "",
-    //   });
-    // }
 
-    const roleRecord = await Role.findOne({ where: { name: role } });
-    if (!roleRecord) {
-      return res.status(404).json({ error: `Role '${role}' not found` });
+    // Assign roles
+    const employeeRoles = [];
+    for (const roleName of roles) {
+      const roleRecord = await Role.findOne({ where: { name: roleName } });
+      if (!roleRecord) {
+        // Rollback: delete employee if role not found
+        await employee.destroy();
+        return res.status(404).json({ error: `Role '${roleName}' not found` });
+      }
+
+      await EmployeeRole.create({
+        employeeId: employee.id,
+        roleId: roleRecord.id,
+      });
+
+      employeeRoles.push({
+        id: roleRecord.id,
+        name: roleRecord.name,
+      });
     }
 
-    await EmployeeRole.create({
-      employeeId: employee.id,
-      roleId: roleRecord.id,
-    });
-
+    // Send verification email
     await sendStaffVerifyEmail(employee.email, userData.password);
 
+    // Prepare response
     const cleanEmployee = employee.get({ plain: true });
-    const cleanRole = roleRecord.get({ plain: true });
 
     const responseData = {
       id: cleanEmployee.id,
@@ -176,10 +197,8 @@ const createEmployee = async (req, res) => {
       address: cleanEmployee.address,
       avatar: cleanEmployee.avatar,
       isActive: cleanEmployee.isActive,
-      role: {
-        id: cleanRole.id,
-        name: cleanRole.name,
-      },
+      speciality: cleanEmployee.speciality,
+      roles: employeeRoles,
       createdAt: cleanEmployee.createdAt,
       updatedAt: cleanEmployee.updatedAt,
     };
@@ -318,7 +337,14 @@ const updateActiveStatus = async (req, res) => {
 const updateEmployee = async (req, res) => {
   try {
     const { id } = req.params;
-    const { role, speciality, ...updateData } = req.body;
+    let { roles, speciality, ...updateData } = req.body;
+
+    // Parse roles nếu là string (từ FormData)
+    if (typeof roles === "string") {
+      roles = roles.split(",").map((r) => r.trim());
+    }
+
+    console.log("Roles parsed:", roles);
 
     // Lấy thông tin nhân viên hiện tại
     const existingUser = await Employee.findOne({
@@ -350,31 +376,34 @@ const updateEmployee = async (req, res) => {
     // ==== Cập nhật thông tin cơ bản ====
     await Employee.update(updateData, { where: { id } });
 
-    // ==== Kiểm tra role thay đổi ====
-    const oldRole = existingUser.roles?.[0]?.name;
-    const newRole = role;
-
-    if (newRole && newRole !== oldRole) {
-      // Xóa role cũ
+    // ==== Cập nhật roles nếu có ====
+    if (roles && Array.isArray(roles) && roles.length > 0) {
+      // Xóa tất cả roles cũ
       await EmployeeRole.destroy({ where: { employeeId: id } });
 
-      // Tìm role mới
-      const roleRecord = await Role.findOne({ where: { name: newRole } });
-      if (!roleRecord) {
-        return res.status(404).json({ error: `Role '${newRole}' not found` });
+      // Thêm roles mới
+      for (const roleName of roles) {
+        const roleRecord = await Role.findOne({ where: { name: roleName } });
+        if (!roleRecord) {
+          return res
+            .status(404)
+            .json({ error: `Role '${roleName}' not found` });
+        }
+
+        await EmployeeRole.create({
+          employeeId: id,
+          roleId: roleRecord.id,
+        });
       }
 
-      // Gán role mới
-      await EmployeeRole.create({
-        employeeId: id,
-        roleId: roleRecord.id,
-      });
-
-      if (oldRole === "Doctor" && newRole !== "Doctor") {
+      // Cập nhật speciality nếu có role Doctor
+      const hasDoctor = roles.some((r) => r.toLowerCase() === "doctor");
+      if (hasDoctor && speciality !== undefined) {
+        await Employee.update({ speciality }, { where: { id } });
+      } else if (!hasDoctor) {
+        // Xóa speciality nếu không còn là Doctor
         await Employee.update({ speciality: null }, { where: { id } });
       }
-    } else if (newRole === "Doctor" && speciality !== undefined) {
-      await Employee.update({ speciality }, { where: { id } });
     }
 
     // ==== Lấy lại dữ liệu sau khi cập nhật ====

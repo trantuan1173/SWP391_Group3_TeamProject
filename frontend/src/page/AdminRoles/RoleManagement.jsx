@@ -44,7 +44,7 @@ export default function RoleManagement() {
       setRoles(data.roles || []);
       setTotalPages(data.totalPages || 1);
     } catch {
-      toast.error("Failed to fetch roles");
+      toast.error("Không thể tải danh sách vai trò");
     }
   };
 
@@ -53,37 +53,37 @@ export default function RoleManagement() {
   }, [currentPage, search]);
 
   const handleCreateRole = async (data) => {
-    const toastId = toast.loading("Creating role...");
+    const toastId = toast.loading("Đang tạo vai trò...");
     try {
       await createRole(data);
-      toast.success("Role created successfully!", { id: toastId });
+      toast.success("Tạo vai trò thành công!", { id: toastId });
       setDialogOpen(false);
       loadRoles();
     } catch {
-      toast.error("Failed to create role", { id: toastId });
+      toast.error("Không thể tạo vai trò", { id: toastId });
     }
   };
 
   const handleUpdateRole = async (id, data) => {
-    const toastId = toast.loading("Updating role...");
+    const toastId = toast.loading("Đang cập nhật vai trò...");
     try {
       await updateRole(id, data);
-      toast.success("Role updated successfully", { id: toastId });
+      toast.success("Cập nhật vai trò thành công!", { id: toastId });
       setEditDialogOpen(false);
       loadRoles();
     } catch {
-      toast.error("Failed to update role", { id: toastId });
+      toast.error("Cập nhật vai trò thất bại", { id: toastId });
     }
   };
 
   const confirmDelete = async () => {
-    const toastId = toast.loading("Deleting...");
+    const toastId = toast.loading("Đang xóa...");
     try {
       await deleteRole(selectedRole.id);
-      toast.success("Deleted successfully!", { id: toastId });
+      toast.success("Xóa vai trò thành công!", { id: toastId });
       loadRoles();
     } catch {
-      toast.error("Failed to delete role", { id: toastId });
+      toast.error("Xóa vai trò thất bại", { id: toastId });
     } finally {
       setDeleteDialogOpen(false);
       setSelectedRole(null);
@@ -95,18 +95,18 @@ export default function RoleManagement() {
       <div className="bg-white h-full p-5 rounded-lg shadow-md">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <h4 className="text-xl font-bold">Role Management</h4>
+          <h4 className="text-xl font-bold">Quản lý vai trò</h4>
           <Button
             onClick={() => setDialogOpen(true)}
             className="bg-green-500 text-white hover:bg-green-600 !rounded-md"
           >
-            Create Role
+            Thêm vai trò
           </Button>
         </div>
 
         {/* Search */}
         <Input
-          placeholder="Search role..."
+          placeholder="Tìm kiếm vai trò..."
           value={searchInput}
           onChange={(e) => {
             setSearchInput(e.target.value);
@@ -117,12 +117,12 @@ export default function RoleManagement() {
 
         {/* Table */}
         <Table>
-          <TableCaption>Role List</TableCaption>
+          <TableCaption>Danh sách vai trò</TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead>STT</TableHead>
+              <TableHead>Tên vai trò</TableHead>
+              <TableHead>Hành động</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -142,7 +142,7 @@ export default function RoleManagement() {
                         setEditDialogOpen(true);
                       }}
                     >
-                      Edit
+                      Sửa
                     </Button>
                     <Button
                       className="bg-red-400 text-white hover:bg-red-500 !rounded-sm"
@@ -151,7 +151,7 @@ export default function RoleManagement() {
                         setDeleteDialogOpen(true);
                       }}
                     >
-                      Delete
+                      Xóa
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -159,7 +159,7 @@ export default function RoleManagement() {
             ) : (
               <TableRow>
                 <TableCell colSpan={3} className="text-center text-gray-500">
-                  No roles found
+                  Không tìm thấy vai trò nào
                 </TableCell>
               </TableRow>
             )}
