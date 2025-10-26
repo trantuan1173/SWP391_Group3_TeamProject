@@ -87,7 +87,9 @@ router.get("/:id", protect, authorize("Admin", "Receptionist"), getAppointmentBy
  *       500:
  *         description: Failed to update appointment
  */
-router.put("/:id", protect, authorize("Admin", "Receptionist"), updateAppointment);
+// Note: appointment update is handled by a unified route below which allows
+// either employees (Admin/Receptionist) to update or patients to cancel their own
+// appointments. The explicit employee-only route was removed so patients can cancel.
 
 /**
  * @swagger
@@ -149,7 +151,6 @@ router.get("/patient/:id", protect, (req, res, next) => {
 	return res.status(403).json({ success: false, message: "Không có quyền truy cập" });
 }, getAppointmentByPatientId);
 
-
 /**
  * @swagger
  * /appointments/patient/{id}:
@@ -167,6 +168,12 @@ router.get("/patient/:id", protect, (req, res, next) => {
  *         description: List of appointments
  */
 router.get("/patient/:id", protect, authorize("Admin", "Receptionist", "Doctor"), getAppointmentByPatientId);
+
+// Legacy employee-only update route preserved for compatibility.
+// It's placed after the unified PUT handler so the unified handler
+// (which allows patients to cancel their own appointments) runs first.
+// This keeps the original line present without blocking patient flow.
+router.put("/:id", protect, authorize("Admin", "Receptionist"), updateAppointment);
 
 /**
  * @swagger
@@ -204,8 +211,8 @@ router.get("/doctor/:id", protect, authorize("Admin", "Receptionist", "Doctor"),
  */
 router.get("/status/:status", protect, authorize("Admin", "Receptionist", "Doctor"), getAppointmentByStatus);
 
-module.exports = router;
-
 // Feedback endpoints for appointments
 router.post('/:id/feedback', protect, createFeedback);
 router.get('/:id/feedback', protect, getFeedbackForAppointment);
+
+module.exports = router;

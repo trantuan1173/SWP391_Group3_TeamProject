@@ -93,23 +93,84 @@ const deleteAppointment = async (req, res) => {
   }
 };
 
-//Get appointment by patient id
+//Get appointment by patient id with filtering, search and pagination
 const getAppointmentByPatientId = async (req, res) => {
   try {
-    const appointment = await Appointment.findAll({
-      where: { patientId: req.params.id },
-      include: [
-        // doctor is stored as employee via doctorId foreign key
-        { model: Employee, attributes: ["name", "email", "phoneNumber", "avatar"] },
-        { model: Room, attributes: ["name", "type"] },
-      ],
+    const patientId = parseInt(req.params.id, 10);
+
+    // Enforce at controller level that a patient can only fetch their own appointments
+    if (req.userType === 'patient' && req.userId !== patientId) {
+      return res.status(403).json({ success: false, message: 'Bạn chỉ được xem lịch khám của chính mình' });
+    }
+
+    // Query params for filtering and pagination
+    const {
+      page = 1,
+      limit = 20,
+      status,
+      from,
+      to,
+      doctorId,
+      search,
+    } = req.query;
+
+    const pg = Math.max(parseInt(page, 10) || 1, 1);
+    const lim = Math.min(Math.max(parseInt(limit, 10) || 20, 1), 200);
+    const offset = (pg - 1) * lim;
+
+    const where = { patientId };
+
+    if (status) {
+      where.status = status;
+    }
+
+    if (doctorId) {
+      where.doctorId = parseInt(doctorId, 10);
+    }
+
+    if (from || to) {
+      where.date = {};
+      if (from) {
+        const fromDate = new Date(from);
+        if (!isNaN(fromDate)) where.date[Op.gte] = fromDate;
+      }
+      if (to) {
+        const toDate = new Date(to);
+        if (!isNaN(toDate)) where.date[Op.lte] = toDate;
+      }
+    }
+
+    // Build search across related models (employee name and room name)
+    const include = [
+      { model: Employee, attributes: ["id", "name", "email", "phoneNumber", "avatar"] },
+      { model: Room, attributes: ["id", "name", "type"] },
+    ];
+
+    // If search provided, use $Model.field$ syntax in where with OR
+    const finalWhere = { ...where };
+    if (search && typeof search === 'string' && search.trim().length > 0) {
+      const like = { [Op.like]: `%${search.trim()}%` };
+      finalWhere[Op.or] = [
+        { '$Employee.name$': like },
+        { '$Room.name$': like },
+      ];
+    }
+
+    const { count, rows } = await Appointment.findAndCountAll({
+      where: finalWhere,
+      include,
+      order: [['date', 'DESC'], ['startTime', 'ASC']],
+      limit: lim,
+      offset,
+      distinct: true,
     });
 
-    res.status(200).json(appointment);
+    const pages = Math.ceil(count / lim) || 1;
+
+    res.status(200).json({ data: rows, total: count, page: pg, pages });
   } catch (error) {
     console.error('[getAppointmentByPatientId] error:', error && error.stack ? error.stack : error);
-    // Temporary fallback: return empty array so frontend remains usable while DB connectivity is fixed
-    res.status(200).json([]);
+    res.status(500).json({ success: false, message: 'Failed to get appointments' });
   }
 };
 

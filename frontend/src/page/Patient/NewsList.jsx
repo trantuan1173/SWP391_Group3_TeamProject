@@ -5,9 +5,12 @@ import { API_ENDPOINTS } from '../../config';
 
 export default function PatientNewsList() {
   const [news, setNews] = useState([]);
+  const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const pageSize = 6;
   const navigate = useNavigate();
 
@@ -33,6 +36,7 @@ export default function PatientNewsList() {
         else list = [];
         console.log('[PatientNewsList] parsed list length=', list.length);
         setNews(list);
+  setFiltered(list);
       } catch (e) {
         console.error('Failed to fetch news', e);
         if (mounted) setError('Không thể tải tin tức');
@@ -43,13 +47,36 @@ export default function PatientNewsList() {
     return () => (mounted = false);
   }, []);
 
+  // debounce search
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search.trim()), 300);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  // filter news client-side by title/content using debouncedSearch
+  useEffect(() => {
+    if (!debouncedSearch) {
+      setFiltered(news);
+      setCurrentPage(1);
+      return;
+    }
+    const key = debouncedSearch.toLowerCase();
+    const filteredList = news.filter((n) => {
+      const title = (n.title || '').toLowerCase();
+      const content = (n.content || '').toLowerCase().replace(/<[^>]*>/g, '');
+      return title.includes(key) || content.includes(key);
+    });
+    setFiltered(filteredList);
+    setCurrentPage(1);
+  }, [debouncedSearch, news]);
+
   if (loading) return <div className="p-6">Đang tải...</div>;
   if (error) return <div className="p-6 text-red-600">{error}</div>;
   if (!news.length) return <div className="p-6">Chưa có tin tức.</div>;
 
-  const totalPages = Math.ceil(news.length / pageSize);
+  const totalPages = Math.ceil(filtered.length / pageSize);
   const start = (currentPage - 1) * pageSize;
-  const pageItems = news.slice(start, start + pageSize);
+  const pageItems = filtered.slice(start, start + pageSize);
 
   const excerpt = (html, n = 120) => {
     if (!html) return '';
@@ -61,6 +88,11 @@ export default function PatientNewsList() {
   return (
     <div className="p-6">
       <h2 className="text-2xl font-bold mb-6">Tin tức</h2>
+
+      <div className="mb-4 flex items-center gap-3">
+        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Tìm theo tiêu đề hoặc nội dung..." className="border px-3 py-2 rounded w-full max-w-md" />
+        <button onClick={() => { setSearch(''); setDebouncedSearch(''); }} className="px-3 py-2 border rounded">Xóa</button>
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {pageItems.map((n) => (

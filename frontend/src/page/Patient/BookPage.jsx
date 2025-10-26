@@ -41,7 +41,7 @@ export default function BookPage() {
           <label className="block text-gray-700 text-sm mb-1">Ngày</label>
 <input
   type="date"
-  className={`w-full border-2 rounded-lg px-3 py-2 text-sm focus:outline-none ${!bookingDate && bookingMessage ? 'border-red-500' : 'border-purple-400'}`}
+  className={`w-full border-2 rounded-lg px-3 py-2 text-sm focus:outline-none ${!bookingDate && bookingMessage ? 'border-green-500' : 'border-purple-400'}`}
   value={bookingDate}
   onChange={(e) => setBookingDate(e.target.value)}
 />
@@ -52,10 +52,10 @@ export default function BookPage() {
             type="time"
             value={bookingStartTime}
             onChange={(e) => setBookingStartTime(e.target.value)}
-            className={`w-full border-2 rounded-lg px-3 py-2 text-sm focus:outline-none ${!bookingStartTime && bookingMessage ? 'border-red-500' : 'border-purple-400'}`}
+            className={`w-full border-2 rounded-lg px-3 py-2 text-sm focus:outline-none ${!bookingStartTime && bookingMessage ? 'border-green-500' : 'border-purple-400'}`}
           />
         </div>
-        {bookingMessage && <div className="text-sm text-red-600 mb-2">{bookingMessage}</div>}
+        {bookingMessage && <div className="text-sm text-green-600 mb-2">{bookingMessage}</div>}
         <button type="submit" disabled={bookingLoading} className="w-full bg-green-900 text-white py-2 rounded-full">{bookingLoading ? 'Đang gửi...' : 'Đặt lịch'}</button>
       </form>
     </div>
