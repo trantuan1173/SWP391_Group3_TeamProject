@@ -207,11 +207,85 @@ export default function ReceptionistAppointmentDetail() {
   const currentSelectedRoom = availableRooms.find(r => r.id === selectedRoomId) || a.Room;
 
 
+  const getServicesFromMedicalRecord = (medicalRecord) => {
+    if (!medicalRecord || !medicalRecord.orderDetails) return [];
+    try {
+      const services = JSON.parse(medicalRecord.orderDetails);
+      return Array.isArray(services) ? services : [];
+    } catch (error) {
+      console.error("Lỗi khi phân tích orderDetails:", error);
+      return [];
+    }
+  };
+  const currentServices = getServicesFromMedicalRecord(a?.MedicalRecord);
+  const calculateTotalAmount = (services) => {
+    return services.reduce((sum, service) => sum + (service.total || 0), 0);
+  };
+
+  const totalAmount = calculateTotalAmount(currentServices);
+
+  const handlePrintInvoice = (appointment, services, amount) => {
+    const printWindow = window.open('', '', 'height=600,width=800');
+
+    //Nội dung hoá đơn
+    const invoiceContent = `
+        <style>
+            body { font-family: 'Arial', sans-serif; padding: 20px; }
+            h1 { text-align: center; color: #4a5568; }
+            .info { margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f3f4f6; }
+            .total { font-size: 1.2em; font-weight: bold; text-align: right; padding-top: 10px; }
+        </style>
+        <h1>HÓA ĐƠN DỊCH VỤ KHÁM CHỮA BỆNH</h1>
+        <div class="info">
+            <p><strong>Mã Lịch Hẹn:</strong> ${appointment.id}</p>
+            <p><strong>Ngày Thanh Toán:</strong> ${dayjs().format('DD/MM/YYYY HH:mm')}</p>
+            <p><strong>Bệnh Nhân:</strong> ${appointment.Patient?.name || 'N/A'}</p>
+            <p><strong>Bác Sĩ Khám:</strong> ${appointment.Employee?.name || 'N/A'}</p>
+            <p><strong>Liên hệ Bác Sĩ Khám:</strong> ${'Email: ' + appointment.Employee?.email + (appointment.Employee?.phoneNumber && ' SDT: ' + appointment.Employee.phoneNumber) || 'N/A'}</p>
+        </div>
+
+        <h2>Chi tiết Dịch vụ</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Tên Dịch vụ</th>
+                    <th>SL</th>
+                    <th>Đơn giá</th>
+                    <th>Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${services.map((s, i) => `
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td>${s.name}</td>
+                        <td>${s.quantity || 1}</td>
+                        <td>${new Intl.NumberFormat('vi-VN').format(s.price)} VND</td>
+                        <td>${new Intl.NumberFormat('vi-VN').format(s.total)} VND</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+
+        <div class="total">
+            Tổng Cộng: ${new Intl.NumberFormat('vi-VN').format(amount)} VND
+        </div>
+        <p style="text-align: center; margin-top: 30px;">Xin chân thành cảm ơn!</p>
+    `;
+
+    printWindow.document.write(invoiceContent);
+    printWindow.document.close();
+    printWindow.print();
+  };
   return (
     <div className="p-6 bg-white rounded-lg shadow-md">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-semibold text-gray-700">
-          Chi tiết lịch hẹn #{a.id}
+          Chi tiết lịch hẹn
         </h1>
         <button
           onClick={() => navigate(-1)}
@@ -245,14 +319,13 @@ export default function ReceptionistAppointmentDetail() {
             <p><strong>Phòng:</strong> {a.Room?.name || "-"}</p>
           </div>
         </div>
-        {/* KẾT QUẢ KHÁM VÀ DỊCH VỤ SỬ DỤNG (CHỈ HIỂN THỊ KHI CÓ MEDICAL RECORD) */}
         {a.MedicalRecord && (
           <div className="border border-green-500 rounded-lg p-4 bg-green-50 md:col-span-3">
             <h2 className="text-lg font-bold mb-4 text-green-800 flex items-center">
-              <span className="mr-2">📝</span> Kết quả Khám & Hồ sơ Bệnh án
+              Kết quả Khám & Hồ sơ Bệnh án
             </h2>
 
-            {/* THÔNG TIN CHÍNH */}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <p className="font-semibold text-green-700">Triệu chứng:</p>
@@ -263,20 +336,19 @@ export default function ReceptionistAppointmentDetail() {
                 <p className="text-gray-700 italic">{a.MedicalRecord.diagnosis || "Chưa có chẩn đoán"}</p>
               </div>
               <div className="md:col-span-2">
-                <p className="font-semibold text-green-700">Kết luận/Lời khuyên:</p>
-                <p className="text-gray-700 italic">{a.MedicalRecord.conclusion || "Không có kết luận"}</p>
+                <p className="font-semibold text-green-700">Phương pháp Điều trị/Kết luận:</p>
+                <p className="text-gray-700 italic">{a.MedicalRecord.treatment || "Chưa có phương pháp điều trị"}</p>
               </div>
               <div className="md:col-span-2">
-                <p className="font-semibold text-green-700">Ngày khám:</p>
-                <p className="text-gray-700 italic">{dayjs(a.MedicalRecord.date).format('DD/MM/YYYY HH:mm')}</p>
+                <p className="font-semibold text-green-700">Ngày tạo hồ sơ:</p>
+                <p className="text-gray-700 italic">{dayjs(a.MedicalRecord.createdAt).format('DD/MM/YYYY HH:mm')}</p>
               </div>
             </div>
 
             <hr className="my-4 border-green-300" />
 
-            {/* BẢNG DỊCH VỤ SỬ DỤNG */}
             <h3 className="text-md font-bold mb-3 text-green-800">Dịch vụ đã sử dụng</h3>
-            {a.MedicalRecord.servicesUsed && a.MedicalRecord.servicesUsed.length > 0 ? (
+            {currentServices.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-green-200 border border-green-300">
                   <thead className="bg-green-100">
@@ -299,7 +371,7 @@ export default function ReceptionistAppointmentDetail() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-green-200">
-                    {a.MedicalRecord.servicesUsed.map((service, index) => (
+                    {currentServices.map((service, index) => (
                       <tr key={index}>
                         <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
                           {index + 1}
@@ -314,7 +386,7 @@ export default function ReceptionistAppointmentDetail() {
                           {service.price ? new Intl.NumberFormat('vi-VN').format(service.price) + ' VND' : 'N/A'}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap text-sm font-semibold text-gray-700">
-                          {service.price ? new Intl.NumberFormat('vi-VN').format(service.price * (service.quantity || 1)) + ' VND' : 'N/A'}
+                          {service.total ? new Intl.NumberFormat('vi-VN').format(service.total) + ' VND' : 'N/A'}
                         </td>
                       </tr>
                     ))}
@@ -326,11 +398,53 @@ export default function ReceptionistAppointmentDetail() {
             )}
           </div>
         )}
+        {a.MedicalRecord && currentServices.length > 0 && (
+          <div className="border border-purple-500 rounded-lg p-4 bg-purple-50 md:col-span-3">
+            <h2 className="text-lg font-bold mb-4 text-purple-800 flex items-center">
+              Hóa đơn & Thanh toán
+            </h2>
+
+            <div className="flex justify-between items-center text-xl font-bold p-3 bg-purple-100 rounded-md mb-4">
+              <p className="text-purple-800">TỔNG CỘNG:</p>
+              <p className="text-purple-900">
+                {new Intl.NumberFormat('vi-VN').format(totalAmount)} VND
+              </p>
+            </div>
+
+            <p className="text-sm text-gray-700 mb-4">
+              Trạng thái hiện tại: <span className="font-semibold text-red-600">{newStatus.toUpperCase()}</span>.
+            </p>
+
+            <div className="flex gap-4">
+              <button
+                onClick={() => {
+                  toast.error("Chức năng Thanh toán (API) chưa được triển khai.");
+                }}
+                disabled={newStatus === 'completed' || isUpdating}
+                className={`flex-1 px-4 py-2 text-white font-semibold rounded-md transition-colors ${(newStatus === 'completed' || isUpdating)
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-green-600 hover:bg-green-700'
+                  }`}
+              >
+                {isUpdating ? 'Đang xử lý...' : 'Xác nhận Thanh toán'}
+              </button>
+
+              <button
+                onClick={() => {
+                  toast.success("Đang tiến hành tạo mẫu in hóa đơn...");
+                  handlePrintInvoice(a, currentServices, totalAmount);
+                }}
+                className="flex-1 px-4 py-2 text-purple-600 font-semibold border border-purple-600 rounded-md hover:bg-purple-100 transition-colors"
+              >
+                <span className="mr-1">🖨️</span> In Hóa đơn
+              </button>
+            </div>
+          </div>
+        )}
         {/* CẬP NHẬT CHUNG */}
         <div className="border border-blue-400 rounded-lg p-4 bg-blue-50 md:col-span-2">
           <h2 className="text-lg font-bold mb-4 text-blue-800">Cập nhật Lịch hẹn</h2>
 
-          {/* Input fields for Date & Time & Status */}
           <div className="grid grid-cols-3 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Ngày:</label>
@@ -361,7 +475,6 @@ export default function ReceptionistAppointmentDetail() {
             </div>
           </div>
 
-          {/* Status Dropdown */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">Trạng thái:</label>
             <select
@@ -375,7 +488,6 @@ export default function ReceptionistAppointmentDetail() {
             </select>
           </div>
 
-          {/* Dropdown CHỌN CHUYÊN KHOA */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Lọc Bác sĩ theo Chuyên khoa:
@@ -393,7 +505,6 @@ export default function ReceptionistAppointmentDetail() {
             </select>
           </div>
 
-          {/* Select Doctor */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Chọn Bác sĩ Khả dụng:
@@ -425,7 +536,6 @@ export default function ReceptionistAppointmentDetail() {
             )}
           </div>
 
-          {/* Select Room */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">Chọn Phòng khám Khả dụng:</label>
             <select
@@ -444,7 +554,6 @@ export default function ReceptionistAppointmentDetail() {
             {availableRooms.length === 0 && !fetchingAvailability && <p className="text-red-500 text-xs mt-1">Không tìm thấy phòng khả dụng nào.</p>}
           </div>
 
-          {/* SUGGESTION BLOCK */}
           {availableDoctors.length === 0 && suggestedSlots.length > 0 && (
             <div className="mt-4 p-3 border border-red-300 bg-red-50 rounded-md">
               <h3 className="text-md font-bold text-red-800 mb-2">⚠ Gợi ý Thời gian Khác:</h3>
@@ -461,7 +570,6 @@ export default function ReceptionistAppointmentDetail() {
             </div>
           )}
 
-          {/* Cập nhật Button */}
           <button
             onClick={handleUpdate}
             disabled={!selectedDoctorId || !selectedRoomId || isUpdating || fetchingAvailability}
@@ -474,7 +582,6 @@ export default function ReceptionistAppointmentDetail() {
           </button>
         </div>
 
-        {/* Notes */}
         <div className="border rounded-lg p-4 bg-gray-50 md:col-span-3">
           <h2 className="text-lg font-semibold mb-3 text-gray-700">Ghi chú</h2>
           <p>{a.notes || "Không có ghi chú."}</p>
