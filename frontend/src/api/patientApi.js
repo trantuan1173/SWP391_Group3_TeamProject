@@ -8,7 +8,7 @@ const getAuthHeaders = () => ({
 });
 
 export const fetchPatients = async (page = 1, pageSize = 10, search = "") => {
-  const res = await axios.get(API_ENDPOINTS.GET_ALL_PATIENTS, {
+  const res = await axios.get(API_ENDPOINTS.ADMIN_GET_ALL_PATIENTS, {
     params: { page, pageSize, search },
     headers: getAuthHeaders(),
   });

@@ -42,6 +42,7 @@ export const updateRole = async (id, data) => {
 
 // Xoá role
 export const deleteRole = async (id) => {
+  console.log("Deleting role with ID:", id);
   return axios.delete(API_ENDPOINTS.DELETE_ROLE(id), {
     headers: getAuthHeaders(),
   });

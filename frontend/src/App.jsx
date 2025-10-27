@@ -37,6 +37,8 @@ import PatientNewsDetail from "./page/Patient/NewsDetail";
 import RoleManagement from "./page/AdminRoles/RoleManagement";
 import AdminPatients from "./page/AdminPatient/AdminPatients";
 import PatientDetailManagement from "./page/AdminPatient/PatientDetailManagement";
+import AdminProfile from "./page/AdminDashboard/AdminProfile";
+import AdminService from "./page/AdminServices/AdminService";
 
 function App() {
   const RedirectPatientId = () => {
@@ -87,7 +89,10 @@ function App() {
         {/* Doctor Dashboard routes */}
         <Route path="/doctor/schedule" element={<DoctorSchedule />} />
         <Route path="/doctor/exam-records" element={<ViewExamRecord />} />
-        <Route path="/doctor/create-records" element={<CreateMedicalRecord />} />
+        <Route
+          path="/doctor/create-records"
+          element={<CreateMedicalRecord />}
+        />
 
         {/* Admin routes */}
         <Route>
@@ -97,6 +102,7 @@ function App() {
             element={<UserDetailManagement />}
           ></Route>
           <Route path="/admin/dashboard" element={<AdminDashboard />}></Route>
+          <Route path="/admin/profile" element={<AdminProfile />}></Route>
           <Route path="/admin/user" element={<UserManagement />}></Route>
           <Route path="/admin/roles" element={<RoleManagement />}></Route>
           <Route path="/admin/patients" element={<AdminPatients />}></Route>
@@ -109,6 +115,7 @@ function App() {
             element={<PatientDetailManagement />}
           ></Route>
           <Route path="/admin/dashboard" element={<AdminDashboard />}></Route>
+          <Route path="/admin/services" element={<AdminService />}></Route>
         </Route>
         <Route element={<RequireAuth allowedRoles={["Receptionist"]} />}>
           <Route path="/receptionist" element={<ReceptionistSideBar />}>

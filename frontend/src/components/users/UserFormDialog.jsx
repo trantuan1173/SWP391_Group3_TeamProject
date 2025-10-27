@@ -86,7 +86,10 @@ export default function UserFormDialog({ open, setOpen, onSubmit, userId }) {
   useEffect(() => {
     if (open) {
       fetchRoles()
-        .then(setRoles)
+        .then((data) => {
+          // Đảm bảo roles luôn là mảng
+          setRoles(Array.isArray(data.roles) ? data.roles : []);
+        })
         .catch((err) => console.error("Failed to load roles", err));
     }
 

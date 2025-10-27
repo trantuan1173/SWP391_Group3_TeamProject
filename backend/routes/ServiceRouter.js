@@ -1,8 +1,14 @@
 const express = require("express");
 const router = express.Router();
-const { getAllService, getServiceById, createService, updateService, deleteService } = require("../controllers/ServiceController");
+const {
+  getAllService,
+  getServiceById,
+  createService,
+  updateService,
+  deleteService,
+  getAllServicePagination,
+} = require("../controllers/ServiceController");
 const { protect, authorize } = require("../middleware/authMiddleware");
-
 
 /**
  * @swagger
@@ -19,6 +25,8 @@ const { protect, authorize } = require("../middleware/authMiddleware");
  *         description: Failed to get services
  */
 router.get("/", getAllService);
+
+router.get("/get-all", getAllServicePagination);
 
 /**
  * @swagger
