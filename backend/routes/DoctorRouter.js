@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { getDoctor, getDoctorById, updateDoctor, deleteDoctor, getDoctorAvailable, getDoctorSchedule, getSpecialties } = require("../controllers/DoctorController");
+const { getDoctor, getDoctorById, updateDoctor, deleteDoctor, getDoctorAvailable, getDoctorSchedule, getSpecialties, getUniqueSpecialties } = require("../controllers/DoctorController");
 const { protect, authorize } = require("../middleware/authMiddleware.js");
 
 /**
@@ -27,6 +27,23 @@ const { protect, authorize } = require("../middleware/authMiddleware.js");
  *                 $ref: '#/components/schemas/Doctor'
  */
 router.get("/", getDoctor);
+/**
+ * @swagger
+ * /doctors/specialties:
+ *   get:
+ *     summary: Get unique specialties
+ *     tags: [Doctor]
+ *     responses:
+ *       200:
+ *         description: List of unique specialties
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: string
+ */
+router.get("/specialties", getUniqueSpecialties);
 /**
  * @swagger
  * /doctors/{id}:
