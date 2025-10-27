@@ -71,9 +71,10 @@ export const API_ENDPOINTS = {
     `${baseUrl}/api/appointments/${appointmentId}`,
   PATIENT_BY_ID: (patientId) => `${baseUrl}/api/patients/${patientId}`,
   GET_ALL_APPOINTMENTS: `${baseUrl}/api/appointments`,
-  GET_APPOINTMENT_BY_ID: (appointmentId) =>
-    `${baseUrl}/api/appointments/${appointmentId}`,
+  GET_APPOINTMENT_BY_ID: (appointmentId) => `${baseUrl}/api/appointments/${appointmentId}`,
+  UPDATE_APPOINTMENT: (appointmentId) => `${baseUrl}/api/appointments/${appointmentId}`,
   GET_TODAY_APPOINTMENTS: `${baseUrl}/api/appointments/today`,
+  GET_APPOINTMENT_DASHBOARD: `${baseUrl}/api/appointments/dashboard`,
   CREATE_NEWS: `${baseUrl}/api/news`,
   UPDATE_NEWS: (newsId) => `${baseUrl}/api/news/${newsId}`,
   DELETE_NEWS: (newsId) => `${baseUrl}/api/news/${newsId}`,
@@ -81,4 +82,6 @@ export const API_ENDPOINTS = {
   GET_NEWS_BY_ID: (newsId) => `${baseUrl}/api/news/${newsId}`,
   GET_SERVICES: `${baseUrl}/api/services`,
   CREATE_MEDICAL_RECORD: `${baseUrl}/api/medical-records`,
+  GET_AVAILABLE_DOCTORS: `${baseUrl}/api/appointments/available-doctors`,
+  GET_AVAILABLE_ROOMS: `${baseUrl}/api/appointments/available-rooms`,
 };

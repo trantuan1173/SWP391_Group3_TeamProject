@@ -2,7 +2,7 @@
 
 const express = require("express");
 const router = express.Router();
-const { getAppointment, getAppointmentById, updateAppointment, deleteAppointment, getAppointmentByPatientId, getAppointmentByDoctorId, getAppointmentByStatus, getAppointmentToday } = require("../controllers/AppointmentController");
+const { getAppointment, getAppointmentById, updateAppointment, deleteAppointment, getAppointmentByPatientId, getAppointmentByDoctorId, getAppointmentByStatus, getAppointmentToday, getAppointmentDashboard, getAvailableDoctors, getAvailableRooms } = require("../controllers/AppointmentController");
 const { protect, authorize } = require("../middleware/authMiddleware");
 /**
  * @swagger
@@ -15,6 +15,85 @@ const { protect, authorize } = require("../middleware/authMiddleware");
  *         description: List of appointments
  */
 router.get("/today", protect, authorize("Admin", "Receptionist"), getAppointmentToday);
+
+/**
+ * @swagger
+ * /appointments/available-doctors:
+ *   get:
+ *     summary: Get available doctors for a specific time slot
+ *     tags: [Appointment]
+ *     parameters:
+ *       - in: query
+ *         name: date
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - in: query
+ *         name: startTime
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: time
+ *       - in: query
+ *         name: endTime
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: time
+ *       - in: query
+ *         name: speciality
+ *         required: false
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of available doctors
+ */
+router.get("/available-doctors", protect, authorize("Admin", "Receptionist"), getAvailableDoctors);
+
+/**
+ * @swagger
+ * /appointments/available-rooms:
+ *   get:
+ *     summary: Get available rooms for a specific time slot
+ *     tags: [Appointment]
+ *     parameters:
+ *       - in: query
+ *         name: date
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - in: query
+ *         name: startTime
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: time
+ *       - in: query
+ *         name: endTime
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: time
+ *     responses:
+ *       200:
+ *         description: List of available rooms
+ */
+router.get("/available-rooms", protect, authorize("Admin", "Receptionist"), getAvailableRooms);
+
+/**
+ * @swagger
+ * /appointments/dashboard:
+ *   get:
+ *     summary: Get all appointments today
+ *     tags: [Appointment]
+ *     responses:
+ *       200:
+ *         description: List of appointments
+ */
+router.get("/dashboard", protect, authorize("Admin", "Receptionist"), getAppointmentDashboard);
 
 /**
  * @swagger

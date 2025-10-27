@@ -9,7 +9,7 @@ function generateToken(id, type) {
   });
 }
 
-// ✅ Patient login
+// Patient login
 const patientLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -135,7 +135,7 @@ const createAppointment = async (req, res) => {
   }
 };
 
-// ✅ Create appointment without login
+// Create appointment without login
 const createAppointmentWithoutLogin = async (req, res) => {
   try {
     const { name, identityNumber, phoneNumber, date, startTime, endTime } = req.body;
@@ -171,7 +171,7 @@ const createAppointmentWithoutLogin = async (req, res) => {
   }
 };
 
-// ✅ Confirm appointment
+// Confirm appointment
 const confirmAppointment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -196,7 +196,7 @@ const confirmAppointment = async (req, res) => {
   }
 };
 
-// ✅ Get prescriptions
+// Get prescriptions
 const getPrescriptions = async (req, res) => {
   try {
     const { patientId } = req.query;
@@ -224,7 +224,7 @@ const getPrescriptions = async (req, res) => {
   }
 };
 
-// ✅ Get checkups
+// Get checkups
 const getCheckups = async (req, res) => {
   try {
     const { patientId } = req.query;
@@ -237,7 +237,7 @@ const getCheckups = async (req, res) => {
   }
 };
 
-// ✅ Get documents
+// Get documents
 const getDocuments = async (req, res) => {
   try {
     const { patientId } = req.query;
@@ -250,7 +250,7 @@ const getDocuments = async (req, res) => {
   }
 };
 
-// ✅ Get patient by id (with appointments + records)
+// Get patient by id (with appointments + records)
 const getPatientById = async (req, res) => {
   try {
     const { id } = req.params;
