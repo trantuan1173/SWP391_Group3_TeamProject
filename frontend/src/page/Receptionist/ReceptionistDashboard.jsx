@@ -10,7 +10,7 @@ export default function ReceptionistDashboard() {
   useEffect(() => {
     const fetchTodayAppointments = async () => {
       try {
-        const res = await axios.get(API_ENDPOINTS.GET_TODAY_APPOINTMENTS,
+        const res = await axios.get(API_ENDPOINTS.GET_APPOINTMENT_DASHBOARD,
             {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`,

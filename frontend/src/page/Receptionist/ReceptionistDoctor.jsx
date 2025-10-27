@@ -51,25 +51,11 @@ export default function ReceptionistDoctor() {
           onChange={(e) => setSpecialityFilter(e.target.value)}
         >
           <option value="all">Tất cả</option>
-          <option value="Nội tổng quát">Nội tổng quát</option>
-          <option value="Ngoại tổng quát">Ngoại tổng quát</option>
-          <option value="Nhi khoa">Nhi khoa</option>
-          <option value="Sản - Phụ khoa">Sản - Phụ khoa</option>
-          <option value="Da liễu">Da liễu</option>
-          <option value="Răng - Hàm - Mặt">Răng - Hàm - Mặt</option>
-          <option value="Tai - Mũi - Họng">Tai - Mũi - Họng</option>
-          <option value="Mắt (Nhãn khoa)">Mắt (Nhãn khoa)</option>
-          <option value="Tim mạch">Tim mạch</option>
-          <option value="Hô hấp">Hô hấp</option>
-          <option value="Tiêu hoá">Tiêu hoá</option>
-          <option value="Thận - Tiết niệu">Thận - Tiết niệu</option>
-          <option value="Cơ xương khớp">Cơ xương khớp</option>
-          <option value="Thần kinh">Thần kinh</option>
-          <option value="Nội tiết - Đái tháo đường">Nội tiết - Đái tháo đường</option>
-          <option value="Ung bướu">Ung bướu</option>
-          <option value="Huyết học">Huyết học</option>
+          <option value="Nội khoa">Nội khoa</option>
+          <option value="Ngoại khoa">Ngoại khoa</option>
+          <option value="Sản - Nhi">Sản - Nhi</option>
+          <option value="Da liễu - Thẩm mỹ">Da liễu - Thẩm mỹ</option>
           <option value="Tâm lý - Tâm thần">Tâm lý - Tâm thần</option>
-          <option value="Vật lý trị liệu - Phục hồi chức năng">Vật lý trị liệu - Phục hồi chức năng</option>
           <option value="Y học cổ truyền">Y học cổ truyền</option>
           <option value="Hồi phục chức năng">Hồi phục chức năng</option>
         </select>

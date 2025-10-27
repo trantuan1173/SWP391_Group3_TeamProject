@@ -31,6 +31,7 @@ import ReceptionistDoctor from "./page/Receptionist/ReceptionistDoctor";
 import ReceptionistNews from "./page/Receptionist/ReceptionistNews";
 import News from "./page/guest/News";
 import NewsDetail from "./page/guest/NewsDetail";
+import ReceptionistAppointmentDetail from "./page/Receptionist/ReceptionistAppointmentDetail";
 
 function App() {
   const RedirectPatientId = () => {
@@ -100,6 +101,7 @@ function App() {
             <Route path="dashboard" element={<ReceptionistDashboard />} />
             <Route path="patients" element={<ReceptionistPatient />} />
             <Route path="appointments" element={<ReceptionistAppointment />} />
+            <Route path="appointments/:id" element={<ReceptionistAppointmentDetail />} />
             <Route path="doctors" element={<ReceptionistDoctor />} />
             <Route path="news" element={<ReceptionistNews />} />
           </Route>

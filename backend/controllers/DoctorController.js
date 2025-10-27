@@ -181,7 +181,7 @@ const getSpecialties = async (req, res) => {
       ],
       where: {
         speciality: {
-          [Op.ne]: null // Loại bỏ các giá trị null
+          [Op.ne]: null
         }
       },
       group: ['speciality'],
@@ -201,4 +201,31 @@ const getSpecialties = async (req, res) => {
   }
 };
 
-module.exports = { getDoctor, getDoctorById, updateDoctor, deleteDoctor, getDoctorAvailable, getDoctorSchedule, getSpecialties };
+const getUniqueSpecialties = async (req, res) => {
+  try {
+    const specialties = await Employee.findAll({
+      attributes: [
+        'speciality',
+      ],
+      where: {
+        speciality: {
+          [Op.ne]: null
+        }
+      },
+      group: ['speciality'],
+      raw: true
+    });
+
+    // Format lại data
+    const formattedSpecialties = specialties.map(s => ({
+      name: s.speciality,
+    }));
+
+    res.status(200).json(formattedSpecialties);
+  } catch (error) {
+    console.error("Error in getSpecialties:", error);
+    res.status(500).json({ error: "Failed to get specialties", details: error.message });
+  }
+};
+
+module.exports = { getDoctor, getDoctorById, updateDoctor, deleteDoctor, getDoctorAvailable, getDoctorSchedule, getSpecialties, getUniqueSpecialties };
