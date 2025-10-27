@@ -39,6 +39,7 @@ import AdminPatients from "./page/AdminPatient/AdminPatients";
 import PatientDetailManagement from "./page/AdminPatient/PatientDetailManagement";
 import AdminProfile from "./page/AdminDashboard/AdminProfile";
 import AdminService from "./page/AdminServices/AdminService";
+import ReceptionistAppointmentDetail from "./page/Receptionist/ReceptionistAppointmentDetail";
 
 function App() {
   const RedirectPatientId = () => {
@@ -122,6 +123,7 @@ function App() {
             <Route path="dashboard" element={<ReceptionistDashboard />} />
             <Route path="patients" element={<ReceptionistPatient />} />
             <Route path="appointments" element={<ReceptionistAppointment />} />
+            <Route path="appointments/:id" element={<ReceptionistAppointmentDetail />} />
             <Route path="doctors" element={<ReceptionistDoctor />} />
             <Route path="news" element={<ReceptionistNews />} />
           </Route>
