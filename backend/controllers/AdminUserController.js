@@ -201,12 +201,14 @@ const getEmployees = async (req, res) => {
     const page = parseInt(req.query.page) || 1; // trang hiện tại
     const pageSize = parseInt(req.query.pageSize) || 10; // số record mỗi trang
     const search = req.query.search ? req.query.search.trim() : ""; // từ khóa tìm kiếm
-
+    const role = req.query.role ? req.query.role.trim() : "";
     const offset = (page - 1) * pageSize;
 
     // Điều kiện where cho search
     const whereCondition = {};
-
+    const roleCondition = role
+      ? { name: { [Op.like]: `%${role}%` } }
+      : undefined;
     if (search) {
       whereCondition[Op.or] = [
         { name: { [Op.like]: `%${search}%` } },
@@ -229,8 +231,17 @@ const getEmployees = async (req, res) => {
         "gender",
         "address",
         "identityNumber",
+        "speciality",
       ],
-      include: [{ model: Role, as: "roles" }],
+      include: [
+        {
+          model: Role,
+          as: "roles",
+          where: roleCondition,
+          through: { attributes: [] },
+          required: !!roleCondition,
+        },
+      ],
       where: whereCondition,
       limit: pageSize,
       offset,
@@ -307,9 +318,9 @@ const updateActiveStatus = async (req, res) => {
 const updateEmployee = async (req, res) => {
   try {
     const { id } = req.params;
-    const { role, ...updateData } = req.body;
+    const { role, speciality, ...updateData } = req.body;
 
-    // Tìm nhân viên hiện tại
+    // Lấy thông tin nhân viên hiện tại
     const existingUser = await Employee.findOne({
       where: { id },
       include: [{ model: Role, as: "roles" }],
@@ -317,40 +328,6 @@ const updateEmployee = async (req, res) => {
 
     if (!existingUser) {
       return res.status(404).json({ error: "Employee not found" });
-    }
-
-    // ==== VALIDATE TRÙNG LẶP ====
-    const existingIdentityNumber = await Employee.findOne({
-      where: {
-        identityNumber: updateData.identityNumber,
-      },
-    });
-
-    const existingMail = await Employee.findOne({
-      where: {
-        email: updateData.email,
-      },
-    });
-
-    const existingPhone = await Employee.findOne({
-      where: {
-        phoneNumber: updateData.phoneNumber,
-      },
-    });
-
-    if (
-      (existingIdentityNumber && existingIdentityNumber.id !== parseInt(id)) ||
-      (existingMail && existingMail.id !== parseInt(id)) ||
-      (existingPhone && existingPhone.id !== parseInt(id))
-    ) {
-      if (existingIdentityNumber && existingIdentityNumber.id !== parseInt(id))
-        return res
-          .status(409)
-          .json({ error: "Identity number already exists" });
-      if (existingMail && existingMail.id !== parseInt(id))
-        return res.status(409).json({ error: "Email already exists" });
-      if (existingPhone && existingPhone.id !== parseInt(id))
-        return res.status(409).json({ error: "Phone number already exists" });
     }
 
     // ==== VALIDATE BẮT BUỘC ====
@@ -374,36 +351,33 @@ const updateEmployee = async (req, res) => {
     await Employee.update(updateData, { where: { id } });
 
     // ==== Kiểm tra role thay đổi ====
-    const oldRole = existingUser.Roles?.[0]?.name;
+    const oldRole = existingUser.roles?.[0]?.name;
     const newRole = role;
 
     if (newRole && newRole !== oldRole) {
+      // Xóa role cũ
       await EmployeeRole.destroy({ where: { employeeId: id } });
-      const roleRecord = await Role.findOne({
-        where: { name: newRole },
-        include: [{ model: Role, as: "roles", attributes: ["name"] }],
-      });
+
+      // Tìm role mới
+      const roleRecord = await Role.findOne({ where: { name: newRole } });
       if (!roleRecord) {
         return res.status(404).json({ error: `Role '${newRole}' not found` });
       }
+
+      // Gán role mới
       await EmployeeRole.create({
         employeeId: id,
         roleId: roleRecord.id,
       });
 
-      // if (oldRole === "doctor" && newRole !== "doctor") {
-      //   await Doctor.destroy({ where: { employeeId: id } });
-      // }
-      // if (newRole === "doctor" && oldRole !== "doctor") {
-      //   await Doctor.create({
-      //     employeeId: id,
-      //     speciality: "",
-      //     workingHours: "",
-      //   });
-      // }
+      if (oldRole === "Doctor" && newRole !== "Doctor") {
+        await Employee.update({ speciality: null }, { where: { id } });
+      }
+    } else if (newRole === "Doctor" && speciality !== undefined) {
+      await Employee.update({ speciality }, { where: { id } });
     }
 
-    // ==== Lấy lại dữ liệu đã cập nhật ====
+    // ==== Lấy lại dữ liệu sau khi cập nhật ====
     const updatedUser = await Employee.findByPk(id, {
       include: [{ model: Role, as: "roles" }],
       attributes: { exclude: ["password"] },
@@ -742,8 +716,53 @@ const getRecentEmployees = async (req, res) => {
   }
 };
 
+const updateDoctorSpeciality = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { speciality } = req.body;
+
+    // Tìm employee theo ID
+    const employee = await Employee.findByPk(id, {
+      include: [{ model: Role, as: "roles" }],
+    });
+
+    // Kiểm tra tồn tại
+    if (!employee) {
+      return res.status(404).json({ error: "Employee not found" });
+    }
+
+    // Kiểm tra role có phải là doctor không
+    const isDoctor = employee.roles?.some(
+      (r) => r.name && r.name.toLowerCase() === "doctor"
+    );
+    if (!isDoctor) {
+      return res
+        .status(400)
+        .json({ error: "This employee is not assigned as a doctor" });
+    }
+
+    // Cập nhật trường speciality trực tiếp trong bảng Employees
+    employee.speciality = speciality;
+    await employee.save();
+
+    res.json({
+      message: "Doctor speciality updated successfully",
+      employee: {
+        id: employee.id,
+        name: employee.name,
+        role: "doctor",
+        speciality: employee.speciality,
+      },
+    });
+  } catch (error) {
+    console.error("updateDoctorSpeciality error:", error);
+    res.status(500).json({ error: "Failed to update doctor speciality" });
+  }
+};
+
 module.exports = {
   updatePatientStatus,
+  updateDoctorSpeciality,
   createRole,
   getRoles,
   updateRole,

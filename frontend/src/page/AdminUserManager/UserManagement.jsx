@@ -18,6 +18,7 @@ import {
   deleteUser,
   updateUser,
   updateUserStatus,
+  updateDoctorSpeciality,
 } from "@/api/userApi";
 import UserDetailDialog from "@/components/users/UserDetailDialog";
 
@@ -37,7 +38,31 @@ import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
 
 import useDebounce from "@/hooks/useDebounce";
-import { Icon, Search } from "lucide-react";
+import { Search } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const SPECIALTIES = [
+  "Nội khoa",
+  "Ngoại khoa",
+  "Sản - Nhi",
+  "Da liễu - Thẩm mỹ",
+  "Tâm lý - Tâm thần",
+  "Phục hồi chức năng",
+  "Y học cổ truyền",
+];
 
 export default function UserManagement() {
   const [users, setUsers] = useState([]);
@@ -47,12 +72,14 @@ export default function UserManagement() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [specialtyDialogOpen, setSpecialtyDialogOpen] = useState(false);
+  const [selectedSpecialty, setSelectedSpecialty] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const [searchInput, setSearchInput] = useState(""); // nhập vào input
-  const search = useDebounce(searchInput, 500); // debounce 500ms
+  const [searchInput, setSearchInput] = useState("");
+  const search = useDebounce(searchInput, 500);
 
   const [pageSize, setPageSize] = useState(5);
   const navigate = useNavigate();
@@ -71,7 +98,7 @@ export default function UserManagement() {
 
   useEffect(() => {
     loadUsers();
-  }, [currentPage, search]);
+  }, [currentPage, search, pageSize]);
 
   // ===== CREATE USER =====
   const handleCreateUser = async (data) => {
@@ -85,10 +112,8 @@ export default function UserManagement() {
       const errData = error.response?.data;
 
       if (Array.isArray(errData?.errors)) {
-        // Nếu backend trả về dạng { errors: ["Email exists", ...] }
         errData.errors.forEach((err) => toast.error(err, { id: toastId }));
       } else if (errData?.error) {
-        // Nếu backend trả về dạng { error: "Email exists" }
         toast.error(errData.error, { id: toastId });
       } else {
         toast.error("Failed to create user", { id: toastId });
@@ -149,6 +174,32 @@ export default function UserManagement() {
     setDetailDialogOpen(true);
   };
 
+  // ===== SPECIALTY =====
+  const handleSelectSpecialty = (user) => {
+    setSelectedUser(user);
+    setSelectedSpecialty(user.specialty || "");
+    setSpecialtyDialogOpen(true);
+  };
+
+  const confirmSpecialty = async () => {
+    if (!selectedUser || !selectedSpecialty) {
+      toast.error("Please select a specialty");
+      return;
+    }
+    const toastId = toast.loading("Updating specialty...");
+    try {
+      await updateDoctorSpeciality(selectedUser.id, selectedSpecialty);
+      toast.success("Specialty updated successfully", { id: toastId });
+      loadUsers();
+      setSpecialtyDialogOpen(false);
+    } catch (error) {
+      const errData = error.response?.data;
+      toast.error(errData?.error || "Failed to update specialty", {
+        id: toastId,
+      });
+    }
+  };
+
   // ===== TOGGLE ACTIVE =====
   const handleToggleActive = async (user, checked) => {
     const toastId = toast.loading("Updating status...");
@@ -165,19 +216,39 @@ export default function UserManagement() {
     }
   };
 
+  const isDoctor = (user) => {
+    return (
+      user.roles && user.roles.length > 0 && user.roles[0].name === "Doctor"
+    );
+  };
+
   return (
     <AdminLayout>
       <div className="bg-white h-full p-5 rounded-lg shadow-md">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h4 className="text-xl font-bold">Employee Management</h4>
-          {/* Nút Create User */}
-          <Button
-            onClick={() => setDialogOpen(true)}
-            className="bg-green-500 text-white hover:bg-green-600 !rounded-md"
-          >
-            Create User
-          </Button>
+          <div className="flex gap-3">
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="border border-gray-300 rounded-md p-2"
+            >
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+            </select>
+
+            <Button
+              onClick={() => setDialogOpen(true)}
+              className="bg-green-500 text-white hover:bg-green-600 !rounded-md"
+            >
+              Create User
+            </Button>
+          </div>
         </div>
 
         {/* Search */}
@@ -188,7 +259,7 @@ export default function UserManagement() {
             value={searchInput}
             onChange={(e) => {
               setSearchInput(e.target.value);
-              setCurrentPage(1); // reset về page 1 khi search
+              setCurrentPage(1);
             }}
             className="max-w-sm"
           />
@@ -204,14 +275,17 @@ export default function UserManagement() {
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Role</TableHead>
+              <TableHead>Specialty</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users.map((user) => (
+            {users.map((user, index) => (
               <TableRow key={user.id}>
-                <TableCell>{user.id}</TableCell>
+                <TableCell>
+                  {(currentPage - 1) * pageSize + index + 1}
+                </TableCell>
                 <TableCell>
                   <Avatar className="h-10 w-10 rounded-2xl">
                     <AvatarImage
@@ -223,7 +297,7 @@ export default function UserManagement() {
                     </AvatarFallback>
                   </Avatar>
                 </TableCell>
-                <TableCell>{user.name}</TableCell>
+                <TableCell className="font-bold">{user.name}</TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>
                   {user.roles && user.roles.length > 0 ? (
@@ -240,7 +314,20 @@ export default function UserManagement() {
                     <span className="text-gray-400">No role</span>
                   )}
                 </TableCell>
-
+                <TableCell>
+                  {isDoctor(user) ? (
+                    <Button
+                      onClick={() => handleSelectSpecialty(user)}
+                      variant="outline"
+                      size="sm"
+                      className="!rounded-md text-xs"
+                    >
+                      {user.speciality || "Assign Specialty"}
+                    </Button>
+                  ) : (
+                    <span className="text-gray-400 text-sm">-</span>
+                  )}
+                </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <Switch
@@ -255,23 +342,26 @@ export default function UserManagement() {
                     </span>
                   </div>
                 </TableCell>
-                <TableCell className="flex items-center">
+                <TableCell className="flex items-center gap-2">
                   <Button
                     onClick={() => handleEditUser(user)}
                     variant="outline"
-                    className="!rounded-md !mr-2"
+                    className="!rounded-md"
+                    size="sm"
                   >
                     Edit
                   </Button>
                   <Button
                     onClick={() => navigate(`/admin/user/${user.id}`)}
-                    className="bg-green-500 hover:!bg-green-600 text-white !rounded-md !mr-2"
+                    className="bg-green-500 hover:!bg-green-600 text-white !rounded-md"
+                    size="sm"
                   >
                     Details
                   </Button>
                   <Button
                     className="bg-red-400 text-white !rounded-md hover:bg-red-500"
                     onClick={() => handleDeleteUser(user)}
+                    size="sm"
                   >
                     Delete
                   </Button>
@@ -280,7 +370,7 @@ export default function UserManagement() {
             ))}
             {users.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-gray-500">
+                <TableCell colSpan={8} className="text-center text-gray-500">
                   No users found
                 </TableCell>
               </TableRow>
@@ -349,6 +439,52 @@ export default function UserManagement() {
           user={selectedUser}
           onConfirm={confirmDelete}
         />
+
+        {/* Specialty Selection */}
+        <Dialog
+          open={specialtyDialogOpen}
+          onOpenChange={setSpecialtyDialogOpen}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Select Specialty</DialogTitle>
+              <DialogDescription>
+                Choose a specialty for {selectedUser?.name}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Select
+                value={selectedSpecialty}
+                onValueChange={setSelectedSpecialty}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a specialty" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SPECIALTIES.map((specialty) => (
+                    <SelectItem key={specialty} value={specialty}>
+                      {specialty}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setSpecialtyDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={confirmSpecialty}
+                  className="bg-green-500 hover:bg-green-600"
+                >
+                  Save
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </AdminLayout>
   );

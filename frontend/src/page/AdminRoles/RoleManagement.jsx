@@ -127,9 +127,9 @@ export default function RoleManagement() {
           </TableHeader>
           <TableBody>
             {roles.length > 0 ? (
-              roles.map((r) => (
+              roles.map((r, index) => (
                 <TableRow key={r.id}>
-                  <TableCell>{r.id}</TableCell>
+                  <TableCell>{index + 1}</TableCell>
                   <TableCell className="font-bold capitalize">
                     {r.name}
                   </TableCell>

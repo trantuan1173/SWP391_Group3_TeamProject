@@ -28,6 +28,7 @@ const {
   getAvailableRoles,
   getRecentPatients,
   getRecentEmployees,
+  updateDoctorSpeciality,
 } = require("../controllers/AdminUserController.js");
 
 // ================== Multer config ==================
@@ -220,10 +221,9 @@ router.put(
   upload.single("avatar"), // middleware multer xử lý file
   updateEmployee
 );
-
-// ================== PATIENT ROUTES ==================
+router.put("/employees/update-speciality/:id", updateDoctorSpeciality);
 router.post("/patients", createPatient);
-router.get("/patients", getPatients);
+router.get("/patients/get-all", getPatients);
 router.get("/patients/:id", getPatientById);
 router.put("/patients/:id", updatePatient);
 router.delete("/patients/:id", deletePatient);
