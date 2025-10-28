@@ -17,7 +17,7 @@ export default function UserDetailManagement() {
         const data = await fetchUserById(id);
         setUser(data);
       } catch (error) {
-        console.error("Error fetching user:", error);
+        console.error("Lỗi khi lấy thông tin người dùng:", error);
       }
     };
     loadUser();
@@ -26,7 +26,7 @@ export default function UserDetailManagement() {
   if (!user) {
     return (
       <AdminLayout>
-        <p className="text-center py-10">Loading...</p>
+        <p className="text-center py-10">Đang tải dữ liệu...</p>
       </AdminLayout>
     );
   }
@@ -34,29 +34,29 @@ export default function UserDetailManagement() {
   const getRoleStyles = (role) => {
     switch (role) {
       case "admin":
-        return "bg-red-500 text-white"; // admin: đỏ
+        return "bg-red-500 text-white"; // Quản trị viên
       case "patient":
-        return "bg-blue-500 text-white"; // user: xanh dương
+        return "bg-blue-500 text-white"; // Bệnh nhân
       case "doctor":
-        return "bg-green-500 text-white"; // manager: xanh lá
+        return "bg-green-500 text-white"; // Bác sĩ
       default:
-        return "bg-gray-400 text-white"; // mặc định: xám
+        return "bg-gray-400 text-white"; // Mặc định
     }
   };
 
   return (
     <AdminLayout>
       <div className="p-6 bg-gray-100 rounded-md h-full">
-        {/* Nút Back */}
+        {/* Nút Quay lại */}
         <Button
           className="!mb-6 !rounded-md"
           onClick={() => navigate("/admin/user")}
         >
-          Back To Home
+          Quay lại danh sách
         </Button>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Avatar Card */}
+          {/* Thẻ Avatar */}
           <Card className="col-span-1 flex flex-col items-center p-6">
             <Avatar className="w-40 h-40">
               <AvatarImage
@@ -67,7 +67,7 @@ export default function UserDetailManagement() {
                 {user.name?.charAt(0).toUpperCase() || "U"}
               </AvatarFallback>
             </Avatar>
-            <p className="text-lg font-bold mb-0">{user.name}</p>
+            <p className="text-lg font-bold mb-0 mt-2">{user.name}</p>
 
             <div
               className={`px-4 py-2 rounded-full mt-2 ${getRoleStyles(
@@ -75,23 +75,22 @@ export default function UserDetailManagement() {
               )}`}
             >
               <p className="text-sm m-0 font-bold">
-                {" "}
-                {user.roles?.[0]?.name.toUpperCase() || "No role"}
+                {user.roles?.[0]?.name.toUpperCase() || "Không có vai trò"}
               </p>
             </div>
           </Card>
 
-          {/* Info Card */}
+          {/* Thẻ Thông tin */}
           <Card className="col-span-3 p-10">
             <CardHeader>
               <CardTitle className="text-2xl font-bold">
-                {user.name} Information
+                Thông tin người dùng
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid p-3 grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <p className="font-medium">Name</p>
+                  <p className="font-medium">Họ và tên</p>
                   <p>{user.name}</p>
                 </div>
                 <div>
@@ -99,20 +98,30 @@ export default function UserDetailManagement() {
                   <p>{user.email}</p>
                 </div>
                 <div>
-                  <p className="font-medium">Identity Number</p>
-                  <p>{user.identityNumber}</p>
+                  <p className="font-medium">Số CCCD / CMND</p>
+                  <p>{user.identityNumber || "—"}</p>
                 </div>
                 <div>
-                  <p className="font-medium">Phone Number</p>
-                  <p>{user.phoneNumber}</p>
+                  <p className="font-medium">Số điện thoại</p>
+                  <p>{user.phoneNumber || "—"}</p>
                 </div>
                 <div>
-                  <p className="font-medium">Date of Birth</p>
-                  <p>{new Date(user.dateOfBirth).toLocaleDateString()}</p>
+                  <p className="font-medium">Ngày sinh</p>
+                  <p>
+                    {user.dateOfBirth
+                      ? new Date(user.dateOfBirth).toLocaleDateString("vi-VN")
+                      : "—"}
+                  </p>
                 </div>
                 <div>
-                  <p className="font-medium">Gender</p>
-                  <p>{user.gender}</p>
+                  <p className="font-medium">Giới tính</p>
+                  <p>
+                    {user.gender === "male"
+                      ? "Nam"
+                      : user.gender === "female"
+                      ? "Nữ"
+                      : "Khác"}
+                  </p>
                 </div>
               </div>
             </CardContent>

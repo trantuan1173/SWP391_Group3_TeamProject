@@ -38,7 +38,6 @@ import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
 
 import useDebounce from "@/hooks/useDebounce";
-import { Search } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -88,11 +87,10 @@ export default function UserManagement() {
   const loadUsers = async () => {
     try {
       const data = await fetchUsers(currentPage, pageSize, search);
-      console.log(data.employees);
       setUsers(data.employees);
       setTotalPages(data.totalPages);
     } catch {
-      toast.error("Failed to fetch users");
+      toast.error("Không thể tải danh sách người dùng");
     }
   };
 
@@ -102,48 +100,39 @@ export default function UserManagement() {
 
   // ===== CREATE USER =====
   const handleCreateUser = async (data) => {
-    const toastId = toast.loading("Creating user...");
+    const toastId = toast.loading("Đang tạo người dùng...");
     try {
       await createUser(data);
-      toast.success("User created successfully!", { id: toastId });
+      toast.success("Tạo người dùng thành công!", { id: toastId });
       setDialogOpen(false);
       loadUsers();
     } catch (error) {
       const errData = error.response?.data;
-
       if (Array.isArray(errData?.errors)) {
         errData.errors.forEach((err) => toast.error(err, { id: toastId }));
-      } else if (errData?.error) {
-        toast.error(errData.error, { id: toastId });
       } else {
-        toast.error("Failed to create user", { id: toastId });
+        toast.error(errData?.error || "Lỗi khi tạo người dùng", {
+          id: toastId,
+        });
       }
     }
   };
 
-  // ===== EDIT / UPDATE =====
+  // ===== UPDATE =====
   const handleEditUser = (user) => {
     setSelectedUserId(user.id);
     setEditDialogOpen(true);
   };
 
   const handleUpdateUser = async (id, data) => {
-    const toastId = toast.loading("Updating user...");
+    const toastId = toast.loading("Đang cập nhật người dùng...");
     try {
       await updateUser(id, data);
-      toast.success("User updated successfully", { id: toastId });
+      toast.success("Cập nhật thành công!", { id: toastId });
       setEditDialogOpen(false);
       loadUsers();
-    } catch (error) {
-      const errData = error.response?.data;
-
-      if (Array.isArray(errData?.errors)) {
-        errData.errors.forEach((err) => toast.error(err, { id: toastId }));
-      } else if (errData?.error) {
-        toast.error(errData.error, { id: toastId });
-      } else {
-        toast.error("Failed to update user", { id: toastId });
-      }
+    } catch {
+      toast.error("Cập nhật thất bại", { id: toastId });
     }
   };
 
@@ -155,23 +144,17 @@ export default function UserManagement() {
 
   const confirmDelete = async () => {
     if (!selectedUser) return;
-    const toastId = toast.loading("Deleting user...");
+    const toastId = toast.loading("Đang xóa người dùng...");
     try {
       await deleteUser(selectedUser.id);
-      toast.success("User deleted successfully", { id: toastId });
+      toast.success("Xóa người dùng thành công", { id: toastId });
       loadUsers();
     } catch {
-      toast.error("Failed to delete user", { id: toastId });
+      toast.error("Xóa người dùng thất bại", { id: toastId });
     } finally {
       setDeleteDialogOpen(false);
       setSelectedUser(null);
     }
-  };
-
-  // ===== DETAIL =====
-  const handleDetailUser = (user) => {
-    setSelectedUser(user);
-    setDetailDialogOpen(true);
   };
 
   // ===== SPECIALTY =====
@@ -183,36 +166,34 @@ export default function UserManagement() {
 
   const confirmSpecialty = async () => {
     if (!selectedUser || !selectedSpecialty) {
-      toast.error("Please select a specialty");
+      toast.error("Vui lòng chọn chuyên khoa");
       return;
     }
-    const toastId = toast.loading("Updating specialty...");
+    const toastId = toast.loading("Đang cập nhật chuyên khoa...");
     try {
       await updateDoctorSpeciality(selectedUser.id, selectedSpecialty);
-      toast.success("Specialty updated successfully", { id: toastId });
+      toast.success("Cập nhật chuyên khoa thành công", { id: toastId });
       loadUsers();
       setSpecialtyDialogOpen(false);
-    } catch (error) {
-      const errData = error.response?.data;
-      toast.error(errData?.error || "Failed to update specialty", {
-        id: toastId,
-      });
+    } catch {
+      toast.error("Cập nhật chuyên khoa thất bại", { id: toastId });
     }
   };
 
   // ===== TOGGLE ACTIVE =====
   const handleToggleActive = async (user, checked) => {
-    const toastId = toast.loading("Updating status...");
+    const toastId = toast.loading("Đang cập nhật trạng thái...");
     try {
       await updateUserStatus(user.id, checked);
       toast.success(
-        `User ${user.name} is now ${checked ? "Active" : "Inactive"}`,
+        `Người dùng ${user.name} đã được ${
+          checked ? "kích hoạt" : "vô hiệu hóa"
+        }`,
         { id: toastId }
       );
       loadUsers();
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to update status", { id: toastId });
+    } catch {
+      toast.error("Không thể cập nhật trạng thái", { id: toastId });
     }
   };
 
@@ -227,7 +208,7 @@ export default function UserManagement() {
       <div className="bg-white h-full p-5 rounded-lg shadow-md">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <h4 className="text-xl font-bold">Employee Management</h4>
+          <h4 className="text-xl font-bold">Quản lý nhân viên</h4>
           <div className="flex gap-3">
             <select
               value={pageSize}
@@ -237,16 +218,16 @@ export default function UserManagement() {
               }}
               className="border border-gray-300 rounded-md p-2"
             >
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
+              <option value="5">5 / trang</option>
+              <option value="10">10 / trang</option>
+              <option value="20">20 / trang</option>
             </select>
 
             <Button
               onClick={() => setDialogOpen(true)}
               className="bg-green-500 text-white hover:bg-green-600 !rounded-md"
             >
-              Create User
+              Thêm người dùng
             </Button>
           </div>
         </div>
@@ -255,7 +236,7 @@ export default function UserManagement() {
         <div className="mb-4">
           <Input
             type="text"
-            placeholder="Search by name or email..."
+            placeholder="Tìm kiếm theo tên hoặc email..."
             value={searchInput}
             onChange={(e) => {
               setSearchInput(e.target.value);
@@ -267,17 +248,17 @@ export default function UserManagement() {
 
         {/* Table */}
         <Table>
-          <TableCaption>Employee List</TableCaption>
+          <TableCaption>Danh sách nhân viên</TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>Avatar</TableHead>
-              <TableHead>Name</TableHead>
+              <TableHead>STT</TableHead>
+              <TableHead>Ảnh đại diện</TableHead>
+              <TableHead>Họ và tên</TableHead>
               <TableHead>Email</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Specialty</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead>Vai trò</TableHead>
+              <TableHead>Chuyên khoa</TableHead>
+              <TableHead>Trạng thái</TableHead>
+              <TableHead>Thao tác</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -311,7 +292,7 @@ export default function UserManagement() {
                       {user.roles[0].name}
                     </div>
                   ) : (
-                    <span className="text-gray-400">No role</span>
+                    <span className="text-gray-400">Không có vai trò</span>
                   )}
                 </TableCell>
                 <TableCell>
@@ -322,7 +303,7 @@ export default function UserManagement() {
                       size="sm"
                       className="!rounded-md text-xs"
                     >
-                      {user.speciality || "Assign Specialty"}
+                      {user.speciality || "Chọn chuyên khoa"}
                     </Button>
                   ) : (
                     <span className="text-gray-400 text-sm">-</span>
@@ -338,7 +319,7 @@ export default function UserManagement() {
                       className="bg-gray-200 data-[state=checked]:bg-green-500 !rounded-full"
                     />
                     <span className="text-sm">
-                      {user.isActive ? "Active" : "Inactive"}
+                      {user.isActive ? "Hoạt động" : "Tạm khóa"}
                     </span>
                   </div>
                 </TableCell>
@@ -349,21 +330,21 @@ export default function UserManagement() {
                     className="!rounded-md"
                     size="sm"
                   >
-                    Edit
+                    Sửa
                   </Button>
                   <Button
                     onClick={() => navigate(`/admin/user/${user.id}`)}
                     className="bg-green-500 hover:!bg-green-600 text-white !rounded-md"
                     size="sm"
                   >
-                    Details
+                    Chi tiết
                   </Button>
                   <Button
                     className="bg-red-400 text-white !rounded-md hover:bg-red-500"
                     onClick={() => handleDeleteUser(user)}
                     size="sm"
                   >
-                    Delete
+                    Xóa
                   </Button>
                 </TableCell>
               </TableRow>
@@ -371,7 +352,7 @@ export default function UserManagement() {
             {users.length === 0 && (
               <TableRow>
                 <TableCell colSpan={8} className="text-center text-gray-500">
-                  No users found
+                  Không có người dùng nào
                 </TableCell>
               </TableRow>
             )}
@@ -410,14 +391,12 @@ export default function UserManagement() {
         </div>
 
         {/* Dialogs */}
-        {/* Create */}
         <UserFormDialog
           open={dialogOpen}
           setOpen={setDialogOpen}
           onSubmit={handleCreateUser}
         />
 
-        {/* Edit */}
         <UserFormDialog
           open={editDialogOpen}
           setOpen={setEditDialogOpen}
@@ -425,14 +404,12 @@ export default function UserManagement() {
           onSubmit={handleUpdateUser}
         />
 
-        {/* Detail */}
         <UserDetailDialog
           open={detailDialogOpen}
           setOpen={setDetailDialogOpen}
           user={selectedUser}
         />
 
-        {/* Delete */}
         <DeleteConfirmDialog
           open={deleteDialogOpen}
           setOpen={setDeleteDialogOpen}
@@ -440,16 +417,16 @@ export default function UserManagement() {
           onConfirm={confirmDelete}
         />
 
-        {/* Specialty Selection */}
+        {/* Chọn chuyên khoa */}
         <Dialog
           open={specialtyDialogOpen}
           onOpenChange={setSpecialtyDialogOpen}
         >
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Select Specialty</DialogTitle>
+              <DialogTitle>Chọn chuyên khoa</DialogTitle>
               <DialogDescription>
-                Choose a specialty for {selectedUser?.name}
+                Chọn chuyên khoa cho {selectedUser?.name}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -458,7 +435,7 @@ export default function UserManagement() {
                 onValueChange={setSelectedSpecialty}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a specialty" />
+                  <SelectValue placeholder="Chọn chuyên khoa" />
                 </SelectTrigger>
                 <SelectContent>
                   {SPECIALTIES.map((specialty) => (
@@ -473,13 +450,13 @@ export default function UserManagement() {
                   variant="outline"
                   onClick={() => setSpecialtyDialogOpen(false)}
                 >
-                  Cancel
+                  Hủy
                 </Button>
                 <Button
                   onClick={confirmSpecialty}
                   className="bg-green-500 hover:bg-green-600"
                 >
-                  Save
+                  Lưu
                 </Button>
               </div>
             </div>

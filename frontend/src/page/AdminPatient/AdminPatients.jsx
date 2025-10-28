@@ -55,11 +55,10 @@ export default function AdminPatients() {
   const loadPatients = async () => {
     try {
       const data = await fetchPatients(currentPage, pageSize, search);
-      console.log("Fetched patients:", data);
       setPatients(data.patients || []);
       setTotalPages(data.totalPages || 1);
     } catch {
-      toast.error("Failed to fetch patients");
+      toast.error("Không thể tải danh sách bệnh nhân");
     }
   };
 
@@ -69,14 +68,14 @@ export default function AdminPatients() {
 
   // ===== CREATE =====
   const handleCreate = async (data) => {
-    const t = toast.loading("Creating patient...");
+    const t = toast.loading("Đang tạo bệnh nhân...");
     try {
       await createPatient(data);
-      toast.success("Patient created successfully!", { id: t });
+      toast.success("Thêm bệnh nhân thành công!", { id: t });
       setDialogOpen(false);
       loadPatients();
     } catch (err) {
-      toast.error(err.response?.data?.error || "Failed to create patient", {
+      toast.error(err.response?.data?.error || "Không thể thêm bệnh nhân", {
         id: t,
       });
     }
@@ -84,14 +83,14 @@ export default function AdminPatients() {
 
   // ===== UPDATE =====
   const handleUpdate = async (id, data) => {
-    const t = toast.loading("Updating patient...");
+    const t = toast.loading("Đang cập nhật thông tin...");
     try {
       await updatePatient(id, data);
-      toast.success("Patient updated successfully!", { id: t });
+      toast.success("Cập nhật thành công!", { id: t });
       setEditDialogOpen(false);
       loadPatients();
     } catch (err) {
-      toast.error(err.response?.data?.error || "Failed to update patient", {
+      toast.error(err.response?.data?.error || "Cập nhật thất bại", {
         id: t,
       });
     }
@@ -104,13 +103,13 @@ export default function AdminPatients() {
   };
 
   const confirmDelete = async () => {
-    const t = toast.loading("Deleting...");
+    const t = toast.loading("Đang xóa...");
     try {
       await deletePatient(selectedPatient.id);
-      toast.success("Deleted successfully!", { id: t });
+      toast.success("Xóa bệnh nhân thành công!", { id: t });
       loadPatients();
     } catch {
-      toast.error("Failed to delete patient", { id: t });
+      toast.error("Xóa thất bại", { id: t });
     } finally {
       setDeleteDialogOpen(false);
       setSelectedPatient(null);
@@ -119,16 +118,18 @@ export default function AdminPatients() {
 
   // ===== TOGGLE ACTIVE STATUS =====
   const handleToggleActive = async (patient, checked) => {
-    const t = toast.loading("Updating status...");
+    const t = toast.loading("Đang cập nhật trạng thái...");
     try {
       await updatePatientStatus(patient.id, checked);
       toast.success(
-        `Patient ${patient.name} is now ${checked ? "Active" : "Inactive"}`,
+        `Bệnh nhân ${patient.name} hiện đang ${
+          checked ? "Hoạt động" : "Tạm khóa"
+        }`,
         { id: t }
       );
       loadPatients();
-    } catch (err) {
-      toast.error("Failed to update status", { id: t });
+    } catch {
+      toast.error("Không thể cập nhật trạng thái", { id: t });
     }
   };
 
@@ -137,12 +138,12 @@ export default function AdminPatients() {
       <div className="bg-white h-full p-5 rounded-lg shadow-md">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <h4 className="text-xl font-bold">Patient Management</h4>
+          <h4 className="text-xl font-bold">Quản lý bệnh nhân</h4>
           <Button
             onClick={() => setDialogOpen(true)}
             className="bg-green-500 text-white hover:bg-green-600 !rounded-md"
           >
-            Create Patient
+            Thêm bệnh nhân
           </Button>
         </div>
 
@@ -150,7 +151,7 @@ export default function AdminPatients() {
         <div className="mb-4">
           <Input
             type="text"
-            placeholder="Search by name, email, or phone..."
+            placeholder="Tìm kiếm theo tên, email hoặc số điện thoại..."
             value={searchInput}
             onChange={(e) => {
               setSearchInput(e.target.value);
@@ -162,17 +163,17 @@ export default function AdminPatients() {
 
         {/* Table */}
         <Table>
-          <TableCaption>Patient List</TableCaption>
+          <TableCaption>Danh sách bệnh nhân</TableCaption>
           <TableHeader>
             <TableRow className="border-b border-gray-200">
-              <TableHead>ID</TableHead>
-              <TableHead>Avatar</TableHead>
-              <TableHead>Name</TableHead>
+              <TableHead>STT</TableHead>
+              <TableHead>Ảnh đại diện</TableHead>
+              <TableHead>Họ và tên</TableHead>
               <TableHead>Email</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead>Gender</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead>Số điện thoại</TableHead>
+              <TableHead>Giới tính</TableHead>
+              <TableHead>Trạng thái</TableHead>
+              <TableHead>Thao tác</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -200,7 +201,11 @@ export default function AdminPatients() {
                   <TableCell>{p.email || "-"}</TableCell>
                   <TableCell>{p.phoneNumber || "-"}</TableCell>
                   <TableCell className="capitalize">
-                    {p.gender || "N/A"}
+                    {p.gender === "male"
+                      ? "Nam"
+                      : p.gender === "female"
+                      ? "Nữ"
+                      : "Khác"}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
@@ -212,7 +217,7 @@ export default function AdminPatients() {
                         className="bg-gray-200 data-[state=checked]:bg-green-500 !rounded-full"
                       />
                       <span className="text-sm">
-                        {p.isActive ? "Active" : "Inactive"}
+                        {p.isActive ? "Hoạt động" : "Tạm khóa"}
                       </span>
                     </div>
                   </TableCell>
@@ -225,19 +230,19 @@ export default function AdminPatients() {
                       variant="outline"
                       className="!rounded-md"
                     >
-                      Edit
+                      Sửa
                     </Button>
                     <Button
                       onClick={() => navigate(`/admin/patient/${p.id}`)}
                       className="bg-green-500 hover:!bg-green-600 text-white !rounded-md"
                     >
-                      Details
+                      Chi tiết
                     </Button>
                     <Button
                       onClick={() => handleDelete(p)}
                       className="bg-red-400 text-white !rounded-md hover:bg-red-500"
                     >
-                      Delete
+                      Xóa
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -245,7 +250,7 @@ export default function AdminPatients() {
             ) : (
               <TableRow>
                 <TableCell colSpan={8} className="text-center text-gray-500">
-                  No patients found
+                  Không có bệnh nhân nào
                 </TableCell>
               </TableRow>
             )}
