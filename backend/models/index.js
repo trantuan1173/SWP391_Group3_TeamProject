@@ -2,7 +2,7 @@
 const Patient = require("./Patient");
 const Appointment = require("./Appointment");
 const MedicalRecord = require("./MedicalRecord");
-const DoctorSchedule = require("./DoctorSchedule");
+// const DoctorSchedule = require("./DoctorSchedule");
 const Room = require("./Room");
 const Employee = require("./Employee");
 const EmployeeRole = require("./EmployeeRole");
@@ -61,8 +61,8 @@ Appointment.belongsTo(Patient, { foreignKey: "patientId" });
 Patient.hasMany(MedicalRecord, { foreignKey: "patientId" });
 MedicalRecord.belongsTo(Patient, { foreignKey: "patientId" });
 
-Employee.hasMany(DoctorSchedule, { foreignKey: "doctorId" });
-DoctorSchedule.belongsTo(Employee, { foreignKey: "doctorId" });
+// Employee.hasMany(DoctorSchedule, { foreignKey: "doctorId" });
+// DoctorSchedule.belongsTo(Employee, { foreignKey: "doctorId" });
 
 Room.hasMany(Appointment, { foreignKey: "roomId" });
 Appointment.belongsTo(Room, { foreignKey: "roomId" });
@@ -74,13 +74,13 @@ News.belongsTo(Employee, { foreignKey: "createdBy" });
 Employee.hasMany(News, { foreignKey: "createdBy" });
 
 // Thêm associations cho DoctorSchedule và Room
-DoctorSchedule.belongsTo(Room, { foreignKey: "roomId" });
-Room.hasMany(DoctorSchedule, { foreignKey: "roomId" });
+// DoctorSchedule.belongsTo(Room, { foreignKey: "roomId" });
+// Room.hasMany(DoctorSchedule, { foreignKey: "roomId" });
 module.exports = {
   Patient,
   Appointment,
   MedicalRecord,
-  DoctorSchedule,
+  // DoctorSchedule,
   Room,
   Employee,
   EmployeeRole,
