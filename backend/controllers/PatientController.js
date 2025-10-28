@@ -9,7 +9,7 @@ function generateToken(id, type) {
   });
 }
 
-// ✅ Patient login
+// Patient login
 const patientLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -135,7 +135,7 @@ const createAppointment = async (req, res) => {
   }
 };
 
-// ✅ Create appointment without login
+// Create appointment without login
 const createAppointmentWithoutLogin = async (req, res) => {
   try {
     const { name, identityNumber, phoneNumber, date, startTime, endTime } = req.body;
@@ -171,7 +171,7 @@ const createAppointmentWithoutLogin = async (req, res) => {
   }
 };
 
-// ✅ Confirm appointment
+// Confirm appointment
 const confirmAppointment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -196,7 +196,7 @@ const confirmAppointment = async (req, res) => {
   }
 };
 
-// ✅ Get prescriptions
+// Get prescriptions
 const getPrescriptions = async (req, res) => {
   try {
     const { patientId } = req.query;
@@ -224,7 +224,7 @@ const getPrescriptions = async (req, res) => {
   }
 };
 
-// ✅ Get checkups
+// Get checkups
 const getCheckups = async (req, res) => {
   try {
     const { patientId } = req.query;
@@ -237,7 +237,7 @@ const getCheckups = async (req, res) => {
   }
 };
 
-// ✅ Get documents
+// Get documents
 const getDocuments = async (req, res) => {
   try {
     const { patientId } = req.query;
@@ -250,7 +250,7 @@ const getDocuments = async (req, res) => {
   }
 };
 
-// ✅ Get patient by id (with appointments + records)
+// Get patient by id (with appointments + records)
 const getPatientById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -329,31 +329,34 @@ module.exports = {
   getCheckups,
   getDocuments,
   getPatientById,
-  // Update patient profile (only patient themself or admin via other routes)
-  updatePatient: async (req, res) => {
-    try {
-      const { id } = req.params;
-      // Only patient owners can update their profile
-      if (req.userType === 'patient') {
-        if (!req.user || parseInt(req.user.id) !== parseInt(id)) {
-          return res.status(403).json({ error: 'Forbidden: cannot update other patient' });
-        }
-      }
-
-  const allowed = ['name', 'email', 'phoneNumber', 'address', 'dateOfBirth'];
-      const payload = {};
-      for (const k of allowed) if (k in req.body) payload[k] = req.body[k];
-
-      const patient = await Patient.findByPk(id);
-      if (!patient) return res.status(404).json({ error: 'Patient not found' });
-
-      await patient.update(payload);
-      const p = patient.toJSON();
-      if (p.password) delete p.password;
-      res.json({ message: 'Profile updated', patient: p });
-    } catch (error) {
-      console.error('[updatePatient] error:', error);
-      res.status(500).json({ error: 'Failed to update patient' });
-    }
-  }
+  updatePatient,
 };
+
+// Update patient profile (only patient themself or admin via other routes)
+async function updatePatient(req, res) {
+  try {
+    const { id } = req.params;
+
+    // Only patient owners can update their profile
+    if (req.userType === 'patient') {
+      if (!req.user || parseInt(req.user.id) !== parseInt(id)) {
+        return res.status(403).json({ error: 'Forbidden: cannot update other patient' });
+      }
+    }
+
+    const allowed = ['name', 'email', 'phoneNumber', 'address', 'dateOfBirth'];
+    const payload = {};
+    for (const k of allowed) if (k in req.body) payload[k] = req.body[k];
+
+    const patient = await Patient.findByPk(id);
+    if (!patient) return res.status(404).json({ error: 'Patient not found' });
+
+    await patient.update(payload);
+    const p = patient.toJSON ? patient.toJSON() : { ...patient };
+    if (p.password) delete p.password;
+    res.json({ message: 'Profile updated', patient: p });
+  } catch (error) {
+    console.error('[updatePatient] error:', error && error.stack ? error.stack : error);
+    res.status(500).json({ error: 'Failed to update patient' });
+  }
+}

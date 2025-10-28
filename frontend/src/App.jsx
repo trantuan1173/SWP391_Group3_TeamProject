@@ -32,11 +32,14 @@ import ReceptionistDoctor from "./page/Receptionist/ReceptionistDoctor";
 import ReceptionistNews from "./page/Receptionist/ReceptionistNews";
 import News from "./page/guest/News";
 import NewsDetail from "./page/guest/NewsDetail";
+import PatientNewsList from "./page/Patient/NewsList";
+import PatientNewsDetail from "./page/Patient/NewsDetail";
 import RoleManagement from "./page/AdminRoles/RoleManagement";
 import AdminPatients from "./page/AdminPatient/AdminPatients";
 import PatientDetailManagement from "./page/AdminPatient/PatientDetailManagement";
 import AdminProfile from "./page/AdminDashboard/AdminProfile";
 import AdminService from "./page/AdminServices/AdminService";
+import ReceptionistAppointmentDetail from "./page/Receptionist/ReceptionistAppointmentDetail";
 
 function App() {
   const RedirectPatientId = () => {
@@ -72,6 +75,8 @@ function App() {
             <Route path=":id/appointments" element={<AppointmentPage />} />
             <Route path=":id/book" element={<BookPage />} />
             <Route path=":id/records" element={<MedicalRecordPage />} />
+            <Route path="news" element={<PatientNewsList/>} />
+            <Route path="news/:id" element={<PatientNewsDetail/>} />
           </Route>
         </Route>
 
@@ -118,6 +123,7 @@ function App() {
             <Route path="dashboard" element={<ReceptionistDashboard />} />
             <Route path="patients" element={<ReceptionistPatient />} />
             <Route path="appointments" element={<ReceptionistAppointment />} />
+            <Route path="appointments/:id" element={<ReceptionistAppointmentDetail />} />
             <Route path="doctors" element={<ReceptionistDoctor />} />
             <Route path="news" element={<ReceptionistNews />} />
           </Route>

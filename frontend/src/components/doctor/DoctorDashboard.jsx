@@ -57,9 +57,9 @@ export default function DoctorDashboard({ children, activeMenu, setActiveMenu, d
               </button>
 
               <button
-                onClick={() => { setActiveMenu('patients'); navigate('/doctor/create-records'); }}
+                onClick={() => { setActiveMenu('patient'); navigate('/doctor/create-records'); }}
                 className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg transition ${
-                  activeMenu === 'patients' 
+                  activeMenu === 'patient' 
                     ? 'bg-white text-green-600 font-semibold' 
                     : 'text-white hover:bg-green-500/30'
                 }`}

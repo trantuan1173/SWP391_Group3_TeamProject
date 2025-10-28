@@ -33,7 +33,7 @@ const DoctorSchedule = () => {
     
     while (date.getFullYear() === year) {
       const startOfWeek = new Date(date);
-      startOfWeek.setDate(date.getDate() - date.getDay() + 1); // Monday
+      startOfWeek.setDate(date.getDate() - date.getDay() ); // Monday
       
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(startOfWeek.getDate() + 6); // Sunday

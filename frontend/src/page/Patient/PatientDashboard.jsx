@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Clock } from "lucide-react";
 import { useParams } from "react-router-dom";
-import PatientInfo from "./components/PatientInfo";
 import axios from "../../lib/axios";
 import { API_ENDPOINTS } from "../../config";
 import { useAuth } from "../../context/AuthContext";
@@ -166,12 +164,7 @@ export default function PatientDashboard() {
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-          <div className="bg-green-50 rounded-2xl p-6 shadow flex flex-col items-center">
-            <div className="text-xs text-gray-400 mb-1">Tổng số lịch khám</div>
-            <div className="text-3xl font-bold text-green-700">{Array.isArray(appointments) ? appointments.length : 0}</div>
-            <div className="text-xs text-gray-500 mt-2">Lịch gần nhất: {Array.isArray(appointments) && appointments[0] ? formatDateTime(appointments[0].date) : "-"}</div>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
           <div className="bg-purple-50 rounded-2xl p-6 shadow flex flex-col items-center">
             <div className="text-xs text-gray-400 mb-1">Tổng hồ sơ y tế</div>
             <div className="text-3xl font-bold text-purple-700">{medicalRecords.length}</div>

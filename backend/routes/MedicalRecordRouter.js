@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { getAllMedicalRecordByPatientId, getAllMedicalRecordByAppointmentId, getMedicalRecordById, createMedicalRecord, updateMedicalRecord, deleteMedicalRecord,getMedicalRecordsByDoctor,getPatientsByDoctorV ,getPatientsByDoctor , getAllPatients } = require("../controllers/MedicalRecordController");
+const { getAllMedicalRecordByPatientId, getAllMedicalRecordByAppointmentId, getMedicalRecordById, createMedicalRecord, updateMedicalRecord, deleteMedicalRecord,getMedicalRecordsByDoctor,getPatientsByDoctorV ,getPatientsByDoctor , getAllPatients, searchMedicalRecord } = require("../controllers/MedicalRecordController");
 const { protect, authorize } = require("../middleware/authMiddleware");
 
 /**
@@ -47,6 +47,25 @@ router.get("/doctor/:doctorId/patients", protect, authorize("Doctor", "Admin"), 
 router.get("/doctor/:doctorId/patient", protect, authorize("Doctor", "Admin"), getPatientsByDoctor);
 
 router.get("/patients", protect, authorize("Doctor", "Admin"), getAllPatients);
+
+/**
+ * @swagger
+ * /medical-records/search:
+ *   get:
+ *     summary: Tìm kiếm bệnh nhân
+ *     tags: [Medical Record]
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Tên, email hoặc số điện thoại của bệnh nhân
+ *     responses:
+ *       200:
+ *         description: Danh sách bệnh nhân
+ */
+router.get("/search", searchMedicalRecord);
 
 /**
  * @swagger

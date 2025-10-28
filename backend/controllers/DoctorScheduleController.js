@@ -1,4 +1,4 @@
-const { DoctorSchedule, Employee, Room } = require("../models");
+const { DoctorSchedule,Appointment, Employee, Room } = require("../models");
 const { Op } = require("sequelize");
 
 // Lấy lịch làm việc của bác sĩ
@@ -6,7 +6,7 @@ const getDoctorSchedule = async (req, res) => {
   try {
     const { doctorId } = req.params;
 
-    const schedules = await DoctorSchedule.findAll({
+    const appointments = await Appointment.findAll({
       where: {
         doctorId: doctorId
       },
@@ -17,12 +17,13 @@ const getDoctorSchedule = async (req, res) => {
       ]
     });
 
-    res.status(200).json(schedules);
+    res.status(200).json(appointments);
   } catch (error) {
     console.error("Error in getDoctorSchedule:", error);
     res.status(500).json({ error: "Failed to get doctor schedule", details: error.message });
   }
 };
+
 
 // Tạo lịch làm việc mới
 const createDoctorSchedule = async (req, res) => {

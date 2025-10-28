@@ -5,6 +5,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import DoctorLayout from "../../components/doctor/DoctorDashboard";
 import { API_ENDPOINTS } from '../../config';
+import { date } from 'zod';
 
 const CreateMedicalRecord = () => {
   const [patientsWithAppointments, setPatientsWithAppointments] = useState([]);
@@ -23,6 +24,8 @@ const CreateMedicalRecord = () => {
   useEffect(() => {
     checkAuthAndFetchData();
   }, []);
+
+  
 
   const checkAuthAndFetchData = async () => {
     try {
@@ -62,7 +65,7 @@ const CreateMedicalRecord = () => {
       // Lấy danh sách bệnh nhân
       const patientsRes = await axios.get(
         API_ENDPOINTS.GET_PATIENT_BY_DOCTOR(userId),
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` }}
       );
 
       console.log("Patients response:", patientsRes.data); // Debug
@@ -87,6 +90,7 @@ const CreateMedicalRecord = () => {
       setLoading(false);
     }
   };
+
 
   const handleServiceChange = (serviceId, quantity) => {
     const service = services.find(s => s.id === serviceId);
@@ -173,7 +177,7 @@ const CreateMedicalRecord = () => {
 
   return (
     <DoctorLayout activeMenu={activeMenu} setActiveMenu={setActiveMenu} doctorInfo={doctorInfo}>
-      <div className="max-w-4xl mx-auto p-8 bg-white rounded-xl shadow mt-8">
+      <div className="max-w-4xl medium-h mx-auto p-8 bg-white rounded-xl shadow mt-8">
         <h1 className="text-3xl font-bold mb-6 text-green-700">Tạo Hồ Sơ Khám Bệnh</h1>
 
         {error && (
@@ -210,6 +214,7 @@ const CreateMedicalRecord = () => {
                 >
                   <option value="">-- Chọn bệnh nhân --</option>
                   {patientsWithAppointments.map(patient => (
+                    
                     <option key={patient.appointmentId} value={patient.appointmentId}>
                       {patient.patientName} - {patient.appointmentDate} ({patient.appointmentTime})
                     </option>

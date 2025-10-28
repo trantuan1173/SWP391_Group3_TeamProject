@@ -1,45 +1,72 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { API_ENDPOINTS } from "../../config";
+import { useNavigate } from "react-router-dom";
 
 export default function Appointments() {
+  const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
   const [statusFilter, setStatusFilter] = useState("all");
   const [apiFilter, setApiFilter] = useState("today");
   const [searchPhone, setSearchPhone] = useState("");
+  const [patientName, setPatientName] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    const fetchAppointments = async () => {
-      try {
-        let url =
-          apiFilter === "today"
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const itemsPerPage = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+  const handleSearch = () => {
+    fetchAppointments();
+  };
+
+
+  const fetchAppointments = async () => {
+    try {
+      let url =
+        searchQuery.trim() !== ""
+          ? API_ENDPOINTS.GET_ALL_APPOINTMENTS
+          : apiFilter === "today"
             ? API_ENDPOINTS.GET_TODAY_APPOINTMENTS
             : API_ENDPOINTS.GET_ALL_APPOINTMENTS;
 
-        const res = await axios.get(url, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
+      const res = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        params: {
+          search: searchQuery,
+          page: currentPage,
+          limit: itemsPerPage,
+          status: statusFilter !== "all" ? statusFilter : undefined,
+        },
+      });
 
-        setAppointments(res.data);
-      } catch (error) {
-        console.error("Failed to fetch appointments:", error);
-      }
-    };
+      setAppointments(res.data.data || []);
+      setTotalItems(res.data.totalItems || 0);
+      setTotalPages(res.data.totalPages || 1);
+      console.log(res.data);
+    } catch (error) {
+      console.error("Failed to fetch appointments:", error);
+    }
+  };
 
+  useEffect(() => {
+    if (searchQuery === "") {
+      fetchAppointments();
+    }
+  }, [searchQuery]);
+  useEffect(() => {
     fetchAppointments();
-  }, [apiFilter]); 
-
-  const filteredAppointments = appointments.filter((a) => {
-    if (statusFilter !== "all" && a.status !== statusFilter) return false;
-    if (
-      searchPhone &&
-      !a.Patient?.phoneNumber?.toLowerCase().includes(searchPhone.toLowerCase())
-    )
-      return false;
-    return true;
-  });
+  }, [currentPage]);
+  useEffect(() => {
+    setCurrentPage(1);
+    fetchAppointments();
+  }, [statusFilter]);
+  useEffect(() => {
+    setCurrentPage(1);
+    fetchAppointments();
+  }, [apiFilter]);
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-md">
@@ -51,23 +78,32 @@ export default function Appointments() {
         <div className="flex gap-3 flex-wrap">
           <input
             type="text"
-            placeholder="Search by phone..."
-            value={searchPhone}
-            onChange={(e) => setSearchPhone(e.target.value)}
+            placeholder="Search by name or phone..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="border border-gray-300 rounded-md px-3 py-2 text-sm"
           />
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm"
-          >
-            <option value="all">All</option>
-            <option value="pending">Pending</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="cancelled">Cancelled</option>
-            <option value="completed">Completed</option>
-          </select>
 
+          <button
+            onClick={handleSearch}
+            className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700"
+          >
+            Search
+          </button>
+          <div>
+            <label htmlFor="statusFilter" className="mr-2">Status:</label>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+            >
+              <option value="all">All</option>
+              <option value="pending">Pending</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
           <select
             value={apiFilter}
             onChange={(e) => setApiFilter(e.target.value)}
@@ -92,8 +128,8 @@ export default function Appointments() {
           </tr>
         </thead>
         <tbody>
-          {filteredAppointments.length > 0 ? (
-            filteredAppointments.map((a, index) => (
+          {appointments.length > 0 ? (
+            appointments.map((a, index) => (
               <tr
                 key={a.id}
                 className="hover:bg-gray-50 border-b transition-colors"
@@ -107,21 +143,23 @@ export default function Appointments() {
                   {a.startTime} - {a.endTime}
                 </td>
                 <td
-                  className={`p-3 font-medium ${
-                    a.status === "confirmed"
-                      ? "text-blue-600"
-                      : a.status === "pending"
+                  className={`p-3 font-medium ${a.status === "confirmed"
+                    ? "text-blue-600"
+                    : a.status === "pending"
                       ? "text-yellow-600"
                       : a.status === "cancelled"
-                      ? "text-red-600"
-                      : "text-green-600"
-                  }`}
+                        ? "text-red-600"
+                        : "text-green-600"
+                    }`}
                 >
                   {a.status}
                 </td>
-                <td className="p-3">{a.roomId || "-"}</td>
+                <td className="p-3">{a.Room?.name || "-"}</td>
                 <td className="p-3">
-                  <button className="text-sm text-blue-600 hover:underline">
+                  <button
+                    onClick={() => navigate(`/receptionist/appointments/${a.id}`)}
+                    className="text-sm text-blue-600 hover:underline"
+                  >
                     View
                   </button>
                 </td>
@@ -136,6 +174,32 @@ export default function Appointments() {
           )}
         </tbody>
       </table>
+
+      <div className="flex justify-center items-center mt-6 space-x-4">
+        <button
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+          className={`px-4 py-2 rounded ${currentPage === 1
+            ? "bg-gray-300 cursor-not-allowed"
+            : "bg-blue-600 text-white hover:bg-blue-700"
+            }`}
+        >
+          Previous
+        </button>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages || totalPages === 0}
+          className={`px-4 py-2 rounded ${currentPage === totalPages || totalPages === 0
+            ? "bg-gray-300 cursor-not-allowed"
+            : "bg-blue-600 text-white hover:bg-blue-700"
+            }`}
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 }

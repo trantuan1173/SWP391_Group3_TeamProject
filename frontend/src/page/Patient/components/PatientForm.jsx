@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from '../../../lib/axios';
 import { API_ENDPOINTS } from '../../../config';
 
-export default function PatientForm({ initial = {}, onSaved }) {
+export default function PatientForm({ initial = {}, patient, onSaved, onUpdate, onCancel }) {
+
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -14,8 +15,9 @@ export default function PatientForm({ initial = {}, onSaved }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    setForm((s) => ({ ...s, ...initial }));
-  }, [initial]);
+    const src = patient && Object.keys(patient).length ? patient : initial || {};
+    setForm((s) => ({ ...s, ...src, id: src.id || s.id }));
+  }, [initial, patient]);
 
   const handleChange = (k) => (e) => setForm((s) => ({ ...s, [k]: e.target.value }));
 
@@ -35,12 +37,16 @@ export default function PatientForm({ initial = {}, onSaved }) {
     }
     setLoading(true);
     try {
-      const res = await axios.put(API_ENDPOINTS.PATIENT_BY_ID(form.id || id), form);
+      const url = API_ENDPOINTS.PATIENT_BY_ID(form.id || id);
+      console.log('[PatientForm] PUT', url, form);
+      const res = await axios.put(url, form);
       const data = res.data?.patient || res.data;
       onSaved && onSaved(data);
+      onUpdate && onUpdate(data);
     } catch (e) {
-      console.error('PatientForm save error', e);
-      setError('Lưu thất bại, thử lại');
+      console.error('PatientForm save error', e, e.response && e.response.data ? e.response.data : 'no response body');
+      const serverMsg = e.response && e.response.data && (e.response.data.error || e.response.data.message);
+      setError(serverMsg || 'Lưu thất bại, thử lại');
     } finally {
       setLoading(false);
     }
@@ -61,6 +67,9 @@ export default function PatientForm({ initial = {}, onSaved }) {
 
       <div className="mt-4 flex items-center gap-2">
         <button onClick={() => save(form.id)} disabled={loading} className="px-4 py-2 rounded bg-green-600 text-white">{loading ? 'Đang lưu...' : 'Lưu'}</button>
+        {onCancel && (
+          <button onClick={onCancel} disabled={loading} className="px-4 py-2 rounded border">Hủy</button>
+        )}
         {error && <div className="text-sm text-red-600">{error}</div>}
       </div>
     </div>
