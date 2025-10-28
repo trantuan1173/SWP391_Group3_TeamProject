@@ -329,7 +329,6 @@ module.exports = {
   getCheckups,
   getDocuments,
   getPatientById,
-  // Update patient profile (only patient themself or admin via other routes)
   updatePatient,
 };
 
