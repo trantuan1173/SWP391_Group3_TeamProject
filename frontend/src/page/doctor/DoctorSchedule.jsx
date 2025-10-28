@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import DoctorLayout from "../../components/doctor/DoctorDashboard";
+  import dayjs from 'dayjs';
 
 const DoctorSchedule = () => {
   const [schedules, setSchedules] = useState([]);
@@ -131,38 +132,31 @@ const DoctorSchedule = () => {
       setError("Không thể tải lịch làm việc.");
     }
   };
+  // Hàm lấy lịch theo tuần
+const getWeeklySchedules = () => {
+  const selectedWeekData = weeks.find(w => w.weekNum === selectedWeek);
+  if (!selectedWeekData) {
+    return { weekDays: [], groupedSchedules: {} };
+  }
 
-  // Hàm nhóm schedules theo tuần đã chọn
-  const getWeeklySchedules = () => {
-    const selectedWeekData = weeks.find(w => w.weekNum === selectedWeek);
-    
-    if (!selectedWeekData) {
-      return { weekDays: [], groupedSchedules: {} };
-    }
+  const weekDays = [];
+  const groupedSchedules = {};
 
-    const startOfWeek = selectedWeekData.startDate;
-    const weekDays = [];
-    const groupedSchedules = {};
+  for (let i = 0; i < 7; i++) {
+    const day = dayjs(selectedWeekData.startDate).add(i, 'day');
+    const dayKey = day.format('YYYY-MM-DD');
+    weekDays.push({
+      date: day.toDate(),
+      key: dayKey,
+      label: day.format('ddd, D/M') // ví dụ: Th 3, 28/10
+    });
 
-    for (let i = 0; i < 7; i++) {
-      const day = new Date(startOfWeek);
-      day.setDate(startOfWeek.getDate() + i);
-      const dayKey = day.toISOString().split('T')[0];
-      
-      weekDays.push({
-        date: day,
-        key: dayKey,
-        label: day.toLocaleDateString('vi-VN', { weekday: 'short', day: 'numeric', month: 'numeric' })
-      });
-      
-      groupedSchedules[dayKey] = schedules.filter(s => {
-        const scheduleDate = new Date(s.date).toISOString().split('T')[0];
-        return scheduleDate === dayKey;
-      });
-    }
+    groupedSchedules[dayKey] = schedules.filter(s => s.date === dayKey);
+  }
 
-    return { weekDays, groupedSchedules };
-  };
+  return { weekDays, groupedSchedules };
+};
+
 
   const { weekDays, groupedSchedules } = getWeeklySchedules();
 

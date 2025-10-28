@@ -8,7 +8,8 @@ const getDoctorSchedule = async (req, res) => {
 
     const appointments = await Appointment.findAll({
       where: {
-        doctorId: doctorId
+        doctorId: doctorId,
+        status: 'confirmed'
       },
       attributes: ['id', 'doctorId', 'date', 'startTime', 'endTime'],
       order: [

@@ -27,7 +27,7 @@ const getEmployeeWithRole = async (req, res) => {
     });
 
     if (!employee) {
-      return res.status(404).json({ error: "Không tìm thấy nhân viên" });
+      return res.status(404).json({ error: "Không tìm thấy role" });
     }
 
     // Lấy danh sách roles
