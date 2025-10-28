@@ -57,8 +57,8 @@ export const API_ENDPOINTS = {
       patientId ? `?patientId=${patientId}` : ""
     }`,
   GET_ALL_PATIENTS: `${baseUrl}/api/medical-records/patients`,
-  GET_MEDICAL_RECORDS_BY_PATIENT: (patientId) =>
-    `${baseUrl}/api/medical-records/patient/${patientId}`,
+  //GET_MEDICAL_RECORDS_BY_PATIENT: (patientId) =>
+   // `${baseUrl}/api/medical-records/patient/${patientId}`,
   GET_PATIENTS_BY_DOCTOR: (doctorId) =>
     `${baseUrl}/api/medical-records/doctor/${doctorId}/patients`,
   GET_PATIENT_BY_DOCTOR: (doctorId) =>

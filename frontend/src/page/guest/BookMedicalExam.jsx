@@ -22,13 +22,34 @@ export default function BookMedicalExam() {
     endTime
   };
 
+  function isValidCCCD(value) {
+  // CCCD phải đúng 12 số
+  return /^\d{12}$/.test(value);
+}
+
+function isValidPhoneNumber(value) {
+  // Số điện thoại phải đúng 10 số
+  return /^\d{10}$/.test(value);
+}
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Validate required fields
     if (!name || !identityNumber || !phoneNumber || !date || !startTime) {
       setMessage("Vui lòng điền đầy đủ thông tin bắt buộc.");
       return;
+      
+    
     }
+  if (!isValidCCCD(identityNumber)) {
+    setMessage("CCCD phải gồm đúng 12 số.");
+    return;
+  }
+  if (!isValidPhoneNumber(phoneNumber)) {
+    setMessage("Số điện thoại phải gồm đúng 10 số.");
+    return;
+  }
     try {
       const response = await axios.post(API_ENDPOINTS.CREATE_APPOINTMENT_WITHOUT_LOGIN, payload);
       if (!response.data) {
