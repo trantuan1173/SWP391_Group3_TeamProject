@@ -85,14 +85,14 @@ export default function AdminDashboard() {
       <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <h2 className="!text-3xl !font-bold">Welcome, {user.name}!</h2>
+          <h2 className="!text-3xl !font-bold">Xin chào, {user.name}!</h2>
           <div className="flex gap-2">
             <Button
               asChild
               className="bg-blue-600 text-white hover:bg-blue-700"
             >
               <Link className="text-decoration-none" to="/admin/user">
-                Go to Employee
+                Đi đến nhân viên
               </Link>
             </Button>
             <Button
@@ -100,7 +100,7 @@ export default function AdminDashboard() {
               className="bg-green-500 text-white hover:bg-green-700"
             >
               <Link className="text-decoration-none" to="/admin/patients">
-                Go to Patients
+                Đi đến bệnh nhân
               </Link>
             </Button>
           </div>
@@ -111,20 +111,20 @@ export default function AdminDashboard() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">
-                Total Patients
+                Tổng nhân viên
               </CardTitle>
               <Users className="h-5 w-5 text-blue-500" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.totalPatients}</div>
-              <p className="text-xs text-gray-500 mt-1">Updated recently</p>
+              <p className="text-xs text-gray-500 mt-1">Cập nhật gần đây</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">
-                Active Patients
+                Nhân viên hoạt động
               </CardTitle>
               <UserPlus className="h-5 w-5 text-green-500" />
             </CardHeader>
@@ -134,7 +134,7 @@ export default function AdminDashboard() {
                 {stats.totalPatients > 0
                   ? `${Math.round(
                       (stats.activePatients / stats.totalPatients) * 100
-                    )}% currently active`
+                    )}% hiện tại hoạt động`
                   : "No data"}
               </p>
             </CardContent>
@@ -143,20 +143,20 @@ export default function AdminDashboard() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">
-                Total Employees
+                Tổng nhân viên
               </CardTitle>
               <Shield className="h-5 w-5 text-purple-500" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.totalEmployees}</div>
-              <p className="text-xs text-gray-500 mt-1">Latest staff count</p>
+              <p className="text-xs text-gray-500 mt-1">Số nhân viên gần đây</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">
-                Available Roles
+                Các role hiện có
               </CardTitle>
               <ClipboardList className="h-5 w-5 text-orange-500" />
             </CardHeader>
@@ -178,13 +178,13 @@ export default function AdminDashboard() {
           {/* Recent Patients */}
           <Card className="shadow-sm">
             <CardHeader className="flex items-center justify-between">
-              <CardTitle>Recent Patients</CardTitle>
+              <CardTitle>Các bệnh nhân gần đây</CardTitle>
               <Button asChild variant="link" className="text-blue-600">
                 <Link
                   className="text-decoration-none hover:!underline"
                   to="/admin/patients"
                 >
-                  View All <ArrowRight className="ml-1 h-4 w-4" />
+                  Xem thêm <ArrowRight className="ml-1 h-4 w-4" />
                 </Link>
               </Button>
             </CardHeader>
@@ -232,7 +232,7 @@ export default function AdminDashboard() {
           {/* Recent Employees */}
           <Card className="shadow-sm">
             <CardHeader className="flex items-center justify-between">
-              <CardTitle>Recent Employees</CardTitle>
+              <CardTitle>Các nhân viên gần đây</CardTitle>
               <Button
                 asChild
                 variant="link"
@@ -242,7 +242,7 @@ export default function AdminDashboard() {
                   className="text-decoration-none hover:!underline"
                   to="/admin/user"
                 >
-                  View All <ArrowRight className="ml-1 h-4 w-4" />
+                  Xem thêm <ArrowRight className="ml-1 h-4 w-4" />
                 </Link>
               </Button>
             </CardHeader>

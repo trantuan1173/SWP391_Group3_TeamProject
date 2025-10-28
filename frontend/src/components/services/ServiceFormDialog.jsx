@@ -21,9 +21,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
 const schema = z.object({
-  name: z.string().min(3, "Service name is required"),
+  name: z.string().min(3, "Vui lòng nhập tên dịch vụ (ít nhất 3 ký tự)"),
   description: z.string().optional(),
-  price: z.coerce.number().positive("Price must be greater than 0"),
+  price: z.coerce.number().positive("Giá phải lớn hơn 0"),
 });
 
 export default function ServiceFormDialog({
@@ -57,7 +57,7 @@ export default function ServiceFormDialog({
       <DialogContent className="max-w-md w-full">
         <DialogHeader>
           <DialogTitle>
-            {isEdit ? "Edit Service" : "Create Service"}
+            {isEdit ? "Chỉnh sửa dịch vụ" : "Thêm dịch vụ mới"}
           </DialogTitle>
         </DialogHeader>
 
@@ -69,30 +69,32 @@ export default function ServiceFormDialog({
             })}
             className="space-y-4"
           >
+            {/* Tên dịch vụ */}
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Service Name</FormLabel>
+                  <FormLabel>Tên dịch vụ</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Enter service name..." />
+                    <Input {...field} placeholder="Nhập tên dịch vụ..." />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
+            {/* Mô tả */}
             <FormField
               control={form.control}
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>Mô tả</FormLabel>
                   <FormControl>
                     <Textarea
                       {...field}
-                      placeholder="Enter service description..."
+                      placeholder="Nhập mô tả dịch vụ (tuỳ chọn)..."
                     />
                   </FormControl>
                   <FormMessage />
@@ -100,17 +102,18 @@ export default function ServiceFormDialog({
               )}
             />
 
+            {/* Giá dịch vụ */}
             <FormField
               control={form.control}
               name="price"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Price (VNĐ)</FormLabel>
+                  <FormLabel>Giá (VNĐ)</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
                       {...field}
-                      placeholder="Enter price..."
+                      placeholder="Nhập giá dịch vụ..."
                     />
                   </FormControl>
                   <FormMessage />
@@ -118,8 +121,12 @@ export default function ServiceFormDialog({
               )}
             />
 
-            <Button type="submit" className="w-full bg-blue-600 text-white">
-              {isEdit ? "Update" : "Create"}
+            {/* Nút hành động */}
+            <Button
+              type="submit"
+              className="w-full bg-green-500 text-white hover:bg-green-600"
+            >
+              {isEdit ? "Cập nhật dịch vụ" : "Tạo dịch vụ mới"}
             </Button>
           </form>
         </Form>

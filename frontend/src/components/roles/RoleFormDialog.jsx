@@ -21,7 +21,7 @@ import * as z from "zod";
 import { fetchRoleById } from "@/api/roleApi";
 
 const schema = z.object({
-  name: z.string().min(3, "Role name is required"),
+  name: z.string().min(3, "Vui lòng nhập tên vai trò (tối thiểu 3 ký tự)"),
 });
 
 export default function RoleFormDialog({ open, setOpen, onSubmit, roleId }) {
@@ -48,11 +48,15 @@ export default function RoleFormDialog({ open, setOpen, onSubmit, roleId }) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-md w-full">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit Role" : "Create Role"}</DialogTitle>
+          <DialogTitle>
+            {isEdit ? "Chỉnh sửa vai trò" : "Thêm vai trò mới"}
+          </DialogTitle>
         </DialogHeader>
 
         {loading ? (
-          <div className="p-4 text-gray-500 text-center">Loading...</div>
+          <div className="p-4 text-gray-500 text-center">
+            Đang tải dữ liệu...
+          </div>
         ) : (
           <Form {...form}>
             <form
@@ -67,9 +71,9 @@ export default function RoleFormDialog({ open, setOpen, onSubmit, roleId }) {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Role Name</FormLabel>
+                    <FormLabel>Tên vai trò</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter role name..." {...field} />
+                      <Input placeholder="Nhập tên vai trò..." {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -80,7 +84,7 @@ export default function RoleFormDialog({ open, setOpen, onSubmit, roleId }) {
                 type="submit"
                 className="w-full bg-green-500 text-white hover:bg-green-600"
               >
-                {isEdit ? "Update Role" : "Create Role"}
+                {isEdit ? "Cập nhật vai trò" : "Tạo vai trò mới"}
               </Button>
             </form>
           </Form>

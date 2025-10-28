@@ -3,6 +3,7 @@
 const express = require("express");
 const router = express.Router();
 const { getAppointment, getAppointmentById, updateAppointment, deleteAppointment, getAppointmentByPatientId, getAppointmentByDoctorId, getAppointmentByStatus, getAppointmentToday, getAppointmentDashboard, getAvailableDoctors, getAvailableRooms } = require("../controllers/AppointmentController");
+const { createFeedback, getFeedbackForAppointment } = require('../controllers/FeedbackController');
 const { protect, authorize } = require("../middleware/authMiddleware");
 /**
  * @swagger
@@ -165,7 +166,9 @@ router.get("/:id", protect, authorize("Admin", "Receptionist"), getAppointmentBy
  *       500:
  *         description: Failed to update appointment
  */
-router.put("/:id", protect, authorize("Admin", "Receptionist"), updateAppointment);
+// Note: appointment update is handled by a unified route below which allows
+// either employees (Admin/Receptionist) to update or patients to cancel their own
+// appointments. The explicit employee-only route was removed so patients can cancel.
 
 /**
  * @swagger
@@ -186,15 +189,15 @@ router.put("/:id", protect, authorize("Admin", "Receptionist"), updateAppointmen
  *         description: Failed to delete appointment
  */
 router.delete("/:id", protect, authorize("Admin", "Receptionist"), deleteAppointment);
-// Cho phép cả bệnh nhân và nhân viên hủy lịch
+
+// Unified update route: employees (Admin/Receptionist) can update; patients can only cancel their own appointments
 router.put("/:id", protect, (req, res, next) => {
 	if (req.userType === "employee") {
 		return authorize("Admin", "Receptionist")(req, res, next);
 	}
 	if (req.userType === "patient") {
-		// Chỉ cho phép bệnh nhân hủy lịch của chính mình
+		// Patients can only cancel their own appointment
 		const appointmentId = parseInt(req.params.id);
-		// Lấy appointment để kiểm tra
 		const { Appointment } = require("../models");
 		Appointment.findByPk(appointmentId).then(app => {
 			if (!app) return res.status(404).json({ error: "Appointment not found" });
@@ -210,23 +213,20 @@ router.put("/:id", protect, (req, res, next) => {
 	return res.status(403).json({ error: "Không có quyền hủy lịch" });
 }, updateAppointment);
 
-// Cho phép cả bệnh nhân và nhân viên truy cập lịch khám của bệnh nhân
+// Allow both patients and employees to access a patient's appointments.
+// Employees: Admin, Receptionist, Doctor. Patients: only their own appointments.
 router.get("/patient/:id", protect, (req, res, next) => {
-	// Nếu là employee thì kiểm tra quyền như cũ
 	if (req.userType === "employee") {
 		return authorize("Admin", "Receptionist", "Doctor")(req, res, next);
 	}
-	// Nếu là bệnh nhân thì chỉ cho phép xem lịch của chính mình
 	if (req.userType === "patient") {
 		if (parseInt(req.params.id) !== req.userId) {
 			return res.status(403).json({ success: false, message: "Bạn chỉ được xem lịch khám của chính mình" });
 		}
 		return next();
 	}
-	// Các loại user khác bị chặn
 	return res.status(403).json({ success: false, message: "Không có quyền truy cập" });
 }, getAppointmentByPatientId);
-
 
 /**
  * @swagger
@@ -244,7 +244,13 @@ router.get("/patient/:id", protect, (req, res, next) => {
  *       200:
  *         description: List of appointments
  */
-router.get("/patient/:id", protect, authorize("Admin", "Receptionist", "Doctor"), getAppointmentByPatientId);
+// (The combined /patient/:id route above covers both employees and patients.)
+
+// Legacy employee-only update route preserved for compatibility.
+// It's placed after the unified PUT handler so the unified handler
+// (which allows patients to cancel their own appointments) runs first.
+// This keeps the original line present without blocking patient flow.
+router.put("/:id", protect, authorize("Admin", "Receptionist"), updateAppointment);
 
 /**
  * @swagger
@@ -281,5 +287,9 @@ router.get("/doctor/:id", protect, authorize("Admin", "Receptionist", "Doctor"),
  *         description: List of appointments
  */
 router.get("/status/:status", protect, authorize("Admin", "Receptionist", "Doctor"), getAppointmentByStatus);
+
+// Feedback endpoints for appointments
+router.post('/:id/feedback', protect, createFeedback);
+router.get('/:id/feedback', protect, getFeedbackForAppointment);
 
 module.exports = router;

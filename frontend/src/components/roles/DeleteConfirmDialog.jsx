@@ -17,18 +17,18 @@ export default function DeleteConfirmDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Are you sure?</DialogTitle>
+          <DialogTitle>Xác nhận xóa</DialogTitle>
         </DialogHeader>
         <p>
-          This action cannot be undone. The role <b>{role?.name}</b> will be
-          permanently deleted.
+          Hành động này <b>không thể hoàn tác</b>. Vai trò <b>{role?.name}</b>{" "}
+          sẽ bị xóa vĩnh viễn khỏi hệ thống.
         </p>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancel
+            Hủy
           </Button>
           <Button variant="destructive" onClick={onConfirm}>
-            Delete
+            Xóa
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -329,31 +329,34 @@ module.exports = {
   getCheckups,
   getDocuments,
   getPatientById,
-  // Update patient profile (only patient themself or admin via other routes)
-  updatePatient: async (req, res) => {
-    try {
-      const { id } = req.params;
-      // Only patient owners can update their profile
-      if (req.userType === 'patient') {
-        if (!req.user || parseInt(req.user.id) !== parseInt(id)) {
-          return res.status(403).json({ error: 'Forbidden: cannot update other patient' });
-        }
-      }
-
-  const allowed = ['name', 'email', 'phoneNumber', 'address', 'dateOfBirth'];
-      const payload = {};
-      for (const k of allowed) if (k in req.body) payload[k] = req.body[k];
-
-      const patient = await Patient.findByPk(id);
-      if (!patient) return res.status(404).json({ error: 'Patient not found' });
-
-      await patient.update(payload);
-      const p = patient.toJSON();
-      if (p.password) delete p.password;
-      res.json({ message: 'Profile updated', patient: p });
-    } catch (error) {
-      console.error('[updatePatient] error:', error);
-      res.status(500).json({ error: 'Failed to update patient' });
-    }
-  }
+  updatePatient,
 };
+
+// Update patient profile (only patient themself or admin via other routes)
+async function updatePatient(req, res) {
+  try {
+    const { id } = req.params;
+
+    // Only patient owners can update their profile
+    if (req.userType === 'patient') {
+      if (!req.user || parseInt(req.user.id) !== parseInt(id)) {
+        return res.status(403).json({ error: 'Forbidden: cannot update other patient' });
+      }
+    }
+
+    const allowed = ['name', 'email', 'phoneNumber', 'address', 'dateOfBirth'];
+    const payload = {};
+    for (const k of allowed) if (k in req.body) payload[k] = req.body[k];
+
+    const patient = await Patient.findByPk(id);
+    if (!patient) return res.status(404).json({ error: 'Patient not found' });
+
+    await patient.update(payload);
+    const p = patient.toJSON ? patient.toJSON() : { ...patient };
+    if (p.password) delete p.password;
+    res.json({ message: 'Profile updated', patient: p });
+  } catch (error) {
+    console.error('[updatePatient] error:', error && error.stack ? error.stack : error);
+    res.status(500).json({ error: 'Failed to update patient' });
+  }
+}

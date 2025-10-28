@@ -28,10 +28,10 @@ import * as z from "zod";
 import { fetchPatientById } from "@/api/patientApi";
 
 const schema = z.object({
-  name: z.string().min(3, "Name is required"),
+  name: z.string().min(3, "Vui lòng nhập họ và tên"),
   email: z.string().optional(),
   password: z.string().optional(),
-  identityNumber: z.string().min(9, "Identity number required"),
+  identityNumber: z.string().min(9, "Vui lòng nhập số CCCD / CMND"),
   phoneNumber: z.string().optional(),
   address: z.string().optional(),
   dateOfBirth: z.string().optional(),
@@ -83,12 +83,14 @@ export default function PatientFormDialog({
       <DialogContent className="max-w-lg w-full">
         <DialogHeader>
           <DialogTitle>
-            {isEdit ? "Edit Patient" : "Create Patient"}
+            {isEdit ? "Chỉnh sửa thông tin bệnh nhân" : "Thêm bệnh nhân mới"}
           </DialogTitle>
         </DialogHeader>
 
         {loading ? (
-          <div className="p-4 text-gray-500 text-center">Loading...</div>
+          <div className="p-4 text-gray-500 text-center">
+            Đang tải dữ liệu...
+          </div>
         ) : (
           <Form {...form}>
             <form
@@ -99,13 +101,20 @@ export default function PatientFormDialog({
               className="space-y-3"
             >
               {[
-                { name: "name", label: "Full Name" },
+                { name: "name", label: "Họ và tên" },
                 { name: "email", label: "Email", type: "email" },
-                { name: "password", label: "Password", type: "password" },
-                { name: "identityNumber", label: "Identity Number" },
-                { name: "phoneNumber", label: "Phone Number" },
-                { name: "address", label: "Address" },
-                { name: "dateOfBirth", label: "Date of Birth", type: "date" },
+                {
+                  name: "password",
+                  label: "Mật khẩu",
+                  type: "password",
+                  placeholder: isEdit
+                    ? "Để trống nếu không muốn đổi mật khẩu"
+                    : "Nhập mật khẩu",
+                },
+                { name: "identityNumber", label: "Số CCCD / CMND" },
+                { name: "phoneNumber", label: "Số điện thoại" },
+                { name: "address", label: "Địa chỉ" },
+                { name: "dateOfBirth", label: "Ngày sinh", type: "date" },
               ].map((f) => (
                 <FormField
                   key={f.name}
@@ -115,7 +124,11 @@ export default function PatientFormDialog({
                     <FormItem>
                       <FormLabel>{f.label}</FormLabel>
                       <FormControl>
-                        <Input {...field} type={f.type || "text"} />
+                        <Input
+                          {...field}
+                          type={f.type || "text"}
+                          placeholder={f.placeholder || ""}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -123,21 +136,22 @@ export default function PatientFormDialog({
                 />
               ))}
 
+              {/* Giới tính */}
               <FormField
                 control={form.control}
                 name="gender"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Gender</FormLabel>
+                    <FormLabel>Giới tính</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue />
+                          <SelectValue placeholder="Chọn giới tính" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="male">Male</SelectItem>
-                        <SelectItem value="female">Female</SelectItem>
+                        <SelectItem value="male">Nam</SelectItem>
+                        <SelectItem value="female">Nữ</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -149,7 +163,7 @@ export default function PatientFormDialog({
                 type="submit"
                 className="w-full bg-green-500 text-white hover:bg-green-600"
               >
-                {isEdit ? "Update Patient" : "Create Patient"}
+                {isEdit ? "Cập nhật bệnh nhân" : "Tạo bệnh nhân mới"}
               </Button>
             </form>
           </Form>

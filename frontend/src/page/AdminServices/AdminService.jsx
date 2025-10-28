@@ -21,7 +21,7 @@ import {
 import { toast } from "sonner";
 import useDebounce from "@/hooks/useDebounce";
 import ServiceFormDialog from "@/components/services/ServiceFormDialog";
-import DeleteConfirmDialog from "@/components/users/DeleteConfirmDialog"; // reuse dialog
+import DeleteConfirmDialog from "@/components/users/DeleteConfirmDialog"; // dùng lại dialog xóa người dùng
 import {
   createService,
   deleteService,
@@ -50,7 +50,7 @@ export default function AdminService() {
       setTotalPages(data.totalPages);
     } catch (err) {
       console.error(err);
-      toast.error("Failed to fetch services");
+      toast.error("Không thể tải danh sách dịch vụ");
     }
   };
 
@@ -60,14 +60,14 @@ export default function AdminService() {
 
   // === CREATE ===
   const handleCreate = async (formData) => {
-    const toastId = toast.loading("Creating service...");
+    const toastId = toast.loading("Đang tạo dịch vụ...");
     try {
       await createService(formData);
-      toast.success("Service created successfully", { id: toastId });
+      toast.success("Tạo dịch vụ thành công!", { id: toastId });
       setDialogOpen(false);
       loadServices();
     } catch (err) {
-      toast.error(err.response?.data?.error || "Failed to create service", {
+      toast.error(err.response?.data?.error || "Không thể tạo dịch vụ", {
         id: toastId,
       });
     }
@@ -75,14 +75,14 @@ export default function AdminService() {
 
   // === UPDATE ===
   const handleUpdate = async (id, formData) => {
-    const toastId = toast.loading("Updating service...");
+    const toastId = toast.loading("Đang cập nhật dịch vụ...");
     try {
       await updateService(id, formData);
-      toast.success("Service updated successfully", { id: toastId });
+      toast.success("Cập nhật dịch vụ thành công!", { id: toastId });
       setEditDialogOpen(false);
       loadServices();
     } catch (err) {
-      toast.error(err.response?.data?.error || "Failed to update service", {
+      toast.error(err.response?.data?.error || "Cập nhật thất bại", {
         id: toastId,
       });
     }
@@ -95,13 +95,13 @@ export default function AdminService() {
   };
 
   const confirmDelete = async () => {
-    const toastId = toast.loading("Deleting service...");
+    const toastId = toast.loading("Đang xóa dịch vụ...");
     try {
       await deleteService(selectedService.id);
-      toast.success("Service deleted successfully", { id: toastId });
+      toast.success("Xóa dịch vụ thành công!", { id: toastId });
       loadServices();
     } catch {
-      toast.error("Failed to delete service", { id: toastId });
+      toast.error("Không thể xóa dịch vụ", { id: toastId });
     } finally {
       setDeleteDialogOpen(false);
       setSelectedService(null);
@@ -113,7 +113,7 @@ export default function AdminService() {
       <div className="bg-white h-full p-5 rounded-lg shadow-md">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <h4 className="text-xl font-bold">Service Management</h4>
+          <h4 className="text-xl font-bold">Quản lý dịch vụ</h4>
           <div className="flex gap-3">
             <select
               value={pageSize}
@@ -131,7 +131,7 @@ export default function AdminService() {
               className="bg-green-500 text-white hover:bg-green-600 !rounded-md"
               onClick={() => setDialogOpen(true)}
             >
-              Create Service
+              Thêm dịch vụ
             </Button>
           </div>
         </div>
@@ -139,7 +139,7 @@ export default function AdminService() {
         {/* Search */}
         <div className="mb-4">
           <Input
-            placeholder="Search service by name or description..."
+            placeholder="Tìm kiếm dịch vụ theo tên hoặc mô tả..."
             value={searchInput}
             onChange={(e) => {
               setSearchInput(e.target.value);
@@ -153,11 +153,11 @@ export default function AdminService() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>#</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Price (VNĐ)</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead>STT</TableHead>
+              <TableHead>Tên dịch vụ</TableHead>
+              <TableHead>Mô tả</TableHead>
+              <TableHead>Giá (VNĐ)</TableHead>
+              <TableHead>Thao tác</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -165,7 +165,13 @@ export default function AdminService() {
               <TableRow key={s.id}>
                 <TableCell>{(currentPage - 1) * pageSize + i + 1}</TableCell>
                 <TableCell className="font-bold">{s.name}</TableCell>
-                <TableCell>{s.description || "—"}</TableCell>
+                <TableCell>
+                  {s.description
+                    ? s.description.length > 100
+                      ? s.description.slice(0, 100) + "..."
+                      : s.description
+                    : "—"}
+                </TableCell>
                 <TableCell>{s.price.toLocaleString("vi-VN")}</TableCell>
                 <TableCell className="flex gap-2">
                   <Button
@@ -176,14 +182,14 @@ export default function AdminService() {
                       setEditDialogOpen(true);
                     }}
                   >
-                    Edit
+                    Sửa
                   </Button>
                   <Button
                     size="sm"
                     className="bg-red-500 text-white hover:bg-red-600"
                     onClick={() => handleDelete(s)}
                   >
-                    Delete
+                    Xóa
                   </Button>
                 </TableCell>
               </TableRow>
@@ -191,7 +197,7 @@ export default function AdminService() {
             {services.length === 0 && (
               <TableRow>
                 <TableCell colSpan={5} className="text-center text-gray-500">
-                  No services found
+                  Không tìm thấy dịch vụ nào
                 </TableCell>
               </TableRow>
             )}
