@@ -13,16 +13,16 @@ const createRole = async (req, res) => {
     const { name } = req.body;
     const existingRole = await Role.findOne({ where: { name } });
     if (existingRole) {
-      return res.status(400).json({ error: "Role already exists" });
+      return res.status(400).json({ error: "Vai trò đã tồn tại" });
     }
     if (!name) {
-      return res.status(400).json({ error: "Name is required" });
+      return res.status(400).json({ error: "Bạn cần nhập tên vai trò" });
     }
     const role = await Role.create({ name });
-    res.status(201).json({ message: "Role created", role });
+    res.status(201).json({ message: "Vai trò tạo thành công", role });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Failed to create role" });
+    res.status(500).json({ error: "Vai trò không thể tạo" });
   }
 };
 
@@ -48,14 +48,14 @@ const getRoles = async (req, res) => {
     });
 
     res.json({
+      message: "Vai trò lấy thành công",
       roles,
       total,
       totalPages: Math.ceil(total / pageSize),
       currentPage: page,
     });
   } catch (error) {
-    console.error("getRoles error:", error);
-    res.status(500).json({ error: "Failed to fetch roles" });
+    res.status(500).json({ error: "Vai trò lấy thất bại" });
   }
 };
 
@@ -66,14 +66,14 @@ const updateRole = async (req, res) => {
     const { name } = req.body;
     const role = await Role.findByPk(id);
     if (!role) {
-      return res.status(404).json({ error: "Role not found" });
+      return res.status(404).json({ error: "Không tìm thấy vai trò" });
     }
     role.name = name;
     await role.save();
-    res.json({ message: "Role updated", role });
+    res.json({ message: "Vai trò cập nhật thành công", role });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Failed to update role" });
+    res.status(500).json({ error: "Vai trò cập nhật thất bại" });
   }
 };
 
@@ -83,13 +83,13 @@ const deleteRole = async (req, res) => {
     const { id } = req.params;
     const role = await Role.findByPk(id);
     if (!role) {
-      return res.status(404).json({ error: "Role not found" });
+      return res.status(404).json({ error: "Vai trò không tìm thấy" });
     }
     await role.destroy();
-    res.json({ message: "Role deleted" });
+    res.json({ message: "Vai trò đã xoá" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Failed to delete role" });
+    res.status(500).json({ error: "Vai trò xoá thất bại" });
   }
 };
 
@@ -98,12 +98,12 @@ const getRoleById = async (req, res) => {
     const { id } = req.params;
     const role = await Role.findByPk(id);
     if (!role) {
-      return res.status(404).json({ error: "Role not found" });
+      return res.status(404).json({ error: "Vai trò không tìm thấy" });
     }
     res.json(role);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Failed to fetch role" });
+    res.status(500).json({ error: "Vai trò lấy thất bại" });
   }
 };
 //Create employee
@@ -116,18 +116,16 @@ const createEmployee = async (req, res) => {
       roles = roles.split(",").map((r) => r.trim());
     }
 
-    console.log("Roles parsed:", roles);
-
     // Validate roles
     if (!roles || !Array.isArray(roles) || roles.length === 0) {
-      return res.status(400).json({ error: "At least one role is required" });
+      return res.status(400).json({ error: "Ít nhất một role phải được chọn" });
     }
 
     // Validate required fields
     if (!userData.name || !userData.email || !userData.password) {
       return res
         .status(400)
-        .json({ error: "Name, email and password are required" });
+        .json({ error: "Tên, email và mật khẩu là bắt buộc" });
     }
 
     // Check duplicates
@@ -142,13 +140,13 @@ const createEmployee = async (req, res) => {
     });
 
     if (existingIdentityNumber) {
-      return res.status(409).json({ error: "Identity number already exists" });
+      return res.status(409).json({ error: "CMND/CCCD đã tồn tại" });
     }
     if (existingMail) {
-      return res.status(409).json({ error: "Email already exists" });
+      return res.status(409).json({ error: "Email đã tồn tại" });
     }
     if (existingPhone) {
-      return res.status(409).json({ error: "Phone number already exists" });
+      return res.status(409).json({ error: "SĐT đã tồn tại" });
     }
 
     // Handle avatar upload
@@ -166,7 +164,9 @@ const createEmployee = async (req, res) => {
       if (!roleRecord) {
         // Rollback: delete employee if role not found
         await employee.destroy();
-        return res.status(404).json({ error: `Role '${roleName}' not found` });
+        return res
+          .status(404)
+          .json({ error: `Vai trò '${roleName}' Không tìm thấy` });
       }
 
       await EmployeeRole.create({
@@ -204,12 +204,12 @@ const createEmployee = async (req, res) => {
     };
 
     res.status(201).json({
-      message: "Employee created successfully",
+      message: "Nhân viên tạo thành công",
       employee: responseData,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Failed to create employee" });
+    res.status(500).json({ error: "Nhân viên tạo thất bại" });
   }
 };
 
@@ -269,14 +269,14 @@ const getEmployees = async (req, res) => {
     });
 
     res.json({
+      message: "Lấy danh sách nhân viên",
       employees,
       total,
       totalPages: Math.ceil(total / pageSize),
       currentPage: page,
     });
   } catch (err) {
-    console.error("getEmployees error:", err);
-    res.status(500).json({ error: "Failed to fetch employees" });
+    res.status(500).json({ error: "Lấy nhân viên thất bại" });
   }
 };
 
@@ -288,12 +288,12 @@ const deleteEmployee = async (req, res) => {
     // await Doctor.destroy({ where: { employeeId: id } });
     // await Patient.destroy({ where: { employeeId: id } });
     const deleted = await Employee.destroy({ where: { id } });
-    if (!deleted) return res.status(404).json({ error: "Employee not found" });
+    if (!deleted)
+      return res.status(404).json({ error: "Không tìm thấy nhân viên" });
 
-    res.json({ message: "Employee deleted successfully" });
+    res.json({ message: "Nhân viên xoá thành công" });
   } catch (err) {
-    console.error("Delete employee error:", err);
-    res.status(500).json({ error: "Failed to delete employee" });
+    res.status(500).json({ error: "Nhân viên xoá thất bại" });
   }
 };
 
@@ -303,10 +303,11 @@ const getEmployeeById = async (req, res) => {
     const user = await Employee.findByPk(req.params.id, {
       include: [{ model: Role, as: "roles" }],
     });
-    if (!user) return res.status(404).json({ error: "Employee not found" });
+    if (!user)
+      return res.status(404).json({ error: "Không tìm thấy nhân viên" });
     res.json(user);
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch employee" });
+    res.status(500).json({ error: "Nhân viên lấy thất bại" });
   }
 };
 
@@ -344,8 +345,6 @@ const updateEmployee = async (req, res) => {
       roles = roles.split(",").map((r) => r.trim());
     }
 
-    console.log("Roles parsed:", roles);
-
     // Lấy thông tin nhân viên hiện tại
     const existingUser = await Employee.findOne({
       where: { id },
@@ -353,12 +352,12 @@ const updateEmployee = async (req, res) => {
     });
 
     if (!existingUser) {
-      return res.status(404).json({ error: "Employee not found" });
+      return res.status(404).json({ error: "Nhân viên không tìm thấy" });
     }
 
     // ==== VALIDATE BẮT BUỘC ====
     if (!updateData.name || !updateData.email) {
-      return res.status(400).json({ error: "Name and email are required" });
+      return res.status(400).json({ error: "Tên và email là bắt buộc" });
     }
 
     // ==== Xử lý avatar ====
@@ -387,7 +386,7 @@ const updateEmployee = async (req, res) => {
         if (!roleRecord) {
           return res
             .status(404)
-            .json({ error: `Role '${roleName}' not found` });
+            .json({ error: `Vai trò'${roleName}' Không tìm thấy` });
         }
 
         await EmployeeRole.create({
@@ -413,13 +412,12 @@ const updateEmployee = async (req, res) => {
     });
 
     res.json({
-      message: "Employee updated successfully",
+      message: "Nhân viên cập nhật thành công",
       user: updatedUser,
     });
   } catch (err) {
-    console.error("Update employee error:", err);
     res.status(500).json({
-      error: "Failed to update employee",
+      error: "Nhân viên cập nhật thất bại",
       details: err.message,
     });
   }
@@ -441,9 +439,7 @@ const createPatient = async (req, res) => {
 
     // Validate required fields
     if (!name || !identityNumber) {
-      return res
-        .status(400)
-        .json({ error: "Name and Identity Number are required" });
+      return res.status(400).json({ error: "Tên và CCCD/CMND là bắt buộc" });
     }
 
     // Check for duplicates
@@ -451,21 +447,21 @@ const createPatient = async (req, res) => {
       where: { identityNumber },
     });
     if (existingIdentity) {
-      return res.status(409).json({ error: "Identity number already exists" });
+      return res.status(409).json({ error: "CMND/CCCD đã tồn tại" });
     }
 
     const existingEmail = email
       ? await Patient.findOne({ where: { email } })
       : null;
     if (existingEmail) {
-      return res.status(409).json({ error: "Email already exists" });
+      return res.status(409).json({ error: "Email đã tồn tại" });
     }
 
     const existingPhone = phoneNumber
       ? await Patient.findOne({ where: { phoneNumber } })
       : null;
     if (existingPhone) {
-      return res.status(409).json({ error: "Phone number already exists" });
+      return res.status(409).json({ error: "SĐT đã tồn tại" });
     }
 
     // Create patient
@@ -485,12 +481,11 @@ const createPatient = async (req, res) => {
     delete cleanPatient.password; // không gửi password về client
 
     res.status(201).json({
-      message: "Patient created successfully",
+      message: "Bệnh nhân tạo thành công",
       patient: cleanPatient,
     });
   } catch (error) {
-    console.error("createPatient error:", error);
-    res.status(500).json({ error: "Failed to create patient" });
+    res.status(500).json({ error: "Bệnh nhân tạo thất bại" });
   }
 };
 
@@ -568,7 +563,8 @@ const updatePatient = async (req, res) => {
     } = req.body;
 
     const patient = await Patient.findByPk(id);
-    if (!patient) return res.status(404).json({ error: "Patient not found" });
+    if (!patient)
+      return res.status(404).json({ error: "Bệnh nhân không tìm thấy" });
 
     // kiểm tra trùng email, sđt, CCCD (trừ chính nó)
     if (identityNumber && identityNumber !== patient.identityNumber) {
@@ -576,21 +572,19 @@ const updatePatient = async (req, res) => {
         where: { identityNumber },
       });
       if (existingIdentity)
-        return res
-          .status(409)
-          .json({ error: "Identity number already exists" });
+        return res.status(409).json({ error: "CMND/CCCD đã tồn tại" });
     }
 
     if (email && email !== patient.email) {
       const existingEmail = await Patient.findOne({ where: { email } });
       if (existingEmail)
-        return res.status(409).json({ error: "Email already exists" });
+        return res.status(409).json({ error: "Email đã tồn tại" });
     }
 
     if (phoneNumber && phoneNumber !== patient.phoneNumber) {
       const existingPhone = await Patient.findOne({ where: { phoneNumber } });
       if (existingPhone)
-        return res.status(409).json({ error: "Phone number already exists" });
+        return res.status(409).json({ error: "SĐT đã tồn tại" });
     }
 
     if (password && password.trim() !== "") {
@@ -612,10 +606,10 @@ const updatePatient = async (req, res) => {
     const updated = patient.get({ plain: true });
     delete updated.password;
 
-    res.json({ message: "Patient updated successfully", patient: updated });
+    res.json({ message: "Bệnh nhân cập nhật thành công", patient: updated });
   } catch (error) {
     console.error("updatePatient error:", error);
-    res.status(500).json({ error: "Failed to update patient" });
+    res.status(500).json({ error: "Bệnh nhân cập nhật thất bại" });
   }
 };
 
@@ -624,13 +618,13 @@ const deletePatient = async (req, res) => {
   try {
     const { id } = req.params;
     const patient = await Patient.findByPk(id);
-    if (!patient) return res.status(404).json({ error: "Patient not found" });
+    if (!patient)
+      return res.status(404).json({ error: "Không tìm thấy bệnh nhân" });
 
     await patient.destroy();
-    res.json({ message: "Patient deleted successfully" });
+    res.json({ message: "Bệnh nhân xoá thành công" });
   } catch (error) {
-    console.error("deletePatient error:", error);
-    res.status(500).json({ error: "Failed to delete patient" });
+    res.status(500).json({ error: "Bệnh nhân xoá thất bại" });
   }
 };
 

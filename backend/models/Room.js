@@ -7,7 +7,7 @@ const Room = sequelize.define("Room", {
     allowNull: false,
   },
   type: {
-    type: DataTypes.ENUM("khám", "phẫu thuật", "xét nghiệm", "MRI", "CT", "ECG", "X-quang", "y tế khác"),
+    type: DataTypes.STRING,
     allowNull: false,
   },
   status: {

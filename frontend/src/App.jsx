@@ -91,7 +91,7 @@ function App() {
         />
 
         {/* Admin routes */}
-        <Route>
+        <Route element={<RequireAuth allowedRoles={["Admin"]} />}>
           <Route path="/admin/user" element={<UserManagement />}></Route>
           <Route
             path="/admin/user/:id"
