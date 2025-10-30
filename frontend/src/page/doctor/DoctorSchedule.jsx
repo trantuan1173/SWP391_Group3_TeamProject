@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import DoctorLayout from "../../components/doctor/DoctorDashboard";
-  import dayjs from 'dayjs';
+import dayjs from 'dayjs';
 
 const DoctorSchedule = () => {
   const [schedules, setSchedules] = useState([]);
@@ -34,11 +34,9 @@ const DoctorSchedule = () => {
     
     while (date.getFullYear() === year) {
       const startOfWeek = new Date(date);
-      startOfWeek.setDate(date.getDate() - date.getDay() ); // Monday
-      
+      startOfWeek.setDate(date.getDate() - date.getDay() +1); // Monday
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(startOfWeek.getDate() + 6); // Sunday
-      
       if (startOfWeek.getFullYear() === year || endOfWeek.getFullYear() === year) {
         weeks.push({
           weekNum,
@@ -55,7 +53,6 @@ const DoctorSchedule = () => {
     return weeks;
   };
 
-  // Tạo danh sách năm (từ 2020 đến 2030)
   const years = Array.from({ length: 11 }, (_, i) => 2020 + i);
   const weeks = getWeeksInYear(selectedYear);
 
@@ -164,7 +161,7 @@ const getWeeklySchedules = () => {
   const handleYearChange = (e) => {
     const newYear = parseInt(e.target.value);
     setSelectedYear(newYear);
-    setSelectedWeek(1); // Reset về tuần 1 khi đổi năm
+    setSelectedWeek(1);
   };
 
   // Handler cho việc thay đổi tuần

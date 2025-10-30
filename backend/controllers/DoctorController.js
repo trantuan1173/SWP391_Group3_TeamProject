@@ -8,13 +8,23 @@ const {
 
 const getDoctor = async (req, res) => {
   try {
+    const { Sequelize } = require("sequelize");
+    const { Feedback, Appointment } = require("../models");
+
     // Find employees who have the 'doctor' role (roleId = 2)
     const doctors = await Employee.findAll({
-      attributes: ["id", "name", "email", "phoneNumber", "avatar", "speciality", "isActive"],
+      attributes: [
+        "id", 
+        "name", 
+        "email", 
+        "phoneNumber", 
+        "avatar", 
+        "speciality", 
+        "isActive"
+      ],
       include: [
         {
           model: EmployeeRole,
-
           as: 'employeeRoles',
           attributes: [],
           where: { roleId: 2 },
@@ -23,24 +33,65 @@ const getDoctor = async (req, res) => {
       ],
     });
 
+    // Lấy rating trung bình cho mỗi bác sĩ
+    const formattedDoctors = await Promise.all(
+      doctors.map(async (d) => {
+        // Lấy tất cả appointments của bác sĩ
+        const appointments = await Appointment.findAll({
+          where: { doctorId: d.id },
+          attributes: ['id']
+        });
 
-    // Format response for frontend
-    const formattedDoctors = doctors.map((d) => ({
-      id: d.id,
-      name: d.name || 'Chưa có tên',
-      email: d.email,
-      phoneNumber: d.phoneNumber,
-      avatar: d.avatar ? `${req.protocol}://${req.get('host')}${d.avatar}` : null,
-      speciality: d.speciality || 'Chưa có chuyên khoa',
-      isActive: d.isActive,
-    }));
+        const appointmentIds = appointments.map(a => a.id);
+
+        // Tính rating trung bình từ feedback
+        let averageRating = 0;
+        let totalFeedbacks = 0;
+
+        if (appointmentIds.length > 0) {
+          const feedbackStats = await Feedback.findOne({
+            where: {
+              appointmentId: { [Op.in]: appointmentIds }
+            },
+            attributes: [
+              [Sequelize.fn('AVG', Sequelize.col('rating')), 'avgRating'],
+              [Sequelize.fn('COUNT', Sequelize.col('id')), 'totalCount']
+            ],
+            raw: true
+          });
+
+          averageRating = feedbackStats?.avgRating 
+            ? parseFloat(feedbackStats.avgRating).toFixed(1) 
+            : 0;
+          totalFeedbacks = feedbackStats?.totalCount || 0;
+        }
+
+        return {
+          id: d.id,
+          name: d.name || 'Chưa có tên',
+          email: d.email,
+          phoneNumber: d.phoneNumber,
+          avatar: d.avatar 
+            ? `${req.protocol}://${req.get('host')}${d.avatar}` 
+            : null,
+          speciality: d.speciality || 'Chưa có chuyên khoa',
+          isActive: d.isActive,
+          rating: parseFloat(averageRating),
+          totalReviews: totalFeedbacks
+        };
+      })
+    );
 
     return res.status(200).json(formattedDoctors);
   } catch (error) {
     console.error("Error in getDoctor:", error);
-    res.status(500).json({ error: "Failed to get doctor", details: error.message });
+    res.status(500).json({ 
+      error: "Failed to get doctor", 
+      details: error.message 
+    });
   }
 };
+
 
 const getDoctorById = async (req, res) => {
   try {

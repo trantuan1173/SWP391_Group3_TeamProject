@@ -17,7 +17,7 @@ Appointment.hasOne(Feedback, { foreignKey: "appointmentId" });
 
 Feedback.belongsTo(Patient, { foreignKey: "patientId" });
 Patient.hasOne(Feedback, { foreignKey: "patientId" });
-
+Appointment.hasMany(Feedback, { foreignKey: 'appointmentId' });
 MedicalRecord.belongsToMany(Service, {
   through: MedicalRecordService,
   foreignKey: "medicalRecordId",

@@ -17,8 +17,16 @@ const getDoctorSchedule = async (req, res) => {
         ['startTime', 'ASC']
       ]
     });
+    const formattedAppointments = appointments.map(apt => {
+      const json = apt.toJSON();
+      return {
+        ...json,
+        startTime: json.startTime?.slice(0, 5),
+        endTime: json.endTime?.slice(0, 5)
+      };
+    });
 
-    res.status(200).json(appointments);
+    res.status(200).json(formattedAppointments);
   } catch (error) {
     console.error("Error in getDoctorSchedule:", error);
     res.status(500).json({ error: "Failed to get doctor schedule", details: error.message });
