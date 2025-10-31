@@ -40,6 +40,8 @@ import PatientDetailManagement from "./page/AdminPatient/PatientDetailManagement
 import AdminProfile from "./page/AdminDashboard/AdminProfile";
 import AdminService from "./page/AdminServices/AdminService";
 import ReceptionistAppointmentDetail from "./page/Receptionist/ReceptionistAppointmentDetail";
+import SuccessPage from "./page/payment/SuccessPage";
+import CancelPage from "./page/payment/CancelPage";
 
 function App() {
   const RedirectPatientId = () => {
@@ -52,7 +54,9 @@ function App() {
       <Routes>
         {/* Landing Page */}
         <Route path="/" element={<LandingPage />} />
-
+        {/* Payment routes */}
+        <Route path="/payments/sucess" element={<SuccessPage />} />
+        <Route path="/payments/cancel" element={<CancelPage />} />
         {/* Auth routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -75,8 +79,8 @@ function App() {
             <Route path=":id/appointments" element={<AppointmentPage />} />
             <Route path=":id/book" element={<BookPage />} />
             <Route path=":id/records" element={<MedicalRecordPage />} />
-            <Route path="news" element={<PatientNewsList/>} />
-            <Route path="news/:id" element={<PatientNewsDetail/>} />
+            <Route path="news" element={<PatientNewsList />} />
+            <Route path="news/:id" element={<PatientNewsDetail />} />
           </Route>
         </Route>
 
@@ -123,7 +127,10 @@ function App() {
             <Route path="dashboard" element={<ReceptionistDashboard />} />
             <Route path="patients" element={<ReceptionistPatient />} />
             <Route path="appointments" element={<ReceptionistAppointment />} />
-            <Route path="appointments/:id" element={<ReceptionistAppointmentDetail />} />
+            <Route
+              path="appointments/:id"
+              element={<ReceptionistAppointmentDetail />}
+            />
             <Route path="doctors" element={<ReceptionistDoctor />} />
             <Route path="news" element={<ReceptionistNews />} />
           </Route>
