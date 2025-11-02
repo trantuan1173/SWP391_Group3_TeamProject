@@ -1,4 +1,4 @@
-const { DoctorSchedule,Appointment, Employee, Room } = require("../models");
+const { DoctorSchedule, Appointment, Employee, Room } = require("../models");
 const { Op } = require("sequelize");
 
 // Lấy lịch làm việc của bác sĩ
@@ -8,22 +8,23 @@ const getDoctorSchedule = async (req, res) => {
 
     const appointments = await Appointment.findAll({
       where: {
-        doctorId: doctorId
+        doctorId: doctorId,
       },
-      attributes: ['id', 'doctorId', 'date', 'startTime', 'endTime'],
+      attributes: ["id", "doctorId", "date", "startTime", "endTime"],
       order: [
-        ['date', 'ASC'],
-        ['startTime', 'ASC']
-      ]
+        ["date", "ASC"],
+        ["startTime", "ASC"],
+      ],
     });
 
     res.status(200).json(appointments);
   } catch (error) {
     console.error("Error in getDoctorSchedule:", error);
-    res.status(500).json({ error: "Failed to get doctor schedule", details: error.message });
+    res
+      .status(500)
+      .json({ error: "Failed to get doctor schedule", details: error.message });
   }
 };
-
 
 // Tạo lịch làm việc mới
 const createDoctorSchedule = async (req, res) => {
@@ -42,19 +43,19 @@ const createDoctorSchedule = async (req, res) => {
         date,
         [Op.or]: [
           {
-            startTime: { [Op.between]: [startTime, endTime] }
+            startTime: { [Op.between]: [startTime, endTime] },
           },
           {
-            endTime: { [Op.between]: [startTime, endTime] }
+            endTime: { [Op.between]: [startTime, endTime] },
           },
           {
             [Op.and]: [
               { startTime: { [Op.lte]: startTime } },
-              { endTime: { [Op.gte]: endTime } }
-            ]
-          }
-        ]
-      }
+              { endTime: { [Op.gte]: endTime } },
+            ],
+          },
+        ],
+      },
     });
 
     if (existingSchedule) {
@@ -66,13 +67,15 @@ const createDoctorSchedule = async (req, res) => {
       date,
       startTime,
       endTime,
-      roomId
+      roomId,
     });
 
     res.status(201).json(schedule);
   } catch (error) {
     console.error("Error in createDoctorSchedule:", error);
-    res.status(500).json({ error: "Failed to create schedule", details: error.message });
+    res
+      .status(500)
+      .json({ error: "Failed to create schedule", details: error.message });
   }
 };
 
@@ -95,13 +98,23 @@ const updateDoctorSchedule = async (req, res) => {
         date: date || schedule.date,
         [Op.or]: [
           {
-            startTime: { [Op.between]: [startTime || schedule.startTime, endTime || schedule.endTime] }
+            startTime: {
+              [Op.between]: [
+                startTime || schedule.startTime,
+                endTime || schedule.endTime,
+              ],
+            },
           },
           {
-            endTime: { [Op.between]: [startTime || schedule.startTime, endTime || schedule.endTime] }
-          }
-        ]
-      }
+            endTime: {
+              [Op.between]: [
+                startTime || schedule.startTime,
+                endTime || schedule.endTime,
+              ],
+            },
+          },
+        ],
+      },
     });
 
     if (existingSchedule) {
@@ -112,13 +125,15 @@ const updateDoctorSchedule = async (req, res) => {
       date: date || schedule.date,
       startTime: startTime || schedule.startTime,
       endTime: endTime || schedule.endTime,
-      roomId: roomId !== undefined ? roomId : schedule.roomId
+      roomId: roomId !== undefined ? roomId : schedule.roomId,
     });
 
     res.status(200).json(schedule);
   } catch (error) {
     console.error("Error in updateDoctorSchedule:", error);
-    res.status(500).json({ error: "Failed to update schedule", details: error.message });
+    res
+      .status(500)
+      .json({ error: "Failed to update schedule", details: error.message });
   }
 };
 
@@ -136,7 +151,9 @@ const deleteDoctorSchedule = async (req, res) => {
     res.status(200).json({ message: "Schedule deleted successfully" });
   } catch (error) {
     console.error("Error in deleteDoctorSchedule:", error);
-    res.status(500).json({ error: "Failed to delete schedule", details: error.message });
+    res
+      .status(500)
+      .json({ error: "Failed to delete schedule", details: error.message });
   }
 };
 
@@ -144,5 +161,5 @@ module.exports = {
   getDoctorSchedule,
   createDoctorSchedule,
   updateDoctorSchedule,
-  deleteDoctorSchedule
+  deleteDoctorSchedule,
 };

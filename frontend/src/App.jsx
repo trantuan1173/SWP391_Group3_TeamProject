@@ -55,7 +55,7 @@ function App() {
         {/* Landing Page */}
         <Route path="/" element={<LandingPage />} />
         {/* Payment routes */}
-        <Route path="/payments/sucess" element={<SuccessPage />} />
+        <Route path="/payments/success" element={<SuccessPage />} />
         <Route path="/payments/cancel" element={<CancelPage />} />
         {/* Auth routes */}
         <Route path="/login" element={<Login />} />

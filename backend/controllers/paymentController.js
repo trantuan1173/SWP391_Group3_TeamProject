@@ -15,10 +15,16 @@ const payos = new PayOS({
 
 const createPayment = async (req, res) => {
   try {
-    const { appointmentId, patientId } = req.body;
+    const { appointmentId, patientId, returnUrl, cancelUrl } = req.body;
 
-    console.log("createPayment called with:", { appointmentId, patientId });
+    console.log("createPayment called with:", {
+      appointmentId,
+      patientId,
+      returnUrl,
+      cancelUrl,
+    });
 
+    // Kiểm tra input
     if (!appointmentId || !patientId) {
       return res.status(400).json({ error: "Thiếu dữ liệu bắt buộc" });
     }
@@ -30,13 +36,12 @@ const createPayment = async (req, res) => {
     const patient = await Patient.findByPk(patientId);
     if (!patient)
       return res.status(404).json({ error: "Không tìm thấy bệnh nhân" });
+
     const medicalRecord = await MedicalRecord.findOne({
       where: { appointmentId },
     });
     if (!medicalRecord)
-      return res
-        .status(404)
-        .json({ error: "Không tìm thấy hồ sơ y tế của cuộc hẹn" });
+      return res.status(404).json({ error: "Không tìm thấy hồ sơ y tế" });
 
     const services = await MedicalRecordService.findAll({
       where: { medicalRecordId: medicalRecord.id },
@@ -51,12 +56,15 @@ const createPayment = async (req, res) => {
 
     const orderCode = Math.floor(Date.now() / 1000);
 
+    // Dùng URL frontend truyền xuống, fallback nếu thiếu
     const paymentLink = await payos.paymentRequests.create({
       orderCode,
       amount: totalAmount,
       description: `Thanh toán khám bệnh #${appointmentId}`,
-      returnUrl: `${process.env.FRONT_END_URL}/payments/success?appointmentId=${appointmentId}`,
-      cancelUrl: `${process.env.FRONT_END_URL}/payments/cancel?appointmentId=${appointmentId}`,
+      returnUrl: returnUrl || `${process.env.FRONT_END_URL}/payments/success`,
+      cancelUrl:
+        cancelUrl ||
+        `${process.env.FRONT_END_URL}/payments/cancel?appointmentId=${appointmentId}`,
     });
 
     const payment = await Payment.create({

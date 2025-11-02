@@ -130,6 +130,12 @@ export default function AppointmentPage() {
           appointmentId: appointment.id,
           patientId: appointment.PatientId || appointment.patientId,
           amount: appointment.price || 100000,
+          returnUrl: `http://localhost:5173/patient/${
+            appointment.PatientId || appointment.patientId
+          }`,
+          cancelUrl: `http://localhost:5173/patient/${
+            appointment.PatientId || appointment.patientId
+          }`,
         },
         { headers }
       );
