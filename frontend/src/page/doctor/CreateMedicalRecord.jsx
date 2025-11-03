@@ -338,7 +338,6 @@ const CreateMedicalRecord = () => {
               </div>
             </div>
 
-            {/* Hiển thị số lượng tìm thấy */}
             {searchService && (
               <p className="text-sm text-gray-600 mb-3">
                 Tìm thấy {filteredServices.length} dịch vụ
