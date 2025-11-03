@@ -20,6 +20,7 @@ const CreateMedicalRecord = () => {
   const [doctorInfo, setDoctorInfo] = useState(null);
   const [activeMenu, setActiveMenu] = useState('create-record');
   const navigate = useNavigate();
+  const [searchService, setSearchService] = useState('');
 
   useEffect(() => {
     checkAuthAndFetchData();
@@ -165,6 +166,11 @@ const CreateMedicalRecord = () => {
     }
   };
 
+  const filteredServices = services.filter(service => 
+  service.name.toLowerCase().includes(searchService.toLowerCase()) ||
+  (service.description && service.description.toLowerCase().includes(searchService.toLowerCase()))
+  );
+
   if (loading) {
     return (
       <DoctorLayout activeMenu={activeMenu} setActiveMenu={setActiveMenu} doctorInfo={doctorInfo}>
@@ -177,6 +183,17 @@ const CreateMedicalRecord = () => {
 
   return (
     <DoctorLayout activeMenu={activeMenu} setActiveMenu={setActiveMenu} doctorInfo={doctorInfo}>
+      <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            {/*<button className="p-2 rounded hover:bg-white/60">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <div className="text-gray-700 font-semibold">Xin chào, {doctorInfo?.name || 'Bác Sĩ'}</div> */}
+          </div>
+          <div className="text-sm text-gray-500">Hôm nay: {new Date().toLocaleDateString('vi-VN')}</div>
+        </div>
       <div className="max-w-4xl medium-h mx-auto p-8 bg-white rounded-xl shadow mt-8">
         <h1 className="text-3xl font-bold mb-6 text-green-700">Tạo Hồ Sơ Khám Bệnh</h1>
 
@@ -283,55 +300,102 @@ const CreateMedicalRecord = () => {
             />
           </div>
 
-          {/* Phần chọn dịch vụ giữ nguyên */}
           <div className="bg-green-50 p-4 rounded-lg">
-            <label className="block font-semibold mb-3 text-lg">
-              5. Chọn dịch vụ <span className="text-red-500">*</span>
-            </label>
+            <div className="flex items-center justify-between gap-4 mb-3">
+              <label className="font-semibold text-lg whitespace-nowrap">
+                5. Chọn dịch vụ <span className="text-red-500">*</span>
+              </label>
+              
+              <div className="flex-1 max-w-md">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Tìm kiếm dịch vụ..."
+                    value={searchService}
+                    onChange={(e) => setSearchService(e.target.value)}
+                    className="w-full border-2 border-green-300 rounded-lg px-4 py-2 pl-10 focus:outline-none focus:border-green-500"
+                  />
+                  <svg 
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  {searchService && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchService('')}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Hiển thị số lượng tìm thấy */}
+            {searchService && (
+              <p className="text-sm text-gray-600 mb-3">
+                Tìm thấy {filteredServices.length} dịch vụ
+              </p>
+            )}
+
             <div className="space-y-3 max-h-96 overflow-y-auto">
-              {services.map(service => {
-                const selected = selectedServices.find(s => s.serviceId === service.id);
-                return (
-                  <div key={service.id} className="flex items-center gap-4 p-3 bg-white rounded border hover:border-green-400">
-                    <input
-                      type="checkbox"
-                      checked={!!selected}
-                      onChange={e => {
-                        if (e.target.checked) {
-                          handleServiceChange(service.id, 1);
-                        } else {
-                          handleServiceChange(service.id, 0);
-                        }
-                      }}
-                      className="w-5 h-5"
-                    />
-                    <div className="flex-1">
-                      <p className="font-semibold">{service.name}</p>
-                      {service.description && (
-                        <p className="text-sm text-gray-600">{service.description}</p>
-                      )}
-                      <p className="text-green-600 font-semibold">
-                        {service.price.toLocaleString('vi-VN')}đ
-                      </p>
-                    </div>
-                    {selected && (
-                      <div className="flex items-center gap-2">
-                        <label className="text-sm font-semibold">Số lượng:</label>
-                        <input
-                          type="number"
-                          min="1"
-                          value={selected.quantity}
-                          onChange={e => handleServiceChange(service.id, Number(e.target.value))}
-                          className="w-20 border-2 rounded px-2 py-1 text-center"
-                        />
-                        <span className="text-sm font-semibold text-green-600">
-                          = {selected.total.toLocaleString('vi-VN')}đ
-                        </span>
+              {filteredServices.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <p className="text-lg">Không tìm thấy dịch vụ nào</p>
+                  <p className="text-sm mt-2">Thử tìm kiếm với từ khóa khác</p>
+                </div>
+              ) : (
+                filteredServices.map(service => {
+                  const selected = selectedServices.find(s => s.serviceId === service.id);
+                  return (
+                    <div key={service.id} className="flex items-center gap-4 p-3 bg-white rounded border hover:border-green-400 transition">
+                      <input
+                        type="checkbox"
+                        checked={!!selected}
+                        onChange={e => {
+                          if (e.target.checked) {
+                            handleServiceChange(service.id, 1);
+                          } else {
+                            handleServiceChange(service.id, 0);
+                          }
+                        }}
+                        className="w-5 h-5 accent-green-600"
+                      />
+                      <div className="flex-1">
+                        <p className="font-semibold">{service.name}</p>
+                        {service.description && (
+                          <p className="text-sm text-gray-600">{service.description}</p>
+                        )}
+                        <p className="text-green-600 font-semibold">
+                          {service.price.toLocaleString('vi-VN')}đ
+                        </p>
                       </div>
-                    )}
-                  </div>
-                );
-              })}
+                      {selected && (
+                        <div className="flex items-center gap-2">
+                          <label className="text-sm font-semibold">Số lượng:</label>
+                          <input
+                            type="number"
+                            min="1"
+                            value={selected.quantity}
+                            onChange={e => handleServiceChange(service.id, Number(e.target.value))}
+                            className="w-20 border-2 rounded px-2 py-1 text-center focus:outline-none focus:border-green-500"
+                          />
+                          <span className="text-sm font-semibold text-green-600">
+                            = {selected.total.toLocaleString('vi-VN')}đ
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
             </div>
             
             {selectedServices.length > 0 && (
@@ -343,6 +407,7 @@ const CreateMedicalRecord = () => {
               </div>
             )}
           </div>
+
 
           <div className="flex gap-4">
             <button
