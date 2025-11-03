@@ -2,7 +2,7 @@
 const Patient = require("./Patient");
 const Appointment = require("./Appointment");
 const MedicalRecord = require("./MedicalRecord");
-const DoctorSchedule = require("./DoctorSchedule");
+// const DoctorSchedule = require("./DoctorSchedule");
 const Room = require("./Room");
 const Employee = require("./Employee");
 const EmployeeRole = require("./EmployeeRole");
@@ -11,6 +11,13 @@ const Service = require("./Service");
 const MedicalRecordService = require("./MedicalRecordService");
 const Feedback = require("./Feedback");
 const News = require("./News");
+const Payment = require("./Payment");
+
+Appointment.hasOne(Payment, { foreignKey: "appointmentId" });
+Payment.belongsTo(Appointment, { foreignKey: "appointmentId" });
+
+Patient.hasMany(Payment, { foreignKey: "patientId" });
+Payment.belongsTo(Patient, { foreignKey: "patientId" });
 
 Feedback.belongsTo(Appointment, { foreignKey: "appointmentId" });
 Appointment.hasOne(Feedback, { foreignKey: "appointmentId" });
@@ -43,9 +50,11 @@ Role.belongsToMany(Employee, {
   as: "employees",
 });
 
-
 // Sửa lỗi EagerLoadingError: EmployeeRole is not associated to Employee
-Employee.hasMany(EmployeeRole, { foreignKey: 'employeeId', as: 'employeeRoles' });
+Employee.hasMany(EmployeeRole, {
+  foreignKey: "employeeId",
+  as: "employeeRoles",
+});
 
 Employee.hasMany(Appointment, { foreignKey: "doctorId" });
 Appointment.belongsTo(Employee, { foreignKey: "doctorId" });
@@ -61,8 +70,8 @@ Appointment.belongsTo(Patient, { foreignKey: "patientId" });
 Patient.hasMany(MedicalRecord, { foreignKey: "patientId" });
 MedicalRecord.belongsTo(Patient, { foreignKey: "patientId" });
 
-Employee.hasMany(DoctorSchedule, { foreignKey: "doctorId" });
-DoctorSchedule.belongsTo(Employee, { foreignKey: "doctorId" });
+// Employee.hasMany(DoctorSchedule, { foreignKey: "doctorId" });
+// DoctorSchedule.belongsTo(Employee, { foreignKey: "doctorId" });
 
 Room.hasMany(Appointment, { foreignKey: "roomId" });
 Appointment.belongsTo(Room, { foreignKey: "roomId" });
@@ -74,13 +83,13 @@ News.belongsTo(Employee, { foreignKey: "createdBy" });
 Employee.hasMany(News, { foreignKey: "createdBy" });
 
 // Thêm associations cho DoctorSchedule và Room
-DoctorSchedule.belongsTo(Room, { foreignKey: "roomId" });
-Room.hasMany(DoctorSchedule, { foreignKey: "roomId" });
+// DoctorSchedule.belongsTo(Room, { foreignKey: "roomId" });
+// Room.hasMany(DoctorSchedule, { foreignKey: "roomId" });
 module.exports = {
   Patient,
   Appointment,
   MedicalRecord,
-  DoctorSchedule,
+  // DoctorSchedule,
   Room,
   Employee,
   EmployeeRole,
@@ -89,4 +98,5 @@ module.exports = {
   Service,
   Feedback,
   News,
+  Payment,
 };

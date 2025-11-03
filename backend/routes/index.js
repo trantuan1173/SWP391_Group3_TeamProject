@@ -11,6 +11,7 @@ const employeeRouter = require("./EmployeeRouter");
 const serviceRouter = require("./ServiceRouter");
 const medicalRecordRouter = require("./MedicalRecordRouter");
 const newsRouter = require("./NewsRouter");
+const paymentRouter = require("./PaymentRouter");
 
 router.use("/doctors", DoctorRouter);
 router.use("/patients", PatientRouter);
@@ -22,5 +23,5 @@ router.use("/doctor-schedules", doctorScheduleRouter);
 router.use("/services", serviceRouter);
 router.use("/medical-records", medicalRecordRouter);
 router.use("/news", newsRouter);
+router.use("/payments", paymentRouter);
 module.exports = router;
- 

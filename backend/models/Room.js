@@ -8,7 +8,15 @@ const Room = sequelize.define("Room", {
   },
   type: {
     // type: DataTypes.ENUM("khám", "phẫu thuật", "xét nghiệm", "MRI", "CT", "ECG", "X-quang", "y tế khác"),
-    type: DataTypes.ENUM("Nội khoa", "Ngoại khoa", "Sản - Nhi", "Da liễu - Thẩm mỹ", "Tâm lý - Tâm thần", "Phục hồi chức năng", "Y học cổ truyền"),
+    type: DataTypes.ENUM(
+      "Nội khoa",
+      "Ngoại khoa",
+      "Sản - Nhi",
+      "Da liễu - Thẩm mỹ",
+      "Tâm lý - Tâm thần",
+      "Phục hồi chức năng",
+      "Y học cổ truyền"
+    ),
     // allowNull: false,
   },
   status: {

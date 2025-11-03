@@ -63,8 +63,8 @@ export default function AdminLayout({ children }) {
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
         {/* Sidebar với background xanh lá */}
-        <Sidebar className={"border-0 h-screen bg-[#3de484]"}>
-          <SidebarHeader className="border-b border-green-500 p-4 bg-[#3de484]">
+        <Sidebar className={"border-0 h-screen bg-[#00A646]"}>
+          <SidebarHeader className="border-b border-green-500 p-4 bg-[#00A646]">
             <img
               src="/icon/logo.png"
               alt="Healthy People Logo"
@@ -72,7 +72,7 @@ export default function AdminLayout({ children }) {
             />
           </SidebarHeader>
 
-          <SidebarContent className="bg-[#3de484]">
+          <SidebarContent className="bg-[#00A646]">
             <SidebarGroup>
               <SidebarGroupContent>
                 <SidebarMenu className="!p-0">
@@ -81,7 +81,7 @@ export default function AdminLayout({ children }) {
                       <SidebarMenuButton variant="admin" asChild>
                         <button
                           onClick={() => navigate(item.url)}
-                          className="flex w-full items-center !p-6 !rounded-md hover:!bg-green-400 hover:!text-white active:!bg-green-300 active:!text-black text-black transition-colors font-bold"
+                          className="flex w-full items-center !p-6 !rounded-md hover:!bg-purple-500 hover:!text-white active:!bg-purple-400 active:!text-black text-black transition-colors font-bold"
                         >
                           <item.icon className="h-4 w-4" />
                           <span>{item.title}</span>
@@ -94,7 +94,7 @@ export default function AdminLayout({ children }) {
             </SidebarGroup>
           </SidebarContent>
 
-          <SidebarFooter className="border-t border-green-500 p-4 bg-[#3de484] md:rounded-br-[50px]">
+          <SidebarFooter className="border-t border-green-500 p-4 bg-[#00A646] md:rounded-br-[50px]">
             {user ? (
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-2">
