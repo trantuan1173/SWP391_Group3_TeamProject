@@ -11,6 +11,13 @@ const Service = require("./Service");
 const MedicalRecordService = require("./MedicalRecordService");
 const Feedback = require("./Feedback");
 const News = require("./News");
+const Payment = require("./Payment");
+
+Appointment.hasOne(Payment, { foreignKey: "appointmentId" });
+Payment.belongsTo(Appointment, { foreignKey: "appointmentId" });
+
+Patient.hasMany(Payment, { foreignKey: "patientId" });
+Payment.belongsTo(Patient, { foreignKey: "patientId" });
 
 Feedback.belongsTo(Appointment, { foreignKey: "appointmentId" });
 Appointment.hasOne(Feedback, { foreignKey: "appointmentId" });
@@ -43,9 +50,11 @@ Role.belongsToMany(Employee, {
   as: "employees",
 });
 
-
 // Sửa lỗi EagerLoadingError: EmployeeRole is not associated to Employee
-Employee.hasMany(EmployeeRole, { foreignKey: 'employeeId', as: 'employeeRoles' });
+Employee.hasMany(EmployeeRole, {
+  foreignKey: "employeeId",
+  as: "employeeRoles",
+});
 
 Employee.hasMany(Appointment, { foreignKey: "doctorId" });
 Appointment.belongsTo(Employee, { foreignKey: "doctorId" });
@@ -89,4 +98,5 @@ module.exports = {
   Service,
   Feedback,
   News,
+  Payment,
 };
