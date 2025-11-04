@@ -19,8 +19,8 @@ const STATUS_OPTIONS = [
   "pending",
   "confirmed",
   "cancelled",
-  "completed",
   "to-payment",
+  "completed",
 ];
 
 export default function ReceptionistAppointmentDetail() {
@@ -33,7 +33,7 @@ export default function ReceptionistAppointmentDetail() {
   const [newStartTime, setNewStartTime] = useState("");
   const [newEndTime, setNewEndTime] = useState("");
   const [newStatus, setNewStatus] = useState("");
-
+  const [error, setError] = useState("");
   const [availableDoctors, setAvailableDoctors] = useState([]);
   const [availableRooms, setAvailableRooms] = useState([]);
   const [suggestedSlots, setSuggestedSlots] = useState([]);
@@ -54,6 +54,18 @@ export default function ReceptionistAppointmentDetail() {
     const endDateTime = startDateTime.add(1, "hour");
 
     return endDateTime.format("HH:mm");
+  };
+
+  const handleStatusChange = (e) => {
+    const selectedStatus = e.target.value;
+
+    if (appointment.status === "completed" && selectedStatus === "to-payment") {
+      setError("Không thể chuyển từ trạng thái COMPLETED về TO-PAYMENT.");
+      return;
+    }
+
+    setError("");
+    setNewStatus(selectedStatus);
   };
 
   const handleStartTimeChange = (e) => {
@@ -135,10 +147,8 @@ export default function ReceptionistAppointmentDetail() {
         doctorRes.data.suggestedSlots?.length > 0
       ) {
         toast(
-          `Không có bác sĩ khả dụng trong ${
-            selectedSpeciality || "chuyên khoa này"
-          } vào khung giờ ${newStartTime}-${newEndTime}. Đã tìm thấy ${
-            doctorRes.data.suggestedSlots.length
+          `Không có bác sĩ khả dụng trong ${selectedSpeciality || "chuyên khoa này"
+          } vào khung giờ ${newStartTime}-${newEndTime}. Đã tìm thấy ${doctorRes.data.suggestedSlots.length
           } gợi ý.`,
           { icon: "💡" }
         );
@@ -309,20 +319,17 @@ export default function ReceptionistAppointmentDetail() {
         <div class="info">
             <p><strong>Mã Lịch Hẹn:</strong> ${appointment.id}</p>
             <p><strong>Ngày Thanh Toán:</strong> ${dayjs().format(
-              "DD/MM/YYYY HH:mm"
-            )}</p>
-            <p><strong>Bệnh Nhân:</strong> ${
-              appointment.Patient?.name || "N/A"
-            }</p>
-            <p><strong>Bác Sĩ Khám:</strong> ${
-              appointment.Employee?.name || "N/A"
-            }</p>
-            <p><strong>Liên hệ Bác Sĩ Khám:</strong> ${
-              "Email: " +
-                appointment.Employee?.email +
-                (appointment.Employee?.phoneNumber &&
-                  " SDT: " + appointment.Employee.phoneNumber) || "N/A"
-            }</p>
+      "DD/MM/YYYY HH:mm"
+    )}</p>
+            <p><strong>Bệnh Nhân:</strong> ${appointment.Patient?.name || "N/A"
+      }</p>
+            <p><strong>Bác Sĩ Khám:</strong> ${appointment.Employee?.name || "N/A"
+      }</p>
+            <p><strong>Liên hệ Bác Sĩ Khám:</strong> ${"Email: " +
+      appointment.Employee?.email +
+      (appointment.Employee?.phoneNumber &&
+        " SDT: " + appointment.Employee.phoneNumber) || "N/A"
+      }</p>
         </div>
 
         <h2>Chi tiết Dịch vụ</h2>
@@ -338,22 +345,22 @@ export default function ReceptionistAppointmentDetail() {
             </thead>
             <tbody>
                 ${services
-                  .map(
-                    (s, i) => `
+        .map(
+          (s, i) => `
                     <tr>
                         <td>${i + 1}</td>
                         <td>${s.name}</td>
                         <td>${s.quantity || 1}</td>
                         <td>${new Intl.NumberFormat("vi-VN").format(
-                          s.price
-                        )} VND</td>
+            s.price
+          )} VND</td>
                         <td>${new Intl.NumberFormat("vi-VN").format(
-                          s.total
-                        )} VND</td>
+            s.total
+          )} VND</td>
                     </tr>
                 `
-                  )
-                  .join("")}
+        )
+        .join("")}
             </tbody>
         </table>
 
@@ -422,9 +429,8 @@ export default function ReceptionistAppointmentDetail() {
             <p>
               <strong>Trạng thái:</strong>{" "}
               <span
-                className={`font-medium text-${
-                  a.status === "confirmed" ? "blue" : "yellow"
-                }-600`}
+                className={`font-medium text-${a.status === "confirmed" ? "blue" : "yellow"
+                  }-600`}
               >
                 {a.status}
               </span>
@@ -515,15 +521,15 @@ export default function ReceptionistAppointmentDetail() {
                         <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
                           {service.price
                             ? new Intl.NumberFormat("vi-VN").format(
-                                service.price
-                              ) + " VND"
+                              service.price
+                            ) + " VND"
                             : "N/A"}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap text-sm font-semibold text-gray-700">
                           {service.total
                             ? new Intl.NumberFormat("vi-VN").format(
-                                service.total
-                              ) + " VND"
+                              service.total
+                            ) + " VND"
                             : "N/A"}
                         </td>
                       </tr>
@@ -564,11 +570,10 @@ export default function ReceptionistAppointmentDetail() {
                 <button
                   onClick={() => handlePayment(a)}
                   disabled={newStatus === "completed" || isUpdating}
-                  className={`flex-1 px-4 py-2 text-white font-semibold rounded-md transition-colors ${
-                    newStatus === "completed" || isUpdating
+                  className={`flex-1 px-4 py-2 text-white font-semibold rounded-md transition-colors ${newStatus === "completed" || isUpdating
                       ? "bg-gray-400 cursor-not-allowed"
                       : "bg-green-600 hover:bg-green-700"
-                  }`}
+                    }`}
                 >
                   {isUpdating ? "Đang xử lý..." : "Thanh toán PayOS"}
                 </button>
@@ -628,7 +633,7 @@ export default function ReceptionistAppointmentDetail() {
             </div>
           </div>
 
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Trạng thái:
             </label>
@@ -643,6 +648,22 @@ export default function ReceptionistAppointmentDetail() {
                 </option>
               ))}
             </select>
+          </div> */}
+          <div className="form-group">
+            <label>Trạng thái</label>
+            <select
+              value={newStatus}
+              onChange={handleStatusChange}
+              className={`form-control ${error ? "border-red-500" : ""}`}
+            >
+              <option value="">--Chọn trạng thái--</option>
+              <option value="pending">Pending</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="to-payment">To Payment</option>
+              <option value="completed">Completed</option>
+            </select>
+
+            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
           </div>
 
           <div className="mb-4">
@@ -685,11 +706,10 @@ export default function ReceptionistAppointmentDetail() {
               <button
                 onClick={fetchAvailability}
                 disabled={fetchingAvailability || isUpdating}
-                className={`px-4 py-2 text-sm rounded-md transition-colors ${
-                  fetchingAvailability
+                className={`px-4 py-2 text-sm rounded-md transition-colors ${fetchingAvailability
                     ? "bg-gray-400"
                     : "bg-indigo-600 hover:bg-indigo-700 text-white"
-                }`}
+                  }`}
               >
                 {fetchingAvailability ? "Đang tải..." : "Tải lại DS"}
               </button>
@@ -755,14 +775,13 @@ export default function ReceptionistAppointmentDetail() {
               isUpdating ||
               fetchingAvailability
             }
-            className={`w-full mt-4 px-4 py-2 text-white font-semibold rounded-md transition-colors ${
-              !selectedDoctorId ||
-              !selectedRoomId ||
-              isUpdating ||
-              fetchingAvailability
+            className={`w-full mt-4 px-4 py-2 text-white font-semibold rounded-md transition-colors ${!selectedDoctorId ||
+                !selectedRoomId ||
+                isUpdating ||
+                fetchingAvailability
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-blue-600 hover:bg-blue-700"
-            }`}
+              }`}
           >
             {isUpdating ? "Đang cập nhật..." : "Lưu Thay Đổi (UPDATE)"}
           </button>
