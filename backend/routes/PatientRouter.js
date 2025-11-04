@@ -10,7 +10,11 @@ const {
   getPatientById,
   updatePatient,
   createAppointmentWithoutLogin,
-  confirmAppointment
+  confirmAppointment,
+  verifyPatient,
+  resendVerifyEmail,
+  forgotPassword,
+  resetPassword,
 } = require("../controllers/PatientController");
 const { protect } = require("../middleware/authMiddleware");
 
@@ -47,6 +51,116 @@ const { protect } = require("../middleware/authMiddleware");
  *         description: Failed to login
  */
 router.post("/login", patientLogin);
+
+/**
+ * @swagger
+ * /patients/forgot-password:
+ *   post:
+ *     summary: Forgot password
+ *     tags: [Patient]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: OTP sent successfully
+ *       404:
+ *         description: Patient not found
+ *       500:
+ *         description: Failed to send OTP
+ */
+router.post("/forgot-password", forgotPassword);
+
+/**
+ * @swagger
+ * /patients/reset-password:
+ *   post:
+ *     summary: Reset password
+ *     tags: [Patient]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               identityNumber:
+ *                 type: string
+ *               otp:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
+ *       404:
+ *         description: Patient not found
+ *       400:
+ *         description: Invalid OTP
+ *       500:
+ *         description: Failed to reset password
+ */
+router.post("/reset-password", resetPassword);
+
+/**
+ * @swagger
+ * /patients/verify:
+ *   post:
+ *     summary: Verify a patient
+ *     tags: [Patient]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               otp:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Patient verified successfully
+ *       401:
+ *         description: Invalid credentials
+ *       500:
+ *         description: Failed to verify patient
+ */
+router.post("/verify", verifyPatient);
+
+/**
+ * @swagger
+ * /patients/resend-verify-email:
+ *   post:
+ *     summary: Resend verification email
+ *     tags: [Patient]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: OTP sent successfully
+ *       404:
+ *         description: Patient not found
+ *       400:
+ *         description: Patient already verified
+ *       500:
+ *         description: Failed to resend verification email
+ */
+router.post("/resend-verify-email", resendVerifyEmail);
 
 /**
  * @swagger

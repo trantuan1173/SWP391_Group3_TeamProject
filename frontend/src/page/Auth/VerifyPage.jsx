@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import {API_ENDPOINTS} from "../../config";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const VerifyPage = () => {
   const navigate = useNavigate();
-  const [message, setMessage] = useState("Đang xác minh...");
+  const location = useLocation(); 
+  const [message, setMessage] = useState("");
   const queryParams = new URLSearchParams(location.search);
   const email = queryParams.get('email');
   const [error, setError] = useState("");
@@ -18,6 +19,9 @@ const VerifyPage = () => {
   const handleChange = (e) => {
     setFormData({...formData, [e.target.name]: e.target.value});
   };
+  useEffect(() => {
+    setFormData((prev) => ({ ...prev, email: email || '' }));
+  }, [email]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -76,7 +80,6 @@ const VerifyPage = () => {
             </div>
 
             <button
-              onClick={handleSubmit}
               type="submit"
               className="w-full py-2 rounded bg-[#6FA549] text-white font-medium hover:bg-green-700 transition border border-[#000000]"
             >

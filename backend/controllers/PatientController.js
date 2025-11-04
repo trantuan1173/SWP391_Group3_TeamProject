@@ -1,6 +1,7 @@
 const { Patient, Appointment, MedicalRecord, Employee, Room, Service } = require("../models");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const {sendVerifyEmail, sendForgotPasswordEmail} = require("../service/sendVerifyEmail");
 
 // Generate JWT token
 function generateToken(id, type) {
@@ -42,7 +43,7 @@ const patientLogin = async (req, res) => {
   }
 };
 
-// ✅ Register patient
+// Register patient
 const register = async (req, res) => {
   try {
     const {
@@ -51,9 +52,6 @@ const register = async (req, res) => {
       password,
       identityNumber,
       phoneNumber,
-      dateOfBirth,
-      gender,
-      address,
     } = req.body;
 
     if (!name || !email || !password)
@@ -64,14 +62,14 @@ const register = async (req, res) => {
     const existing = await Patient.findOne({ where: { email } });
     if (existing) {
       console.log(`[register] conflict: email exists -> ${email}`);
-      return res.status(409).json({ error: "Email already exists" });
+      return res.status(409).json({ error: "Email đã tồn tại" });
     }
 
     if (phoneNumber) {
       const existingPhone = await Patient.findOne({ where: { phoneNumber } });
       if (existingPhone) {
         console.log(`[register] conflict: phone exists -> ${phoneNumber}`);
-        return res.status(409).json({ error: "Phone number already exists" });
+        return res.status(409).json({ error: "Số điện thoại đã tồn tại" });
       }
     }
 
@@ -79,9 +77,13 @@ const register = async (req, res) => {
       const existingIdentity = await Patient.findOne({ where: { identityNumber } });
       if (existingIdentity) {
         console.log(`[register] conflict: identity exists -> ${identityNumber}`);
-        return res.status(409).json({ error: "Identity number already exists" });
+        return res.status(409).json({ error: "Số căn cước công dân đã tồn tại" });
       }
     }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpires = Date.now() + 10 * 60 * 1000;
+
 
     const newPatient = await Patient.create({
       name,
@@ -89,10 +91,11 @@ const register = async (req, res) => {
       password: password,
       identityNumber: identityNumber || null,
       phoneNumber: phoneNumber || null,
-      dateOfBirth: dateOfBirth || null,
-      gender: gender || null,
-      address: address || null,
+      otp: otp,
+      otpExpires: otpExpires,
     });
+    
+    sendVerifyEmail(email, otp);
 
     res.status(201).json({
       message: "Patient registered successfully",
@@ -104,7 +107,7 @@ const register = async (req, res) => {
   }
 };
 
-// ✅ Create appointment with login (JWT decoded)
+// Create appointment with login (JWT decoded)
 const createAppointment = async (req, res) => {
   try {
     const { date, startTime, endTime } = req.body;
@@ -319,6 +322,128 @@ const getPatientById = async (req, res) => {
   }
 };
 
+const verifyPatient = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    const patient = await Patient.findOne({ where: { email } });
+
+    if (!patient) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Patient not found" });
+    }
+
+    if (patient.isActive) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Patient already verified" });
+    }
+
+    if (!patient.otp || patient.otp !== otp || patient.otpExpires < Date.now()) {
+      return res
+        .status(400)
+        .json({ success: false, message: "OTP không hợp lệ hoặc đã hết hạn" });
+    }
+
+    patient.isActive = true;
+    patient.otp = undefined;
+    patient.otpExpires = undefined;
+    await patient.save();
+
+    res.status(200).json({ success: true, message: "Xác minh thành công" });
+  } catch (error) {
+    console.error("Verify error:", error);
+    res.status(500).json({ success: false, message: "Lỗi server" });
+  }
+};
+
+const resendVerifyEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const patient = await Patient.findOne({ where: { email } });
+
+    if (!patient) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Patient not found" });
+    }
+
+    if (patient.isActive) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Patient already verified" });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    const otpExpires = Date.now() + 60 * 60 * 1000;
+
+    patient.otp = otp;
+    patient.otpExpires = otpExpires;
+    await patient.save();
+
+    res.status(200).json({ success: true, message: "OTP sent successfully" });
+  } catch (error) {
+    console.error("Resend verify error:", error);
+    res.status(500).json({ success: false, message: "Lỗi server" });
+  }
+};
+
+const forgotPassword = async (req, res) => {
+  try {
+    const { identityNumber } = req.body;
+    const patient = await Patient.findOne({ where: { identityNumber } });
+
+    if (!patient) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Patient not found" });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    const otpExpires = Date.now() + 60 * 60 * 1000;
+
+    patient.otp = otp;
+    patient.otpExpires = otpExpires;
+    await patient.save();
+
+    sendForgotPasswordEmail(patient.email, otp);
+
+    res.status(200).json({ success: true, message: "OTP sent successfully" });
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    res.status(500).json({ success: false, message: "Lỗi server" });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const { identityNumber, otp, password } = req.body;
+    const patient = await Patient.findOne({ where: { identityNumber } });
+
+    if (!patient) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Patient not found" });
+    }
+
+    if (!patient.otp || patient.otp !== otp || patient.otpExpires < Date.now()) {
+      return res
+        .status(400)
+        .json({ success: false, message: "OTP không hợp lệ hoặc đã hết hạn" });
+    }
+
+    patient.password = password;
+    patient.otp = undefined;
+    patient.otpExpires = undefined;
+    await patient.save();
+
+    res.status(200).json({ success: true, message: "Mật khẩu đã được thay đổi" });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    res.status(500).json({ success: false, message: "Lỗi server" });
+  }
+};
+
 module.exports = {
   patientLogin,
   register,
@@ -330,6 +455,10 @@ module.exports = {
   getDocuments,
   getPatientById,
   updatePatient,
+  verifyPatient,
+  resendVerifyEmail,
+  forgotPassword,
+  resetPassword,
 };
 
 // Update patient profile (only patient themself or admin via other routes)

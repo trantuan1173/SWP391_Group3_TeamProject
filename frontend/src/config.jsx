@@ -10,7 +10,10 @@ export const API_ENDPOINTS = {
   PATIENT_LOGIN: `${baseUrl}/api/patients/login`,
   REGISTER: `${baseUrl}/api/patients/register`,
   AUTH_PROFILE: `${baseUrl}/api/users/profile`,
-  VERIFY: `${baseUrl}/api/users/verify`,
+  VERIFY: `${baseUrl}/api/patients/verify`,
+  RESEND_VERIFY_EMAIL: `${baseUrl}/api/patients/resend-verify-email`,
+  FORGOT_PASSWORD: `${baseUrl}/api/patients/forgot-password`,
+  RESET_PASSWORD: `${baseUrl}/api/patients/reset-password`,
   DOCTOR_LIST: `${baseUrl}/api/doctors`,
   GET_DOCTOR_SCHEDULE: (doctorId) =>
     `${baseUrl}/api/doctors/${doctorId}/schedule`,
