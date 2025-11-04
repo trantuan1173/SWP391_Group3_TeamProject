@@ -11,6 +11,8 @@ export default function AppointmentPage() {
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(false);
 
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [showModal, setShowModal] = useState(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -18,6 +20,20 @@ export default function AppointmentPage() {
   const [toDate, setToDate] = useState("");
   const [doctorFilter, setDoctorFilter] = useState("");
   const [doctors, setDoctors] = useState([]);
+
+  const handleViewDetail = async (appointmentId) => {
+    try {
+      const token = localStorage.getItem("token");
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await axios.get(API_ENDPOINTS.APPOINTMENT_BY_ID(appointmentId), { headers });
+      setSelectedAppointment(res.data);
+      console.log(res.data);
+      setShowModal(true);
+    } catch (err) {
+      console.error("Lỗi khi lấy chi tiết lịch hẹn:", err);
+      alert("Không thể tải chi tiết lịch hẹn!");
+    }
+  };
 
   // ✅ Debounce search
   useEffect(() => {
@@ -70,8 +86,8 @@ export default function AppointmentPage() {
           setAppointments(list);
           setTotalItems(
             data?.total ||
-              data?.count ||
-              (Array.isArray(data) ? data.length : 0)
+            data?.count ||
+            (Array.isArray(data) ? data.length : 0)
           );
         }
       } catch (err) {
@@ -130,12 +146,10 @@ export default function AppointmentPage() {
           appointmentId: appointment.id,
           patientId: appointment.PatientId || appointment.patientId,
           amount: appointment.price || 100000,
-          returnUrl: `http://localhost:5173/patient/${
-            appointment.PatientId || appointment.patientId
-          }`,
-          cancelUrl: `http://localhost:5173/patient/${
-            appointment.PatientId || appointment.patientId
-          }`,
+          returnUrl: `http://localhost:5173/patient/${appointment.PatientId || appointment.patientId
+            }`,
+          cancelUrl: `http://localhost:5173/patient/${appointment.PatientId || appointment.patientId
+            }`,
         },
         { headers }
       );
@@ -203,6 +217,94 @@ export default function AppointmentPage() {
         />
       </div>
 
+      {showModal && selectedAppointment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <h2 className="text-2xl font-bold mb-4 text-gray-700 text-center">Chi tiết Lịch hẹn</h2>
+
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">🧍‍♂️ Thông tin Bệnh nhân</h3>
+              <p><strong>Tên:</strong> {selectedAppointment.Patient?.name || "N/A"}</p>
+              <p><strong>Email:</strong> {selectedAppointment.Patient?.email || "N/A"}</p>
+              <p><strong>SĐT:</strong> {selectedAppointment.Patient?.phoneNumber || "N/A"}</p>
+              <p><strong>Giới tính:</strong> {selectedAppointment.Patient?.gender || "N/A"}</p>
+            </div>
+
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">👨‍⚕️ Thông tin Bác sĩ</h3>
+              <p><strong>Tên:</strong> {selectedAppointment.Employee?.name || "N/A"}</p>
+              <p><strong>Email:</strong> {selectedAppointment.Employee?.email || "N/A"}</p>
+              <p><strong>SĐT:</strong> {selectedAppointment.Employee?.phoneNumber || "N/A"}</p>
+              <p><strong>Chuyên khoa:</strong> {selectedAppointment.Employee?.speciality || "N/A"}</p>
+            </div>
+
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">🏥 Thông tin Lịch hẹn</h3>
+              <p><strong>Ngày:</strong> {new Date(selectedAppointment.date).toLocaleDateString("vi-VN")}</p>
+              <p><strong>Thời gian:</strong> {selectedAppointment.startTime?.substring(0, 5)} - {selectedAppointment.endTime?.substring(0, 5)}</p>
+              <p><strong>Phòng:</strong> {selectedAppointment.Room?.name || "N/A"} ({selectedAppointment.Room?.type || "Không xác định"})</p>
+              <p><strong>Trạng thái:</strong> <span className="font-semibold text-blue-600">{selectedAppointment.status}</span></p>
+              <p><strong>Người tạo:</strong> {selectedAppointment.createByType === "patient" ? "Bệnh nhân" : "Nhân viên"}</p>
+              <p><strong>Ngày tạo:</strong> {new Date(selectedAppointment.createdAt).toLocaleString("vi-VN")}</p>
+            </div>
+
+            {selectedAppointment.MedicalRecord && (
+              <div className="mb-4 border-t pt-4">
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">📋 Hồ sơ Bệnh án</h3>
+                <p><strong>Triệu chứng:</strong> {selectedAppointment.MedicalRecord.symptoms || "Không có"}</p>
+                <p><strong>Chẩn đoán:</strong> {selectedAppointment.MedicalRecord.diagnosis || "Chưa có"}</p>
+                <p><strong>Phương pháp điều trị:</strong> {selectedAppointment.MedicalRecord.treatment || "Chưa có"}</p>
+                <p><strong>Ngày tạo hồ sơ:</strong> {new Date(selectedAppointment.MedicalRecord.createdAt).toLocaleString("vi-VN")}</p>
+
+                {/* Dịch vụ khám */}
+                <div className="mt-3">
+                  <h4 className="text-md font-semibold text-gray-700 mb-1">💊 Dịch vụ sử dụng:</h4>
+                  {(() => {
+                    let services = [];
+                    try {
+                      services = JSON.parse(selectedAppointment.MedicalRecord.orderDetails || "[]");
+                    } catch { }
+                    return services.length > 0 ? (
+                      <table className="w-full text-sm border border-gray-300 mt-2">
+                        <thead className="bg-gray-100">
+                          <tr>
+                            <th className="border px-2 py-1">Tên Dịch vụ</th>
+                            <th className="border px-2 py-1">Số lượng</th>
+                            <th className="border px-2 py-1">Đơn giá</th>
+                            <th className="border px-2 py-1">Thành tiền</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {services.map((s, i) => (
+                            <tr key={i}>
+                              <td className="border px-2 py-1">{s.name}</td>
+                              <td className="border px-2 py-1 text-center">{s.quantity || 1}</td>
+                              <td className="border px-2 py-1 text-right">{new Intl.NumberFormat("vi-VN").format(s.price)} VND</td>
+                              <td className="border px-2 py-1 text-right font-semibold">{new Intl.NumberFormat("vi-VN").format(s.total)} VND</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <p className="italic text-gray-500">Không có dịch vụ nào được ghi nhận.</p>
+                    );
+                  })()}
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-5 py-2 bg-gray-300 rounded hover:bg-gray-400 transition"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* --- Danh sách lịch khám --- */}
       {loading ? (
         <div className="p-6">Đang tải...</div>
@@ -260,6 +362,12 @@ export default function AppointmentPage() {
                         Thanh toán
                       </button>
                     )}
+                    <button
+                      onClick={() => handleViewDetail(a.id)}
+                      className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700"
+                    >
+                      Xem
+                    </button>
 
                     {/* Nút Hủy */}
                     {(a.status === "pending" || a.status === "confirmed") && (

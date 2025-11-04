@@ -131,7 +131,7 @@ router.get("/", protect, authorize("Admin", "Receptionist"), getAppointment);
  *       200:
  *         description: Appointment found
  */
-router.get("/:id", protect, authorize("Admin", "Receptionist"), getAppointmentById);
+router.get("/:id", protect, getAppointmentById);
 
 /**
  * @swagger
