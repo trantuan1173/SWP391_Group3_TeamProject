@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import DoctorLayout from "../../components/doctor/DoctorDashboard";
 import dayjs from 'dayjs';
 
+
 const DoctorSchedule = () => {
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -11,6 +12,16 @@ const DoctorSchedule = () => {
   const [doctorInfo, setDoctorInfo] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [activeMenu, setActiveMenu] = useState('schedule');
+
+
+  const handleClick = (appointment) => {
+    navigate(`/doctor/create-records`, {
+      state: {
+        appointmentId: appointment.id,
+        patient: appointment.patient,
+      },
+    });
+  };
 
   // State cho year và week selector
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -258,10 +269,15 @@ const getWeeklySchedules = () => {
                 <div key={day.key} className="min-h-[120px] bg-white rounded-lg p-3 border border-gray-100">
                   {groupedSchedules[day.key] && groupedSchedules[day.key].length > 0 ? (
                     groupedSchedules[day.key].map((s) => (
-                      <div key={s.id || `${day.key}-${Math.random()}`} className="mb-2 p-2 rounded-md bg-green-50 border border-green-100 text-sm">
+                      <div
+                        key={s.id || `${day.key}-${Math.random()}`}
+                        onClick={() => handleClick(s)}
+                        className="mb-2 p-2 rounded-md bg-green-50 border border-green-100 text-sm cursor-pointer hover:bg-green-100 transition"
+                      >
                         <div className="font-semibold text-sm">{s.title || 'Lịch khám'}</div>
                         <div className="text-xs text-gray-600">🕒 {s.startTime || s.from || s.start} - {s.endTime || s.to || s.end}</div>
                         <div className="text-xs text-gray-500 mt-1">{s.note || ''}</div>
+                        
                       </div>
                     ))
                   ) : (

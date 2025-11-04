@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import DoctorLayout from "../../components/doctor/DoctorDashboard";
 import { API_ENDPOINTS } from '../../config';
 import { date } from 'zod';
@@ -21,6 +21,9 @@ const CreateMedicalRecord = () => {
   const [activeMenu, setActiveMenu] = useState('create-record');
   const navigate = useNavigate();
   const [searchService, setSearchService] = useState('');
+
+  const location = useLocation();
+  const { appointmentId, patient } = location.state || {};
 
   useEffect(() => {
     checkAuthAndFetchData();
@@ -75,6 +78,13 @@ const CreateMedicalRecord = () => {
       console.log("Patients list:", patientsList); // Debug
 
       setPatientsWithAppointments(patientsList);
+      // Nếu có appointmentId truyền vào, tự động chọn bệnh nhân tương ứng
+      if (appointmentId && patientsList.length > 0) {
+        const matchedPatient = patientsList.find(p => p.appointmentId === Number(appointmentId));
+        if (matchedPatient) {
+          setSelectedPatient(matchedPatient);
+        }
+      }
 
       // Lấy danh sách dịch vụ
       const servicesRes = await axios.get(
