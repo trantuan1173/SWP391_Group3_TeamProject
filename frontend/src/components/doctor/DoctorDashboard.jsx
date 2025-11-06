@@ -1,119 +1,141 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import {
+    SidebarProvider,
+    SidebarTrigger,
+    SidebarInset,
+} from "@/components/ui/sidebar";
+import {
+    Sidebar,
+    SidebarHeader,
+    SidebarContent,
+    SidebarGroup,
+    SidebarGroupContent,
+    SidebarMenu,
+    SidebarMenuItem,
+    SidebarMenuButton,
+    SidebarFooter,
+} from "@/components/ui/sidebar";
+import { Calendar, Users, FileText } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-export default function DoctorDashboard({ children, activeMenu, setActiveMenu, doctorInfo }) {
+export default function DoctorDashboard({ children, doctorInfo }) {
   const navigate = useNavigate();
+  const location = useLocation();
   
   const avatarUrl = doctorInfo?.avatar || doctorInfo?.image || doctorInfo?.profileImage;
-  const doctorName = doctorInfo?.name || doctorInfo?.fullName || 'Admin';
+  const doctorName = doctorInfo?.name || doctorInfo?.fullName || 'Doctor';
   const firstLetter = doctorName.charAt(0).toUpperCase();
 
+  const navigationItems = [
+    { 
+      title: "Schedule", 
+      url: "/doctor/schedule", 
+      icon: Calendar
+    },
+    { 
+      title: "Patients", 
+      url: "/doctor/exam-records", 
+      icon: Users
+    },
+    { 
+      title: "Generate", 
+      url: "/doctor/create-records", 
+      icon: FileText
+    },
+  ];
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
+
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
-      <aside className="w-72 bg-green-600 text-white flex flex-col justify-between rounded-tr-xl rounded-br-xl shadow-lg">
-        <div>
-          <div className="p-6">
-            {/* Logo */}
-            <div className="w-full flex items-center justify-center mb-6">
-              <div className="flex items-center gap-2">
-                <img
-                  src="/icon/logo.png"
-                  alt="Logo"
-                  className="h-[50px] w-auto"
-                />
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full">
+        {/* Sidebar */}
+        <Sidebar className="border-0 h-screen bg-[#00A646]">
+          <SidebarHeader className="p-4 bg-[#00A646]">
+            <img
+              src="/icon/logo.png"
+              alt="Healthy People Logo"
+              className="!w-[150px] mx-auto"
+            />
+          </SidebarHeader>
+
+          <SidebarContent className="bg-[#00A646]">
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {navigationItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <button
+                          onClick={() => navigate(item.url)}
+                          className={`flex w-full items-center gap-3 !p-6 !rounded-md font-bold transition-colors ${
+                            location.pathname === item.url
+                              ? "bg-purple-700 text-white"
+                              : "text-black hover:bg-purple-700 hover:text-white active:bg-purple-800"
+                          }`}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </button>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </SidebarContent>
+
+          <SidebarFooter className="p-4 bg-[#00A646]">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-green-300 to-green-100 rounded-lg flex items-center justify-center">
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt={doctorName}
+                    className="w-full h-full object-cover rounded-lg"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.parentElement.innerHTML = `<span class="text-green-800 font-bold text-sm">${firstLetter}</span>`;
+                    }}
+                  />
+                ) : (
+                  <span className="text-green-800 font-bold text-sm">
+                    {firstLetter}
+                  </span>
+                )}
+              </div>
+              <div className="text-center mt-2">
+                <div className="font-semibold">{doctorName}</div>
+                <div className="text-sm text-green-200">Doctor</div>
               </div>
             </div>
-
-            {/* Tiêu đề Dashboard */}
-            <div className="mb-6">
-              <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-            </div>
-
-            <nav className="mt-2 space-y-3">
-              <button
-                onClick={() => { setActiveMenu('doctor'); navigate('/doctor/schedule'); }}
-                className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg transition ${
-                  activeMenu === 'doctor' 
-                    ? 'bg-white text-green-600 font-semibold' 
-                    : 'text-white hover:bg-green-500/30'
-                }`}
-                style={{ borderRadius: "20px", marginBottom: "10px" }}
-              >
-                <span className="text-lg">🗓️</span>
-                <span>Schedule</span>
-              </button>
-              <button
-                onClick={() => { setActiveMenu('patients'); navigate('/doctor/exam-records'); }}
-                className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg transition ${
-                  activeMenu === 'patients' 
-                    ? 'bg-white text-green-600 font-semibold' 
-                    : 'text-white hover:bg-green-500/30'
-                }`}
-                style={{ borderRadius: "20px", marginBottom: "10px" }}
-              >
-                <span className="text-lg">🧑‍⚕️</span>
-                <span>Patients</span>
-              </button>
-
-              <button
-                onClick={() => { setActiveMenu('patient'); navigate('/doctor/create-records'); }}
-                className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg transition ${
-                  activeMenu === 'patient' 
-                    ? 'bg-white text-green-600 font-semibold' 
-                    : 'text-white hover:bg-green-500/30'
-                }`}
-                style={{ borderRadius: "20px", marginBottom: "10px" }}
-              >
-                <span className="text-lg"></span>
-                <span>Generate</span>
-              </button>
-            </nav>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="p-6 border-t border-green-500/40">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              {/* Avatar bác sĩ */}
-              {/* Avatar bác sĩ */}
-<div className="w-10 h-10 bg-white text-green-600 rounded-full flex items-center justify-center font-semibold overflow-hidden">
-  {avatarUrl ? (
-    <img
-      src={avatarUrl}
-      alt={doctorName}
-      className="w-full h-full object-cover"
-      onError={(e) => {
-        e.target.style.display = 'none';
-        e.target.parentElement.textContent = firstLetter;
-      }}
-    />
-  ) : (
-    firstLetter
-  )}
-</div>
-
-              <div>
-                <div className="text-sm font-semibold">{doctorName}</div>
-                <div className="text-xs opacity-80">Bác sĩ</div>
-              </div>
-            </div>
-            <button
-              onClick={() => { localStorage.removeItem('token'); navigate('/login'); }}
-              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium shadow transition"
-              style={{ borderRadius: "20px", marginBottom: "10px" }}
+            <Button
+              onClick={handleLogout}
+              className="bg-red-500 hover:bg-red-600 text-white w-full"
             >
               Logout
-            </button>
-          </div>
-        </div>
-      </aside>
+            </Button>
+          </SidebarFooter>
+        </Sidebar>
 
-      {/* Main content slot */}
-      <div className="flex-1">
-        {children}
+        {/* Main content */}
+        <SidebarInset className="flex flex-col flex-1">
+          <header className="flex h-16 items-center border-b bg-white px-4">
+            <SidebarTrigger className="-ml-1" />
+            <h1 className="ml-4 text-lg font-semibold text-gray-700">
+              Doctor Dashboard
+            </h1>
+          </header>
+
+          <main className="flex-1 p-6">
+            {children}
+          </main>
+        </SidebarInset>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }

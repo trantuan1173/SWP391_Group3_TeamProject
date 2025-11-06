@@ -10,7 +10,10 @@ export const API_ENDPOINTS = {
   PATIENT_LOGIN: `${baseUrl}/api/patients/login`,
   REGISTER: `${baseUrl}/api/patients/register`,
   AUTH_PROFILE: `${baseUrl}/api/users/profile`,
-  VERIFY: `${baseUrl}/api/users/verify`,
+  VERIFY: `${baseUrl}/api/patients/verify`,
+  RESEND_VERIFY_EMAIL: `${baseUrl}/api/patients/resend-verify-email`,
+  FORGOT_PASSWORD: `${baseUrl}/api/patients/forgot-password`,
+  RESET_PASSWORD: `${baseUrl}/api/patients/reset-password`,
   DOCTOR_LIST: `${baseUrl}/api/doctors`,
   GET_DOCTOR_SCHEDULE: (doctorId) =>
     `${baseUrl}/api/doctors/${doctorId}/schedule`,
@@ -57,8 +60,9 @@ export const API_ENDPOINTS = {
       patientId ? `?patientId=${patientId}` : ""
     }`,
   GET_ALL_PATIENTS: `${baseUrl}/api/medical-records/patients`,
-  //GET_MEDICAL_RECORDS_BY_PATIENT: (patientId) =>
-  // `${baseUrl}/api/medical-records/patient/${patientId}`,
+
+  //GET_MEDICAL_RECORDS_BY_PATIENT: (patientId) => `${baseUrl}/api/medical-records/patient/${patientId}`,
+
   GET_PATIENTS_BY_DOCTOR: (doctorId) =>
     `${baseUrl}/api/medical-records/doctor/${doctorId}/patients`,
   GET_PATIENT_BY_DOCTOR: (doctorId) =>

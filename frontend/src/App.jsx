@@ -43,6 +43,8 @@ import ReceptionistAppointmentDetail from "./page/Receptionist/ReceptionistAppoi
 import SuccessPage from "./page/payment/SuccessPage";
 import CancelPage from "./page/payment/CancelPage";
 
+import ResetPassword from "./page/Auth/ResetPassword";
+
 function App() {
   const RedirectPatientId = () => {
     const { id } = useParams();
@@ -60,6 +62,7 @@ function App() {
         {/* Auth routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ResetPassword />} />
         <Route path="/verify" element={<VerifyPage />} />
         <Route path="/book" element={<BookMedicalExam />} />
         <Route path="/appointment" element={<QuickBook />} />

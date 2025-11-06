@@ -4,7 +4,7 @@ import { API_ENDPOINTS } from '../../config';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
- const Register = () => {
+const Register = () => {
   const [formData, setFormData] = useState({
     name: '',
     password: '',
@@ -16,9 +16,9 @@ import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
     address: '',
   });
 
+  const [serverError, setServerError] = useState('');
   const [errors, setErrors] = useState({ confirmPassword: '' });
   const [isLoading, setIsLoading] = useState(false);
-  const [showVerifyMsg, setShowVerifyMsg] = useState(false);
   const navigate = useNavigate();
 
 
@@ -34,18 +34,20 @@ import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
     setIsLoading(true);
     try {
       const response = await axios.post(`${API_ENDPOINTS.REGISTER}`, formData);
-      if (response.status === 201) setShowVerifyMsg(true);
-      //href to reload
-      window.location.reload();
-      navigate(`/verify?email=${formData.email}`);
-    } catch {
-      alert('Registration failed');
+      if (response.status === 201) {
+        navigate(`/verify?email=${formData.email}`);
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 409) {
+        setServerError(error.response.data.error + '. Nếu bạn đã khám tại bệnh viện vui lòng chọn quên mật khẩu.');
+      } else {
+        setServerError('Đăng ký thất bại. Vui lòng thử lại.');
+        alert('Đăng ký thất bại');
+      }
     } finally {
       setIsLoading(false);
     }
   };
-
-  if (isLoading) return <LoadingSpinner size={120} text="Registering..." />;
 
   return (
     <div className="min-h-screen flex bg-[#00A646]">
@@ -115,19 +117,6 @@ import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
                 />
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Gender</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  name="gender"
-                  required
-                  value={formData.gender || ""}
-                  onChange={handleChange}
-                  className="mt-1 w-full px-4 py-2 border border-black rounded-full focus:ring-green-500 focus:border-green-500"
-                />
-              </div>
-            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700">Phone</label>
@@ -143,29 +132,21 @@ import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Birth Date</label>
-              <div className="relative">
-                <input
-                  type="date"
-                  name="dateOfBirth"
-                  required
-                  value={formData.dateOfBirth || ""}
-                  onChange={handleChange}
-                  className="mt-1 w-full px-4 py-2 border border-black rounded-full focus:ring-green-500 focus:border-green-500"
-                />
-              </div>
-            </div>
 
             {errors.confirmPassword && (
               <p className="text-sm text-red-500 mt-1">{errors.confirmPassword}</p>
             )}
+            {serverError && (
+              <p className="text-sm text-red-600 font-medium text-center">{serverError}</p>
+            )}
 
             <button
               type="submit"
+              disabled={isLoading}
               className="w-full py-2 rounded bg-[#6FA549] text-white font-medium hover:bg-green-700 transition border border-[#000000]"
             >
-              Register
+              {isLoading ? 'Registering...' : 'Register'}
+
             </button>
 
             <div className="text-center text-sm text-gray-700">
@@ -175,6 +156,17 @@ import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
                 onClick={() => navigate("/login")}
               >
                 Login
+              </span>
+              
+            </div>
+            <hr></hr>
+            <div className="text-center text-sm text-gray-700">
+              If You Forgot Password{" "}
+              <span
+                className="text-blue-600 hover:underline cursor-pointer font-semibold"
+                onClick={() => navigate("/forgot-password")}
+              >
+                Reset Password
               </span>
             </div>
           </form>

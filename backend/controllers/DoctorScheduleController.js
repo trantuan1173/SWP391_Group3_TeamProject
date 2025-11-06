@@ -9,6 +9,7 @@ const getDoctorSchedule = async (req, res) => {
     const appointments = await Appointment.findAll({
       where: {
         doctorId: doctorId,
+        status: 'confirmed'
       },
       attributes: ["id", "doctorId", "date", "startTime", "endTime"],
       order: [
@@ -16,8 +17,16 @@ const getDoctorSchedule = async (req, res) => {
         ["startTime", "ASC"],
       ],
     });
+    const formattedAppointments = appointments.map(apt => {
+      const json = apt.toJSON();
+      return {
+        ...json,
+        startTime: json.startTime?.slice(0, 5),
+        endTime: json.endTime?.slice(0, 5)
+      };
+    });
 
-    res.status(200).json(appointments);
+    res.status(200).json(formattedAppointments);
   } catch (error) {
     console.error("Error in getDoctorSchedule:", error);
     res

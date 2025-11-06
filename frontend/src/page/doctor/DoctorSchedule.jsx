@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import DoctorLayout from "../../components/doctor/DoctorDashboard";
+import dayjs from 'dayjs';
+
 
 const DoctorSchedule = () => {
   const [schedules, setSchedules] = useState([]);
@@ -10,6 +12,16 @@ const DoctorSchedule = () => {
   const [doctorInfo, setDoctorInfo] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [activeMenu, setActiveMenu] = useState('schedule');
+
+
+  const handleClick = (appointment) => {
+    navigate(`/doctor/create-records`, {
+      state: {
+        appointmentId: appointment.id,
+        patient: appointment.patient,
+      },
+    });
+  };
 
   // State cho year và week selector
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -33,11 +45,9 @@ const DoctorSchedule = () => {
     
     while (date.getFullYear() === year) {
       const startOfWeek = new Date(date);
-      startOfWeek.setDate(date.getDate() - date.getDay() ); // Monday
-      
+      startOfWeek.setDate(date.getDate() - date.getDay() +1); // Monday
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(startOfWeek.getDate() + 6); // Sunday
-      
       if (startOfWeek.getFullYear() === year || endOfWeek.getFullYear() === year) {
         weeks.push({
           weekNum,
@@ -54,7 +64,6 @@ const DoctorSchedule = () => {
     return weeks;
   };
 
-  // Tạo danh sách năm (từ 2020 đến 2030)
   const years = Array.from({ length: 11 }, (_, i) => 2020 + i);
   const weeks = getWeeksInYear(selectedYear);
 
@@ -131,38 +140,31 @@ const DoctorSchedule = () => {
       setError("Không thể tải lịch làm việc.");
     }
   };
+  // Hàm lấy lịch theo tuần
+const getWeeklySchedules = () => {
+  const selectedWeekData = weeks.find(w => w.weekNum === selectedWeek);
+  if (!selectedWeekData) {
+    return { weekDays: [], groupedSchedules: {} };
+  }
 
-  // Hàm nhóm schedules theo tuần đã chọn
-  const getWeeklySchedules = () => {
-    const selectedWeekData = weeks.find(w => w.weekNum === selectedWeek);
-    
-    if (!selectedWeekData) {
-      return { weekDays: [], groupedSchedules: {} };
-    }
+  const weekDays = [];
+  const groupedSchedules = {};
 
-    const startOfWeek = selectedWeekData.startDate;
-    const weekDays = [];
-    const groupedSchedules = {};
+  for (let i = 0; i < 7; i++) {
+    const day = dayjs(selectedWeekData.startDate).add(i, 'day');
+    const dayKey = day.format('YYYY-MM-DD');
+    weekDays.push({
+      date: day.toDate(),
+      key: dayKey,
+      label: day.format('ddd, D/M') // ví dụ: Th 3, 28/10
+    });
 
-    for (let i = 0; i < 7; i++) {
-      const day = new Date(startOfWeek);
-      day.setDate(startOfWeek.getDate() + i);
-      const dayKey = day.toISOString().split('T')[0];
-      
-      weekDays.push({
-        date: day,
-        key: dayKey,
-        label: day.toLocaleDateString('vi-VN', { weekday: 'short', day: 'numeric', month: 'numeric' })
-      });
-      
-      groupedSchedules[dayKey] = schedules.filter(s => {
-        const scheduleDate = new Date(s.date).toISOString().split('T')[0];
-        return scheduleDate === dayKey;
-      });
-    }
+    groupedSchedules[dayKey] = schedules.filter(s => s.date === dayKey);
+  }
 
-    return { weekDays, groupedSchedules };
-  };
+  return { weekDays, groupedSchedules };
+};
+
 
   const { weekDays, groupedSchedules } = getWeeklySchedules();
 
@@ -170,7 +172,7 @@ const DoctorSchedule = () => {
   const handleYearChange = (e) => {
     const newYear = parseInt(e.target.value);
     setSelectedYear(newYear);
-    setSelectedWeek(1); // Reset về tuần 1 khi đổi năm
+    setSelectedWeek(1);
   };
 
   // Handler cho việc thay đổi tuần
@@ -206,8 +208,7 @@ const DoctorSchedule = () => {
         {/* Top small bar (trắng) */}
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button className="p-2 rounded hover:bg-white/60"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg></button>
-            <div className="text-gray-700 font-semibold">Xin chào, {doctorInfo?.name || 'Bác Sĩ'}</div>
+            {/* <div className="text-gray-700 font-semibold">Xin chào, {doctorInfo?.name || 'Bác Sĩ'}</div> */}
           </div>
           <div className="text-sm text-gray-500">Hôm nay: {new Date().toLocaleDateString('vi-VN')}</div>
         </div>
@@ -268,10 +269,15 @@ const DoctorSchedule = () => {
                 <div key={day.key} className="min-h-[120px] bg-white rounded-lg p-3 border border-gray-100">
                   {groupedSchedules[day.key] && groupedSchedules[day.key].length > 0 ? (
                     groupedSchedules[day.key].map((s) => (
-                      <div key={s.id || `${day.key}-${Math.random()}`} className="mb-2 p-2 rounded-md bg-green-50 border border-green-100 text-sm">
+                      <div
+                        key={s.id || `${day.key}-${Math.random()}`}
+                        onClick={() => handleClick(s)}
+                        className="mb-2 p-2 rounded-md bg-green-50 border border-green-100 text-sm cursor-pointer hover:bg-green-100 transition"
+                      >
                         <div className="font-semibold text-sm">{s.title || 'Lịch khám'}</div>
                         <div className="text-xs text-gray-600">🕒 {s.startTime || s.from || s.start} - {s.endTime || s.to || s.end}</div>
                         <div className="text-xs text-gray-500 mt-1">{s.note || ''}</div>
+                        
                       </div>
                     ))
                   ) : (
