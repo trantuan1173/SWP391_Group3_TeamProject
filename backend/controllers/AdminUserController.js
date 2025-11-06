@@ -483,6 +483,7 @@ const createPatient = async (req, res) => {
     res.status(201).json({
       message: "Bệnh nhân tạo thành công",
       patient: cleanPatient,
+      l,
     });
   } catch (error) {
     res.status(500).json({ error: "Bệnh nhân tạo thất bại" });
@@ -496,17 +497,20 @@ const getPatients = async (req, res) => {
     const pageSize = parseInt(req.query.pageSize) || 10;
     const search = req.query.search ? req.query.search.trim() : "";
 
+    console.log("Search query:", search);
+
     const offset = (page - 1) * pageSize;
 
     const whereCondition = {};
 
     if (search) {
-      whereCondition[Op.or] = [
-        { name: { [Op.like]: `%${search}%` } },
-        { email: { [Op.like]: `%${search}%` } },
-        { phoneNumber: { [Op.like]: `%${search}%` } },
-        { identityNumber: { [Op.like]: `%${search}%` } },
-      ];
+      const keywords = search.split(/\s+/).filter(Boolean);
+
+      // Thay đổi logic: OR giữa các từ khóa thay vì AND
+      whereCondition[Op.or] = keywords.flatMap((keyword) => [
+        { name: { [Op.like]: `%${keyword}%` } },
+        { email: { [Op.like]: `%${keyword}%` } },
+      ]);
     }
 
     const { rows: patients, count: total } = await Patient.findAndCountAll({

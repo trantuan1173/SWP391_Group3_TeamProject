@@ -19,6 +19,7 @@ import {
   updateUser,
   updateUserStatus,
   updateDoctorSpeciality,
+  fetchRoles,
 } from "@/api/userApi";
 import UserDetailDialog from "@/components/users/UserDetailDialog";
 
@@ -52,6 +53,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { set } from "zod";
 
 const SPECIALTIES = [
   "Nội khoa",
@@ -79,6 +81,8 @@ export default function UserManagement() {
 
   const [searchInput, setSearchInput] = useState("");
   const search = useDebounce(searchInput, 500);
+  const [roleFilter, setRoleFilter] = useState("");
+  const [role, setRole] = useState([]);
 
   const [pageSize, setPageSize] = useState(5);
   const navigate = useNavigate();
@@ -86,7 +90,12 @@ export default function UserManagement() {
   // ===== FETCH USERS =====
   const loadUsers = async () => {
     try {
-      const data = await fetchUsers(currentPage, pageSize, search);
+      const data = await fetchUsers(
+        currentPage,
+        pageSize,
+        search.trim(),
+        roleFilter
+      );
       setUsers(data.employees);
       setTotalPages(data.totalPages);
     } catch {
@@ -96,7 +105,20 @@ export default function UserManagement() {
 
   useEffect(() => {
     loadUsers();
-  }, [currentPage, search, pageSize]);
+  }, [currentPage, search, pageSize, roleFilter]);
+
+  // useEffect(() => {
+  //   const loadRoles = async () => {
+  //     try {
+  //       const data = await fetchRoles();
+  //       // console.log(data);
+  //       setRole(data.roles);
+  //     } catch (err) {
+  //       console.error("Lỗi khi load roles:", err);
+  //     }
+  //   };
+  //   loadRoles();
+  // }, []);
 
   // ===== CREATE USER =====
   const handleCreateUser = async (data) => {
@@ -221,6 +243,19 @@ export default function UserManagement() {
               <option value="5">5 / trang</option>
               <option value="10">10 / trang</option>
               <option value="20">20 / trang</option>
+            </select>
+            <select
+              value={roleFilter}
+              onChange={(e) => {
+                setRoleFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="border border-gray-300 rounded-md p-2"
+            >
+              <option value="">Tất cả vai trò</option>
+              <option value="Admin">Admin</option>
+              <option value="Receptionist">Employee</option>
+              <option value="Doctor">Doctor</option>
             </select>
 
             <Button

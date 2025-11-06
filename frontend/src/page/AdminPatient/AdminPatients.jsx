@@ -54,7 +54,9 @@ export default function AdminPatients() {
   // ===== FETCH PATIENTS =====
   const loadPatients = async () => {
     try {
-      const data = await fetchPatients(currentPage, pageSize, search);
+      const verifySearch = search.trim().replace(/\s+/g, " ").toLowerCase();
+      const data = await fetchPatients(currentPage, pageSize, verifySearch);
+
       setPatients(data.patients || []);
       setTotalPages(data.totalPages || 1);
     } catch {

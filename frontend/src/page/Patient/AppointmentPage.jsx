@@ -120,7 +120,6 @@ export default function AppointmentPage() {
 
   const handlePayment = async (appointment) => {
     try {
-      console.log("💸 Tạo thanh toán cho lịch:", appointment);
       const token = localStorage.getItem("token");
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
