@@ -497,7 +497,7 @@ const getPatientsByDoctor = async (req, res) => {
       include: [
         {
           model: Patient,
-          attributes: ['id', 'name', 'email', 'phoneNumber', 'dateOfBirth', 'gender'],
+          attributes: ['id', 'name', 'email', 'identityNumber' , 'phoneNumber', 'dateOfBirth', 'gender'],
           required: true // Đảm bảo chỉ lấy appointment có patient
         }
       ],
@@ -529,6 +529,7 @@ const getPatientsByDoctor = async (req, res) => {
         patientId: apt.Patient.id,
         patientName: apt.Patient.name || 'Không có tên',
         patientEmail: apt.Patient.email || '',
+        patientIdentityNumber: apt.Patient.identityNumber || '',
         patientPhone: apt.Patient.phoneNumber || '',
         patientDOB: apt.Patient.dateOfBirth || '',
         patientGender: apt.Patient.gender || ''

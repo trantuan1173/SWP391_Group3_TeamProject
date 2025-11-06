@@ -252,8 +252,9 @@ const CreateMedicalRecord = () => {
                   <div className="mt-3 p-3 bg-white rounded border border-blue-200">
                     <p className="text-sm"><strong>Họ tên:</strong> {selectedPatient.patientName}</p>
                     <p className="text-sm"><strong>SĐT:</strong> {selectedPatient.patientPhone}</p>
-                    <p className="text-sm"><strong>Email:</strong> {selectedPatient.patientEmail}</p>
-                    <p className="text-sm"><strong>Giới tính:</strong> {selectedPatient.patientGender}</p>
+                    <p className="text-sm"><strong>CCCD:</strong> {selectedPatient.patientIdentityNumber}</p>
+                    <p className="text-sm"><strong>Email:</strong> {selectedPatient.patientEmail ? selectedPatient.patientEmail : 'N/A'}</p>
+                    <p className="text-sm"><strong>Giới tính:</strong> {selectedPatient.patientGender ? selectedPatient.patientGender : 'N/A'}</p>
                     <p className="text-sm"><strong>Ngày sinh:</strong> {
                       selectedPatient.patientDOB ? 
                       new Date(selectedPatient.patientDOB).toLocaleDateString('vi-VN') : 

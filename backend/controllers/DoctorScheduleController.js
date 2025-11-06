@@ -1,4 +1,4 @@
-const { DoctorSchedule, Appointment, Employee, Room } = require("../models");
+const { DoctorSchedule, Appointment, Employee, Room, Patient  } = require("../models");
 const { Op } = require("sequelize");
 
 // Lấy lịch làm việc của bác sĩ
@@ -11,24 +11,36 @@ const getDoctorSchedule = async (req, res) => {
         doctorId: doctorId,
         status: 'confirmed'
       },
-      attributes: ["id", "doctorId", "date", "startTime", "endTime"],
+      attributes: ["id", "doctorId", "date", "startTime", "endTime", "patientId"],
       order: [
         ["date", "ASC"],
         ["startTime", "ASC"],
       ],
+      include: [
+        {
+          model: Patient,
+          attributes: ["name", "identityNumber"]
+        }
+      ]
     });
+
     const formattedAppointments = appointments.map(apt => {
       const json = apt.toJSON();
       return {
         ...json,
         startTime: json.startTime?.slice(0, 5),
-        endTime: json.endTime?.slice(0, 5)
+        endTime: json.endTime?.slice(0, 5),
+        patient: json.Patient ? {
+          name: json.Patient.name,
+          identityNumber: json.Patient.identityNumber
+        } : null
       };
     });
 
     res.status(200).json(formattedAppointments);
   } catch (error) {
     console.error("Error in getDoctorSchedule:", error);
+    console.log("Patient data:", appointments.map(a => a.Patient));
     res
       .status(500)
       .json({ error: "Failed to get doctor schedule", details: error.message });

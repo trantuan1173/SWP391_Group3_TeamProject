@@ -276,13 +276,20 @@ const getWeeklySchedules = () => {
                       >
                         <div className="font-semibold text-sm">{s.title || 'Lịch khám'}</div>
                         <div className="text-xs text-gray-600">🕒 {s.startTime || s.from || s.start} - {s.endTime || s.to || s.end}</div>
+                        {/* Thêm thông tin bệnh nhân */}
+                        {s.patient && (
+                          <div className="text-xs text-blue-700 mt-1">
+                            <div>Tên bệnh nhân: <span className="font-medium">{s.patient.name}</span></div>
+                            <div>CCCD: <span className="font-medium">{s.patient.identityNumber}</span></div>
+                          </div>
+                        )}
                         <div className="text-xs text-gray-500 mt-1">{s.note || ''}</div>
-                        
                       </div>
                     ))
                   ) : (
                     <div className="text-gray-400 text-sm">Không có lịch</div>
                   )}
+
                 </div>
               ))}
             </div>
