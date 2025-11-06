@@ -13,6 +13,10 @@ export default function AppointmentPage() {
 
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [feedback, setFeedback] = useState(null);
+  const [showFeedbackForm, setShowFeedbackForm] = useState(false);
+  const [feedbackContent, setFeedbackContent] = useState("");
+  const [feedbackRating, setFeedbackRating] = useState(5);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -27,6 +31,15 @@ export default function AppointmentPage() {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const res = await axios.get(API_ENDPOINTS.APPOINTMENT_BY_ID(appointmentId), { headers });
       setSelectedAppointment(res.data);
+      // Try to load feedback for this appointment
+      try {
+        const fbRes = await axios.get(`/api/appointments/${appointmentId}/feedback`, { headers });
+        setFeedback(fbRes.data);
+      } catch (e) {
+        // 404 means no feedback yet — ignore, other errors log
+        if (e.response && e.response.status !== 404) console.error('Lỗi khi lấy feedback:', e);
+        setFeedback(null);
+      }
       console.log(res.data);
       setShowModal(true);
     } catch (err) {
@@ -35,13 +48,11 @@ export default function AppointmentPage() {
     }
   };
 
-  // ✅ Debounce search
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search.trim()), 300);
     return () => clearTimeout(t);
   }, [search]);
 
-  // ✅ Lấy danh sách bác sĩ
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -56,7 +67,6 @@ export default function AppointmentPage() {
     return () => (mounted = false);
   }, []);
 
-  // ✅ Lấy danh sách lịch khám
   useEffect(() => {
     let mounted = true;
     async function fetchAppointments() {
@@ -110,7 +120,6 @@ export default function AppointmentPage() {
     debouncedSearch,
   ]);
 
-  // ✅ Format
   const formatDateTime = (str) => {
     try {
       const d = new Date(str);
@@ -191,7 +200,7 @@ export default function AppointmentPage() {
           <option value="completed">Đã khám</option>
           <option value="cancelled">Đã hủy</option>
         </select>
-        <select
+        {/* <select
           value={doctorFilter}
           onChange={(e) => setDoctorFilter(e.target.value)}
           className="border px-3 py-2 rounded"
@@ -202,19 +211,19 @@ export default function AppointmentPage() {
               {d.name}
             </option>
           ))}
-        </select>
+        </select> */}
         <input
           type="date"
           value={fromDate}
           onChange={(e) => setFromDate(e.target.value)}
           className="border px-3 py-2 rounded"
         />
-        <input
+        {/* <input
           type="date"
           value={toDate}
           onChange={(e) => setToDate(e.target.value)}
           className="border px-3 py-2 rounded"
-        />
+        /> */}
       </div>
 
       {showModal && selectedAppointment && (
@@ -293,6 +302,59 @@ export default function AppointmentPage() {
               </div>
             )}
 
+            {/* Feedback section */}
+            <div className="mb-4 border-t pt-4">
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">⭐ Phản hồi</h3>
+              {feedback ? (
+                <div className="bg-gray-50 p-3 rounded">
+                  <div className="text-sm text-gray-700">Điểm: <strong>{feedback.rating}</strong></div>
+                  <div className="mt-2 text-gray-600 whitespace-pre-wrap">{feedback.content}</div>
+                  <div className="text-xs text-gray-400 mt-2">Gửi lúc: {new Date(feedback.createdAt).toLocaleString('vi-VN')}</div>
+                </div>
+              ) : (
+                <div className="italic text-gray-500">Chưa có phản hồi cho lịch khám này.</div>
+              )}
+
+              {/* Feedback form shown only when appointment is completed and patient hasn't submitted feedback */}
+              {selectedAppointment.status === 'completed' && (!feedback || (feedback && feedback.patientId !== (selectedAppointment.Patient?.id || selectedAppointment.patientId))) && (
+                <div className="mt-3">
+                  {!showFeedbackForm ? (
+                    <button onClick={() => setShowFeedbackForm(true)} className="px-3 py-1 bg-indigo-600 text-white rounded text-sm">Gửi phản hồi</button>
+                  ) : (
+                    <div className="mt-2 bg-white p-3 border rounded">
+                      <label className="block text-sm mb-1">Điểm (1-5)</label>
+                      <select value={feedbackRating} onChange={(e) => setFeedbackRating(Number(e.target.value))} className="border px-2 py-1 rounded">
+                        {[5,4,3,2,1].map(r => <option key={r} value={r}>{r}</option>)}
+                      </select>
+                      <label className="block text-sm mt-2 mb-1">Nội dung</label>
+                      <textarea value={feedbackContent} onChange={(e) => setFeedbackContent(e.target.value)} className="w-full border rounded p-2" rows={4} />
+                      <div className="flex gap-2 justify-end mt-2">
+                        <button onClick={() => { setShowFeedbackForm(false); setFeedbackContent(''); setFeedbackRating(5); }} className="px-3 py-1 border rounded">Hủy</button>
+                        <button onClick={async () => {
+                          // submit feedback
+                          if (!feedbackContent.trim()) return alert('Nội dung phản hồi không được để trống');
+                          try {
+                            const token = localStorage.getItem('token');
+                            const headers = token ? { Authorization: `Bearer ${token}` } : {};
+                            const res = await axios.post(`/api/appointments/${selectedAppointment.id}/feedback`, { content: feedbackContent.trim(), rating: feedbackRating }, { headers });
+                            if (res.status === 201) {
+                              setFeedback(res.data.feedback || { content: feedbackContent.trim(), rating: feedbackRating, createdAt: new Date().toISOString(), patientId: (selectedAppointment.Patient?.id || selectedAppointment.patientId) });
+                              setShowFeedbackForm(false);
+                              setFeedbackContent('');
+                              setFeedbackRating(5);
+                              alert('Gửi phản hồi thành công');
+                            }
+                          } catch (e) {
+                            console.error('Lỗi gửi feedback:', e);
+                            alert('Gửi phản hồi thất bại');
+                          }
+                        }} className="px-3 py-1 bg-green-600 text-white rounded">Gửi</button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
             <div className="flex justify-end mt-6">
               <button
                 onClick={() => setShowModal(false)}
@@ -340,7 +402,7 @@ export default function AppointmentPage() {
                   </div>
                   <div className="flex-1">
                     <div className="font-semibold text-gray-800">
-                      {a.Employee?.name || a.doctorName || "Chưa rõ bác sĩ"}
+                      {"Bác sĩ: " + (a.Employee?.name || a.doctorName || "Chưa rõ bác sĩ")}
                     </div>
                     <div className="text-sm text-gray-500">
                       {formatDateTime(a.date)}

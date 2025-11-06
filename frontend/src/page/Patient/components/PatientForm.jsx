@@ -24,7 +24,18 @@ export default function PatientForm({ initial = {}, patient, onSaved, onUpdate, 
   const validate = () => {
     if (!form.name || form.name.trim().length < 2) return 'Tên không hợp lệ';
     if (form.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) return 'Email không hợp lệ';
-    if (form.phoneNumber && !/^[0-9+\-\s]{6,20}$/.test(form.phoneNumber)) return 'Số điện thoại không hợp lệ';
+    if (form.phoneNumber) {
+      const digits = form.phoneNumber.replace(/\D/g, '');
+      if (!/^[0-9]+$/.test(digits)) return 'Số điện thoại phải là số';
+      if (digits.length < 10 || digits.length > 11) return 'Số điện thoại phải có 10-11 chữ số';
+    }
+    if (form.dateOfBirth) {
+      const dob = new Date(form.dateOfBirth);
+      if (!isNaN(dob.getTime())) {
+        const now = new Date();
+        if (dob > now) return 'Ngày sinh không thể ở tương lai';
+      }
+    }
     return null;
   };
 
@@ -46,7 +57,13 @@ export default function PatientForm({ initial = {}, patient, onSaved, onUpdate, 
     } catch (e) {
       console.error('PatientForm save error', e, e.response && e.response.data ? e.response.data : 'no response body');
       const serverMsg = e.response && e.response.data && (e.response.data.error || e.response.data.message);
-      setError(serverMsg || 'Lưu thất bại, thử lại');
+      if (e.response && e.response.status === 409) {
+        setError(serverMsg || 'Dữ liệu trùng lặp');
+      } else if (e.response && e.response.status === 400) {
+        setError(serverMsg || 'Dữ liệu không hợp lệ');
+      } else {
+        setError(serverMsg || 'Lưu thất bại, thử lại');
+      }
     } finally {
       setLoading(false);
     }

@@ -1,4 +1,5 @@
 const { Patient, Appointment, MedicalRecord, Employee, Room, Service } = require("../models");
+const { Op } = require('sequelize');
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const {sendVerifyEmail, sendForgotPasswordEmail} = require("../service/sendVerifyEmail");
@@ -479,6 +480,30 @@ async function updatePatient(req, res) {
 
     const patient = await Patient.findByPk(id);
     if (!patient) return res.status(404).json({ error: 'Patient not found' });
+
+    // Validate dateOfBirth is not in the future
+    if (payload.dateOfBirth) {
+      const dob = new Date(payload.dateOfBirth);
+      const now = new Date();
+      if (!isNaN(dob.getTime()) && dob > now) {
+        return res.status(400).json({ error: 'Ngày sinh không thể ở tương lai' });
+      }
+    }
+
+    // Check uniqueness for email and phoneNumber (exclude current patient)
+    if (payload.email) {
+      const existing = await Patient.findOne({ where: { email: payload.email, id: { [Op.ne]: id } } });
+      if (existing) {
+        return res.status(409).json({ error: 'Email đã tồn tại' });
+      }
+    }
+
+    if (payload.phoneNumber) {
+      const existingPhone = await Patient.findOne({ where: { phoneNumber: payload.phoneNumber, id: { [Op.ne]: id } } });
+      if (existingPhone) {
+        return res.status(409).json({ error: 'Số điện thoại đã tồn tại' });
+      }
+    }
 
     await patient.update(payload);
     const p = patient.toJSON ? patient.toJSON() : { ...patient };
