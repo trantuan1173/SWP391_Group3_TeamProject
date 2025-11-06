@@ -29,17 +29,17 @@ export default function DoctorDashboard({ children, doctorInfo }) {
 
   const navigationItems = [
     { 
-      title: "Schedule", 
+      title: "Lịch làm việc", 
       url: "/doctor/schedule", 
       icon: Calendar
     },
     { 
-      title: "Patients", 
+      title: "Hồ sơ khám", 
       url: "/doctor/exam-records", 
       icon: Users
     },
     { 
-      title: "Generate", 
+      title: "Tạo hồ sơ khám", 
       url: "/doctor/create-records", 
       icon: FileText
     },
@@ -110,14 +110,14 @@ export default function DoctorDashboard({ children, doctorInfo }) {
               </div>
               <div className="text-center mt-2">
                 <div className="font-semibold">{doctorName}</div>
-                <div className="text-sm text-green-200">Doctor</div>
+                <div className="text-sm text-green-200">Bác sĩ</div>
               </div>
             </div>
             <Button
               onClick={handleLogout}
               className="bg-red-500 hover:bg-red-600 text-white w-full"
             >
-              Logout
+              Đăng xuất
             </Button>
           </SidebarFooter>
         </Sidebar>
@@ -127,7 +127,7 @@ export default function DoctorDashboard({ children, doctorInfo }) {
           <header className="flex h-16 items-center border-b bg-white px-4">
             <SidebarTrigger className="-ml-1" />
             <h1 className="ml-4 text-lg font-semibold text-gray-700">
-              Doctor Dashboard
+              
             </h1>
           </header>
 

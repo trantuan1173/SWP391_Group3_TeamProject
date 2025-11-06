@@ -221,7 +221,7 @@ const getWeeklySchedules = () => {
            {/* Year Selector */}
               <div className="flex items-center gap-2 h-[50px]">
                 <label className="text-sm font-medium text-gray-600 bg-blue-50 px-3 py-1 rounded" style={{ height:'40px', justifyContent: 'center', alignContent: 'center'}}>
-                  YEAR
+                  Năm
                 </label>
                 <select
                   value={selectedYear}
@@ -238,7 +238,7 @@ const getWeeklySchedules = () => {
               {/* Week Selector */}
               <div className="flex items-center gap-2 h-[50px]">
                 <label className="text-sm font-medium text-gray-600 bg-blue-50 px-3 py-1 rounded" style={{ height:'40px', justifyContent: 'center', alignContent: 'center'}}>
-                  WEEK
+                  Tuần
                 </label>
                 <select
                   value={selectedWeek}

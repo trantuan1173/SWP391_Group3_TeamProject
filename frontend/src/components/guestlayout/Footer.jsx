@@ -9,7 +9,7 @@ export default function Footer() {
           <div>
             <img src="/icon/logo.png" alt="MWI Logo" className="h-12 mb-4 brightness-0 invert" />
             <p className="text-gray-400 text-sm">
-              ABC - Định nghĩa lại Y tế & Sức khỏe Tối Ưu
+              Clinic Management System
             </p>
           </div>
           <div>
@@ -34,7 +34,7 @@ export default function Footer() {
             <ul className="space-y-2 text-gray-400 text-sm">
               <li>📞 (+84) xxx-xxx-xxx</li>
               <li>📧 info@abc.com.vn</li>
-              <li>📍 Vinhome Central Park, Q. Bình Thạnh, TP.HCM</li>
+              <li>📍 abc, Q. xyz, TP.Hà Nội</li>
             </ul>
           </div>
           <div>
@@ -60,7 +60,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="w-[80%] mx-auto mt-8 pt-8 border-t border-gray-800 text-center text-gray-400 text-sm">
-          © 2025 ABC. All rights reserved.
+          © 2025 CMS. All rights reserved.
         </div>
       </footer>
     );
