@@ -59,7 +59,7 @@ export const API_ENDPOINTS = {
     `${baseUrl}/api/medical-records/doctor/${doctorId}${
       patientId ? `?patientId=${patientId}` : ""
     }`,
-  GET_ALL_PATIENTS: `${baseUrl}/api/medical-records/patients`,
+  //GET_ALL_PATIENTS: `${baseUrl}/api/medical-records/patients`,
 
   //GET_MEDICAL_RECORDS_BY_PATIENT: (patientId) => `${baseUrl}/api/medical-records/patient/${patientId}`,
 
@@ -95,6 +95,6 @@ export const API_ENDPOINTS = {
   PAYOS_WEBHOOK: `${baseUrl}/api/payments/webhook`,
   DELETE_PAYMENT: `${baseUrl}/api/payments/delete`,
 
-  GET_ALL_PATIENTS_FOR_RECEPTIONIST: `${baseUrl}/api/patients`
-
+  GET_ALL_PATIENTS_FOR_RECEPTIONIST: `${baseUrl}/api/patients/getpatients`,
+  ROOM_LIST: `${baseUrl}/api/employees/rooms`,
 };

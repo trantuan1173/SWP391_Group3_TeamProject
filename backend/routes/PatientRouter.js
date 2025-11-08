@@ -362,7 +362,7 @@ router.get("/checkups/:patientId", getCheckups);
  *         description: Failed to fetch documents
  */
 router.get("/documents/:patientId", getDocuments);
-
+router.get("/getpatients", protect, authorize("Receptionist", "Admin", "Doctor"), getAllPatients);
 /**
  * @swagger
  * /patients/{id}:
@@ -389,5 +389,5 @@ router.get("/:id", protect, getPatientById);
 // Update patient profile
 router.put('/:id', protect, updatePatient);
 
-router.get("/patients", protect, authorize("Receptionist", "Admin", "Doctor"), getAllPatients);
+
 module.exports = router;

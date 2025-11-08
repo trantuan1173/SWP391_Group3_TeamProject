@@ -3,6 +3,36 @@ import axios from "axios";
 import { API_ENDPOINTS } from "../../config";
 import { useNavigate } from "react-router-dom";
 
+// Component input với label, error, disabled
+function FormInput({ label, ...props }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="font-medium">{label}</label>
+      <input
+        {...props}
+        className={`border px-3 py-2 rounded w-full ${props.disabled ? "bg-gray-100" : ""}`}
+      />
+      {props.error && <span className="text-red-500 text-sm">{props.error}</span>}
+    </div>
+  );
+}
+
+// Component select với label, error
+function FormSelect({ label, children, error, ...props }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="font-medium">{label}</label>
+      <select
+        {...props}
+        className="border px-3 py-2 rounded w-full"
+      >
+        {children}
+      </select>
+      {error && <span className="text-red-500 text-sm">{error}</span>}
+    </div>
+  );
+}
+
 export default function ReceptionistAppointmentCreate() {
   const navigate = useNavigate();
   const [patients, setPatients] = useState([]);
@@ -15,7 +45,7 @@ export default function ReceptionistAppointmentCreate() {
     name: "",
     phoneNumber: "",
     identityNumber: "",
-    gender: "male",
+    gender: "",
     doctorId: "",
     roomId: "",
     date: "",
@@ -26,26 +56,23 @@ export default function ReceptionistAppointmentCreate() {
   const [errors, setErrors] = useState({});
   const [search, setSearch] = useState("");
 
-  // Hàm fetch bệnh nhân, dùng lại cho useEffect và onFocus
-  const fetchPatients = async () => {
-    try {
-      const res = await axios.get(API_ENDPOINTS.GET_ALL_PATIENTS_FOR_RECEPTIONIST, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      if (Array.isArray(res.data)) setPatients(res.data);
-      else if (Array.isArray(res.data.data)) setPatients(res.data.data);
-      else setPatients([]);
-    } catch {
-      setPatients([]);
-    }
-  };
-
-  // Lấy danh sách bệnh nhân khi mount
+  // Fetch bệnh nhân
   useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        const res = await axios.get(API_ENDPOINTS.GET_ALL_PATIENTS_FOR_RECEPTIONIST, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        if (Array.isArray(res.data.data)) setPatients(res.data.data);
+        else setPatients([]);
+      } catch {
+        setPatients([]);
+      }
+    };
     fetchPatients();
   }, []);
 
-  // Lấy danh sách bác sĩ
+  // Fetch bác sĩ
   useEffect(() => {
     axios
       .get(API_ENDPOINTS.DOCTOR_LIST, {
@@ -55,17 +82,21 @@ export default function ReceptionistAppointmentCreate() {
       .catch(() => setDoctors([]));
   }, []);
 
-  // Lấy danh sách phòng
+  // Fetch phòng
   useEffect(() => {
     axios
-      .get(API_ENDPOINTS.GET_AVAILABLE_ROOMS, {
+      .get(API_ENDPOINTS.ROOM_LIST, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
-      .then((res) => setRooms(res.data || []))
+      .then((res) => {
+        if (Array.isArray(res.data)) setRooms(res.data);
+        else if (Array.isArray(res.data.data)) setRooms(res.data.data);
+        else setRooms([]);
+      })
       .catch(() => setRooms([]));
   }, []);
 
-  // Khi chọn bệnh nhân, tự động điền thông tin và disable
+  // Tự động điền thông tin bệnh nhân
   useEffect(() => {
     if (form.patientId) {
       const selected = patients.find(
@@ -74,25 +105,26 @@ export default function ReceptionistAppointmentCreate() {
       if (selected) {
         setForm((f) => ({
           ...f,
+          patientId: form.patientId,
           name: selected.name || "",
           phoneNumber: selected.phoneNumber || "",
           identityNumber: selected.identityNumber || "",
-          gender: selected.gender || "male",
+          gender: selected.gender || "",
         }));
       }
     } else {
       setForm((f) => ({
         ...f,
+        patientId: "",
         name: "",
         phoneNumber: "",
         identityNumber: "",
-        gender: "male",
+        gender: "",
       }));
     }
-    // eslint-disable-next-line
   }, [form.patientId, patients]);
 
-  // Kiểm tra bác sĩ rảnh khi chọn ngày/giờ/bác sĩ
+  // Kiểm tra bác sĩ rảnh
   useEffect(() => {
     async function checkDoctorAvailable() {
       if (
@@ -115,12 +147,11 @@ export default function ReceptionistAppointmentCreate() {
         });
         const availableIds = res.data.availableDoctors?.map((d) => String(d.id)) || [];
         setDoctorAvailable(availableIds.includes(String(form.doctorId)));
-      } catch (err) {
-        setDoctorAvailable(true); // Không lỗi thì cho qua
+      } catch {
+        setDoctorAvailable(true);
       }
     }
     checkDoctorAvailable();
-    // eslint-disable-next-line
   }, [form.date, form.startTime, form.endTime, form.doctorId]);
 
   // Validate
@@ -129,8 +160,8 @@ export default function ReceptionistAppointmentCreate() {
     if (!form.name) newErrors.name = "Vui lòng nhập tên";
     if (!form.phoneNumber || !/^\d{10}$/.test(form.phoneNumber))
       newErrors.phoneNumber = "Số điện thoại phải đủ 10 số";
-    if (!form.identityNumber || !/^\d{10}$/.test(form.identityNumber))
-      newErrors.identityNumber = "CCCD phải đủ 10 số";
+    if (!form.identityNumber || !/^\d{12}$/.test(form.identityNumber))
+      newErrors.identityNumber = "CCCD phải đủ 12 số";
     if (!form.date) newErrors.date = "Chọn ngày khám";
     if (!form.startTime) newErrors.startTime = "Chọn giờ bắt đầu";
     if (!form.endTime) newErrors.endTime = "Chọn giờ kết thúc";
@@ -149,7 +180,6 @@ export default function ReceptionistAppointmentCreate() {
     setLoading(true);
     try {
       let patientId = form.patientId;
-      // Nếu là bệnh nhân mới
       if (!patientId) {
         const res = await axios.post(
           API_ENDPOINTS.CREATE_PATIENT,
@@ -188,204 +218,137 @@ export default function ReceptionistAppointmentCreate() {
     setLoading(false);
   }
 
-  const filteredPatients = patients.filter(
-    (p) =>
-      (p.name && p.name.toLowerCase().includes(search.toLowerCase())) ||
-      (p.phoneNumber && p.phoneNumber.includes(search))
-  );
-
-  // Disable trường nếu chọn bệnh nhân cũ
+  // Lọc bệnh nhân theo search
+  const filteredPatients = search.trim() === ""
+    ? patients
+    : patients.filter(
+        (p) =>
+          (p.name && p.name.toLowerCase().includes(search.toLowerCase())) ||
+          (p.phoneNumber && p.phoneNumber.includes(search))
+      );
   const isDisabled = !!form.patientId;
 
   return (
-    <div className="max-w-lg mx-auto bg-white p-6 rounded shadow">
-      <h2 className="text-xl font-bold mb-4">Đăng ký lịch khám</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Ô tìm kiếm bệnh nhân */}
-        <div>
-          <input
-            type="text"
-            placeholder="Tìm tên hoặc số điện thoại"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="border px-3 py-2 w-full mb-2"
-          />
-        </div>
-        {/* Select danh sách bệnh nhân */}
-        <div>
-          <label className="block mb-1">Bệnh nhân:</label>
-          <select
-            value={form.patientId}
-            onChange={(e) =>
-              setForm((f) => ({
-                ...f,
-                patientId: e.target.value,
-              }))
-            }
-            onFocus={fetchPatients}
-            className="border px-3 py-2 w-full"
-          >
-            <option value="">-- Bệnh nhân mới --</option>
-            {filteredPatients.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name} - {p.phoneNumber}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block mb-1">Họ tên:</label>
-          <input
-            type="text"
-            value={form.name}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, name: e.target.value }))
-            }
-            className="border px-3 py-2 w-full"
-            disabled={isDisabled}
-          />
-          {errors.name && <span className="text-red-500">{errors.name}</span>}
-        </div>
-        <div>
-          <label className="block mb-1">Số điện thoại:</label>
-          <input
-            type="text"
-            value={form.phoneNumber}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, phoneNumber: e.target.value }))
-            }
-            className="border px-3 py-2 w-full"
-            disabled={isDisabled}
-          />
-          {errors.phoneNumber && (
-            <span className="text-red-500">{errors.phoneNumber}</span>
-          )}
-        </div>
-        <div>
-          <label className="block mb-1">CCCD:</label>
-          <input
-            type="text"
-            value={form.identityNumber}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, identityNumber: e.target.value }))
-            }
-            className="border px-3 py-2 w-full"
-            disabled={isDisabled}
-          />
-          {errors.identityNumber && (
-            <span className="text-red-500">{errors.identityNumber}</span>
-          )}
-        </div>
-        <div>
-          <label className="block mb-1">Giới tính:</label>
-          <select
-            value={form.gender}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, gender: e.target.value }))
-            }
-            className="border px-3 py-2 w-full"
+    <div className="max-w-xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+      <h2 className="text-2xl font-bold mb-6 text-blue-700 text-center">Đăng ký lịch khám</h2>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Tìm kiếm bệnh nhân */}
+        <FormInput
+          label="Tìm tên hoặc số điện thoại"
+          type="text"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Nhập tên hoặc số điện thoại để tìm nhanh"
+        />
+        {/* Chọn bệnh nhân */}
+        <FormSelect
+          label="Bệnh nhân"
+          value={form.patientId}
+          onChange={e =>
+            setForm((f) => ({
+              ...f,
+              patientId: e.target.value,
+            }))
+          }
+        >
+          <option value="">-- Bệnh nhân mới --</option>
+          {filteredPatients.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name} - {p.phoneNumber}
+            </option>
+          ))}
+        </FormSelect>
+        <FormInput
+          label="Họ tên"
+          type="text"
+          value={form.name}
+          onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+          disabled={isDisabled}
+          error={errors.name}
+        />
+        <FormInput
+          label="Số điện thoại"
+          type="text"
+          value={form.phoneNumber}
+          onChange={e => setForm(f => ({ ...f, phoneNumber: e.target.value }))}
+          disabled={isDisabled}
+          error={errors.phoneNumber}
+        />
+        <FormInput
+          label="CCCD"
+          type="text"
+          value={form.identityNumber}
+          onChange={e => setForm(f => ({ ...f, identityNumber: e.target.value }))}
+          disabled={isDisabled}
+          error={errors.identityNumber}
+        />
+          <FormSelect
+            label="Giới tính"
+            value={form.gender || ""}
+            onChange={e => setForm(f => ({ ...f, gender: e.target.value || null }))}
             disabled={isDisabled}
           >
-            <option value="male">Nam</option>
-            <option value="female">Nữ</option>
-          </select>
-        </div>
-        <div>
-          <label className="block mb-1">Bác sĩ:</label>
-          <select
-            value={form.doctorId}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, doctorId: e.target.value }))
-            }
-            className="border px-3 py-2 w-full"
-          >
-            <option value="">-- Chọn bác sĩ --</option>
-            {doctors.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name} - {d.speciality}
-              </option>
-            ))}
-          </select>
-          {errors.doctorId && (
-            <span className="text-red-500">{errors.doctorId}</span>
-          )}
-          {!doctorAvailable && (
-            <span className="text-red-500">
-              Bác sĩ đã có lịch trong khoảng này!
-            </span>
-          )}
-        </div>
-        <div>
-          <label className="block mb-1">Phòng:</label>
-          <select
-            value={form.roomId}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, roomId: e.target.value }))
-            }
-            className="border px-3 py-2 w-full"
-          >
-            <option value="">-- Chọn phòng --</option>
-            {rooms.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.name} - {r.type}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block mb-1">Ngày khám:</label>
-          <input
-            type="date"
-            value={form.date}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, date: e.target.value }))
-            }
-            className="border px-3 py-2 w-full"
-          />
-          {errors.date && (
-            <span className="text-red-500">{errors.date}</span>
-          )}
-        </div>
-        <div>
-          <label className="block mb-1">Giờ bắt đầu:</label>
-          <input
+          <option value="">-- Chọn giới tính --</option>
+          <option value="male">Nam</option>
+          <option value="female">Nữ</option>
+        </FormSelect>
+        <FormSelect
+          label="Bác sĩ"
+          value={form.doctorId}
+          onChange={e => setForm(f => ({ ...f, doctorId: e.target.value }))}
+          error={errors.doctorId}
+        >
+          <option value="">-- Chọn bác sĩ --</option>
+          {doctors.map((d) => (
+            <option key={d.id} value={d.id}>
+              {d.name} - {d.speciality}
+            </option>
+          ))}
+        </FormSelect>
+        {!doctorAvailable && (
+          <span className="text-red-500 text-sm">
+            Bác sĩ đã có lịch trong khoảng này!
+          </span>
+        )}
+        <FormSelect
+          label="Phòng"
+          value={form.roomId}
+          onChange={e => setForm(f => ({ ...f, roomId: e.target.value }))}
+        >
+          <option value="">-- Chọn phòng --</option>
+          {(Array.isArray(rooms) ? rooms : []).map((r) => (
+            <option key={r.id} value={r.id}>
+              {r.name} - {r.type}
+            </option>
+          ))}
+        </FormSelect>
+        <FormInput
+          label="Ngày khám"
+          type="date"
+          value={form.date}
+          onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
+          error={errors.date}
+        />
+        <div className="grid grid-cols-2 gap-4">
+          <FormInput
+            label="Giờ bắt đầu"
             type="time"
             value={form.startTime}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, startTime: e.target.value }))
-            }
-            className="border px-3 py-2 w-full"
+            onChange={e => setForm(f => ({ ...f, startTime: e.target.value }))}
+            error={errors.startTime}
           />
-          {errors.startTime && (
-            <span className="text-red-500">{errors.startTime}</span>
-          )}
-        </div>
-        <div>
-          <label className="block mb-1">Giờ kết thúc:</label>
-          <input
+          <FormInput
+            label="Giờ kết thúc"
             type="time"
             value={form.endTime}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, endTime: e.target.value }))
-            }
-            className="border px-3 py-2 w-full"
-          />
-          {errors.endTime && (
-            <span className="text-red-500">{errors.endTime}</span>
-          )}
-        </div>
-        <div>
-          <label className="block mb-1">Trạng thái:</label>
-          <input
-            type="text"
-            value="confirmed"
-            disabled
-            className="border px-3 py-2 w-full bg-gray-100"
+            onChange={e => setForm(f => ({ ...f, endTime: e.target.value }))}
+            error={errors.endTime}
           />
         </div>
+        
         <button
           type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded"
+          className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded transition ${loading && "opacity-50 cursor-not-allowed"}`}
           disabled={loading}
         >
           {loading ? "Đang tạo..." : "Tạo lịch"}

@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { employeeLogin, getEmployeeWithRole , authProfile  } = require("../controllers/EmployeeController");
+const { getAllRooms } = require("../controllers/RoomController");
 const EmployeeController = require('../controllers/EmployeeController');
 const { protect } = require("../middleware/authMiddleware");
 
@@ -74,4 +75,5 @@ router.get("/:id/with-role", getEmployeeWithRole);
  */
 router.get("/profile", authProfile);
 
+router.get("/rooms", getAllRooms);
 module.exports = router;

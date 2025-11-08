@@ -115,22 +115,28 @@ const register = async (req, res) => {
 // Create appointment with login (JWT decoded)
 const createAppointment = async (req, res) => {
   try {
-    const { date, startTime, endTime } = req.body;
+    const { patientId, doctorId, roomId, date, startTime, endTime, status } = req.body;
     console.log('[createAppointment] payload:', req.body);
-    const userId = req.userId;
 
-    const patient = await Patient.findByPk(userId);
+    // Kiểm tra patientId có tồn tại không
+    const patient = await Patient.findByPk(patientId);
     if (!patient)
       return res.status(404).json({ error: "Patient not found" });
 
+    // Nếu có employee đăng nhập, lấy id từ token để gán createById/createByType
+    let createById = req.userId;
+    let createByType = req.userType || "employee";
+
     const appointment = await Appointment.create({
-      patientId: patient.id,
+      patientId,
+      doctorId,
+      roomId: roomId === '' ? null : roomId,
       date,
       startTime,
       endTime,
-      status: "pending",
-      createById: patient.id,
-      createByType: "patient",
+      status: status || "pending",
+      createById,
+      createByType: createByType || "employee",
     });
 
     res.status(201).json({
