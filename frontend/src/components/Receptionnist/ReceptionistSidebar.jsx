@@ -27,6 +27,7 @@ const ReceptionistSideBar = () => {
     const navigationItems = [
         { title: "Dashboard", url: "/receptionist/dashboard", icon: LayoutDashboard },
         { title: "Appointments", url: "/receptionist/appointments", icon: Calendar },
+        { title: "Create Appointment", url: "/receptionist/appointments/create", icon: Calendar },
         { title: "Patients", url: "/receptionist/patients", icon: Bed },
         { title: "Doctors", url: "/receptionist/doctors", icon: Users },
         { title: "News", url: "/receptionist/news", icon: Newspaper },

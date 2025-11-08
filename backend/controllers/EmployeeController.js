@@ -58,20 +58,24 @@ const employeeLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
     const employee = await Employee.findOne({
-      where: { email },
-      include: [{ model: Role, as: "roles", through: { attributes: [] }, attributes: ["id", "name"] }]
-    });
-    if (!employee.isActive) {
-      return res.status(401).json({ error: "User not verified" });
-    }
-    if (!employee) {
-      return res.status(401).json({ error: "Invalid email or password" });
-    }
-    if (!await employee.comparePassword(password)) {
-      return res.status(401).json({ error: "Invalid email or password" });
-    }
+  where: { email },
+  include: [{ model: Role, as: "roles", through: { attributes: [] }, attributes: ["id", "name"] }]
+});
 
-    res.status(200).json({ employee, token: generateToken(employee.id, "employee") });
+if (!employee) {
+  return res.status(401).json({ error: "Invalid email or password" });
+}
+
+if (!employee.isActive) {
+  return res.status(401).json({ error: "User not verified" });
+}
+
+if (!await employee.comparePassword(password)) {
+  return res.status(401).json({ error: "Invalid email or password" });
+}
+
+res.status(200).json({ employee, token: generateToken(employee.id, "employee") });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to login" });

@@ -94,4 +94,7 @@ export const API_ENDPOINTS = {
   //payment
   PAYOS_WEBHOOK: `${baseUrl}/api/payments/webhook`,
   DELETE_PAYMENT: `${baseUrl}/api/payments/delete`,
+
+  GET_ALL_PATIENTS_FOR_RECEPTIONIST: `${baseUrl}/api/patients`
+
 };

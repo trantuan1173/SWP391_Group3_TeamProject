@@ -10,6 +10,11 @@ function generateToken(id, type) {
   });
 }
 
+const getAllPatients = async (req, res) => {
+  const patients = await Patient.findAll();
+  res.json({ data: patients });
+};
+
 // Patient login
 const patientLogin = async (req, res) => {
   try {
@@ -459,6 +464,7 @@ module.exports = {
   resendVerifyEmail,
   forgotPassword,
   resetPassword,
+  getAllPatients,
 };
 
 // Update patient profile (only patient themself or admin via other routes)

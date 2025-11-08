@@ -15,8 +15,12 @@ const {
   resendVerifyEmail,
   forgotPassword,
   resetPassword,
+  getAllPatients,
 } = require("../controllers/PatientController");
-const { protect } = require("../middleware/authMiddleware");
+const { protect, authorize } = require("../middleware/authMiddleware");
+
+
+
 
 /**
  * @swagger
@@ -385,4 +389,5 @@ router.get("/:id", protect, getPatientById);
 // Update patient profile
 router.put('/:id', protect, updatePatient);
 
+router.get("/patients", protect, authorize("Receptionist", "Admin", "Doctor"), getAllPatients);
 module.exports = router;

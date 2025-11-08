@@ -42,7 +42,7 @@ import AdminService from "./page/AdminServices/AdminService";
 import ReceptionistAppointmentDetail from "./page/Receptionist/ReceptionistAppointmentDetail";
 import SuccessPage from "./page/payment/SuccessPage";
 import CancelPage from "./page/payment/CancelPage";
-
+import ReceptionistAppointmentCreate from "./page/Receptionist/ReceptionistAppointmentCreate";
 import ResetPassword from "./page/Auth/ResetPassword";
 
 function App() {
@@ -134,6 +134,8 @@ function App() {
               path="appointments/:id"
               element={<ReceptionistAppointmentDetail />}
             />
+            <Route path="appointments/create" element={<ReceptionistAppointmentCreate />} />
+
             <Route path="doctors" element={<ReceptionistDoctor />} />
             <Route path="news" element={<ReceptionistNews />} />
           </Route>
