@@ -44,6 +44,14 @@ import SuccessPage from "./page/payment/SuccessPage";
 import CancelPage from "./page/payment/CancelPage";
 
 import ResetPassword from "./page/Auth/ResetPassword";
+import FaqHome from "./page/FAQ/FaqHome";
+import AdminFaqManagement from "./page/AdminFaq/AdminFaqManagement";
+import FaqCategoryPage from "./page/FAQ/FaqCategoryPage";
+import FaqDetail from "./page/FAQ/FaqDetail";
+import SendTicket from "./page/Ticket/MyTickets";
+import MyTickets from "./page/Ticket/MyTickets";
+import TicketManagement from "./page/admin/TicketManagement";
+import TicketDetail from "./page/admin/TicketDetail";
 
 function App() {
   const RedirectPatientId = () => {
@@ -59,6 +67,11 @@ function App() {
         {/* Payment routes */}
         <Route path="/payments/success" element={<SuccessPage />} />
         <Route path="/payments/cancel" element={<CancelPage />} />
+
+        <Route path="/faq" element={<FaqHome />} />
+        <Route path="/faq/category/:id" element={<FaqCategoryPage />} />
+        <Route path="/faq/:id" element={<FaqDetail />} />
+
         {/* Auth routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -77,8 +90,10 @@ function App() {
           <Route path="doctors" element={<Doctors />} />
           <Route path=":id/edit" element={<PatientEdit />} />
           <Route path=":id/profile" element={<PatientProfile />} />
+
           <Route element={<PatientOnly />}>
             <Route path=":id" element={<PatientDashboard />} />
+            <Route path="ticket" element={<MyTickets />} />
             <Route path=":id/appointments" element={<AppointmentPage />} />
             <Route path=":id/book" element={<BookPage />} />
             <Route path=":id/records" element={<MedicalRecordPage />} />
@@ -124,9 +139,13 @@ function App() {
           ></Route>
           <Route path="/admin/dashboard" element={<AdminDashboard />}></Route>
           <Route path="/admin/services" element={<AdminService />}></Route>
+          <Route path="/admin/faq" element={<AdminFaqManagement />}></Route>
         </Route>
         <Route element={<RequireAuth allowedRoles={["Receptionist"]} />}>
           <Route path="/receptionist" element={<ReceptionistSideBar />}>
+            <Route path="tickets" element={<TicketManagement />} />
+            <Route path="tickets/:id" element={<TicketDetail />} />
+
             <Route path="dashboard" element={<ReceptionistDashboard />} />
             <Route path="patients" element={<ReceptionistPatient />} />
             <Route path="appointments" element={<ReceptionistAppointment />} />

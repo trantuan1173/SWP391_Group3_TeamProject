@@ -30,6 +30,11 @@ const {
   getRecentEmployees,
   updateDoctorSpeciality,
 } = require("../controllers/AdminUserController.js");
+const {
+  getRevenueSummary,
+  getRevenueByMethod,
+  getRevenueTimeseries,
+} = require("../controllers/AdminRevenueController.js");
 
 // ================== Multer config ==================
 const storage = multer.diskStorage({
@@ -235,6 +240,10 @@ router.get("/dashboard/active-patients", getActivePatients);
 router.get("/dashboard/available-roles", getAvailableRoles);
 router.get("/dashboard/recent-patients", getRecentPatients);
 router.get("/dashboard/recent-employees", getRecentEmployees);
+
+router.get("/revenue/summary", getRevenueSummary);
+router.get("/revenue/by-method", getRevenueByMethod);
+router.get("/revenue/timeseries", getRevenueTimeseries);
 
 // router.get("/users/:id", protect, authorize("admin"), getUserById);
 // router.delete("/users/:id", protect, authorize("admin"), deleteUser);

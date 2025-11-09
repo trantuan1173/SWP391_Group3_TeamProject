@@ -216,6 +216,7 @@ const createEmployee = async (req, res) => {
 //Get all employees with role
 const getEmployees = async (req, res) => {
   try {
+    console.log(req.query);
     // Lấy query params
     const page = parseInt(req.query.page) || 1; // trang hiện tại
     const pageSize = parseInt(req.query.pageSize) || 10; // số record mỗi trang

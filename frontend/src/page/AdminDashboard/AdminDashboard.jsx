@@ -22,6 +22,9 @@ import {
   fetchRecentEmployees,
 } from "@/api/dashboardApi";
 import { useAuth } from "@/context/AuthContext";
+import RevenueCharts from "@/components/revenue/RevenueCharts";
+
+// 👇 THÊM
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -170,6 +173,9 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* 🌟 Revenue Block (NEW) */}
+        <RevenueCharts />
 
         <Separator />
 

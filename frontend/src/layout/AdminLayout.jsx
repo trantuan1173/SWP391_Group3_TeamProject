@@ -54,6 +54,11 @@ const navigationItems = [
     url: "/admin/services",
     icon: ShoppingCart,
   },
+  {
+    title: "FAQ",
+    url: "/admin/faq",
+    icon: FlaskConical,
+  },
 ];
 
 export default function AdminLayout({ children }) {

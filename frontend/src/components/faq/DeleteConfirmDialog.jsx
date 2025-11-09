@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,12 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-export default function DeleteConfirmDialog({
-  open,
-  setOpen,
-  user,
-  onConfirm,
-}) {
+export default function DeleteConfirmDialog({ open, setOpen, faq, onConfirm }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
@@ -20,8 +16,8 @@ export default function DeleteConfirmDialog({
           <DialogTitle>Xác nhận xóa</DialogTitle>
         </DialogHeader>
         <p>
-          Hành động này <b>không thể hoàn tác</b>. <b>{user?.name}</b> sẽ bị xóa
-          vĩnh viễn khỏi hệ thống.
+          Hành động này <b>không thể hoàn tác</b>. Bài FAQ <b>{faq?.title}</b>{" "}
+          sẽ bị xóa vĩnh viễn khỏi hệ thống.
         </p>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>

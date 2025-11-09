@@ -94,4 +94,29 @@ export const API_ENDPOINTS = {
   //payment
   PAYOS_WEBHOOK: `${baseUrl}/api/payments/webhook`,
   DELETE_PAYMENT: `${baseUrl}/api/payments/delete`,
+
+  GET_REVENUE_SUMMARY: `${baseUrl}/api/admin/revenue/summary`,
+  GET_REVENUE_TIMESERIES: `${baseUrl}/api/admin/revenue/timeseries`,
+  GET_REVENUE_BY_METHOD: `${baseUrl}/api/admin/revenue/by-method`,
+
+  FETCH_FAQ_CATEGORY_SUMMARY: `${baseUrl}/api/faq/categories/summary`,
+
+  FAQ_LIST: `${baseUrl}/api/faq`,
+  FAQ_DETAIL: (id) => `${baseUrl}/api/faq/get-faq/${id}`,
+  CREATE_FAQ: `${baseUrl}/api/faq/create`,
+  UPDATE_FAQ: (id) => `${baseUrl}/api/faq/${id}`,
+  DELETE_FAQ: (id) => `${baseUrl}/api/faq/delete/${id}`,
+
+  // ===== Tickets =====
+  TICKET_LIST: `${baseUrl}/api/tickets`,
+  TICKET_DETAIL: (id) => `${baseUrl}/api/tickets/get-ticket/${id}`,
+  TICKET_CREATE: `${baseUrl}/api/tickets/create`,
+  TICKET_UPDATE_STATUS: (id) => `${baseUrl}/api/tickets/${id}/status`,
+  TICKET_ANSWER: (id) => `${baseUrl}/api/tickets/${id}/answer`,
+  TICKET_DELETE: (id) => `${baseUrl}/api/tickets/delete/${id}`,
+
+  ADMIN_TICKET_LIST: `${baseUrl}/api/tickets/receptionist/list-tickets`,
+  ADMIN_TICKET_STATUS: (id) => `${baseUrl}/api/tickets/${id}/status`,
+  ADMIN_TICKET_ANSWER: (id) => `${baseUrl}/api/tickets/${id}/answer`,
+  ADMIN_TICKET_DELETE: (id) => `${baseUrl}/api/tickets/delete/${id}`,
 };

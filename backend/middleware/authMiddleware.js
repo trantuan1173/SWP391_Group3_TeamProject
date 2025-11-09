@@ -3,64 +3,79 @@ const { Employee, Patient, Role } = require("../models");
 
 const protect = async (req, res, next) => {
   let token;
-
-  if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+  if (req.headers.authorization?.startsWith("Bearer")) {
     token = req.headers.authorization.split(" ")[1];
   }
-
   if (!token) {
-    return res.status(401).json({
-      success: false,
-      message: "Not authorized, token missing",
-    });
+    return res
+      .status(401)
+      .json({ success: false, message: "Not authorized, token missing" });
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "your_jwt_secret");
-
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "your_jwt_secret"
+    );
     let user = null;
 
     if (decoded.type === "employee") {
-      // Lấy employee + roles
-      user = await Employee.findByPk(decoded.id, {
-        include: {
-          model: Role,
-          as: "roles",
-          through: { attributes: [] },
-        },
+      const emp = await Employee.findByPk(decoded.id, {
+        include: { model: Role, as: "roles", through: { attributes: [] } },
       });
+      if (!emp)
+        return res
+          .status(401)
+          .json({ success: false, message: "User not found or token invalid" });
 
-      if (user) {
-        user = user.toJSON();
-        user.roleNames = user.roles.map(r => r.name);
-      }
+      const json = emp.toJSON();
+      const roleNames = (json.roles || []).map((r) => r.name).filter(Boolean);
+      const roleNamesLower = roleNames.map((r) => String(r).toLowerCase());
 
+      req.user = {
+        ...json,
+        roleNames,
+        roleNamesLower,
+        role: roleNames[0] || "",
+        roleLower: roleNamesLower[0] || "",
+        id: json.id,
+      };
+      req.userType = "employee";
     } else if (decoded.type === "patient") {
-      user = await Patient.findByPk(decoded.id);
+      const pat = await Patient.findByPk(decoded.id);
+      if (!pat)
+        return res
+          .status(401)
+          .json({ success: false, message: "User not found or token invalid" });
+
+      const json = pat.toJSON();
+      req.user = {
+        ...json,
+        role: "patient",
+        roleLower: "patient",
+        roleNames: ["patient"],
+        roleNamesLower: ["patient"],
+        id: json.id,
+      };
+      req.userType = "patient";
+    } else {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid token type" });
     }
 
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "User not found or token invalid",
-      });
-    }
-
-    req.user = user;
-    req.userType = decoded.type;
-  // expose the raw id from the token for convenience in controllers
-  req.userId = decoded.id;
-
+    // tiện cho controller
+    req.userId = req.user.id;
     next();
   } catch (err) {
-    return res.status(401).json({
-      success: false,
-      message: "Not authorized, invalid token",
-    });
+    return res
+      .status(401)
+      .json({ success: false, message: "Not authorized, invalid token" });
   }
 };
 
-const authorize = (...roles) => {
+const authorize = (...allowed) => {
+  const allowSet = new Set(allowed.map((r) => String(r).toLowerCase()));
   return (req, res, next) => {
     if (req.userType !== "employee") {
       return res.status(403).json({
@@ -68,23 +83,18 @@ const authorize = (...roles) => {
         message: "Only employees can access this route",
       });
     }
-
-    const userRoles = req.user.roleNames || [];
-    const isAuthorized = roles.some(role => userRoles.includes(role));
-
-    if (!isAuthorized) {
+    const roles = req.user?.roleNamesLower || [];
+    const ok = roles.some((r) => allowSet.has(r));
+    if (!ok) {
       return res.status(403).json({
         success: false,
-        message: `Employee roles [${userRoles.join(", ")}] are not authorized to access this route`,
+        message: `Employee roles [${(req.user.roleNames || []).join(
+          ", "
+        )}] are not authorized to access this route`,
       });
     }
-
     next();
   };
 };
 
-module.exports = {
-  protect,
-  authorize,
-
-}
+module.exports = { protect, authorize };

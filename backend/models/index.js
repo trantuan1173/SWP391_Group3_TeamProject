@@ -12,6 +12,9 @@ const MedicalRecordService = require("./MedicalRecordService");
 const Feedback = require("./Feedback");
 const News = require("./News");
 const Payment = require("./Payment");
+const Ticket = require("./Ticket");
+const Category = require("./Category");
+const Faq = require("./Faq");
 
 Appointment.hasOne(Payment, { foreignKey: "appointmentId" });
 Payment.belongsTo(Appointment, { foreignKey: "appointmentId" });
@@ -24,7 +27,7 @@ Appointment.hasOne(Feedback, { foreignKey: "appointmentId" });
 
 Feedback.belongsTo(Patient, { foreignKey: "patientId" });
 Patient.hasOne(Feedback, { foreignKey: "patientId" });
-Appointment.hasMany(Feedback, { foreignKey: 'appointmentId' });
+Appointment.hasMany(Feedback, { foreignKey: "appointmentId" });
 MedicalRecord.belongsToMany(Service, {
   through: MedicalRecordService,
   foreignKey: "medicalRecordId",
@@ -85,6 +88,37 @@ Employee.hasMany(News, { foreignKey: "createdBy" });
 // Thêm associations cho DoctorSchedule và Room
 // DoctorSchedule.belongsTo(Room, { foreignKey: "roomId" });
 // Room.hasMany(DoctorSchedule, { foreignKey: "roomId" });
+
+// Category 1 — N Faq (FAQ bắt buộc thuộc 1 category)
+Category.hasMany(Faq, {
+  foreignKey: "categoryId",
+  as: "faqs",
+  onDelete: "RESTRICT",
+});
+Faq.belongsTo(Category, { foreignKey: "categoryId", as: "category" });
+
+// Faq.createdBy → Employee
+Employee.hasMany(Faq, { foreignKey: "createdBy", as: "createdFaqs" });
+Faq.belongsTo(Employee, { foreignKey: "createdBy", as: "creator" });
+
+// (Tuỳ chọn) Category 1 — N Ticket: giúp route ticket đúng nhóm
+Category.hasMany(Ticket, {
+  foreignKey: "categoryId",
+  as: "tickets",
+  onDelete: "SET NULL",
+});
+Ticket.belongsTo(Category, { foreignKey: "categoryId", as: "category" });
+
+// Ticket.userId → Patient (người gửi ticket)
+Patient.hasMany(Ticket, { foreignKey: "userId", as: "tickets" });
+Ticket.belongsTo(Patient, { foreignKey: "userId", as: "user" });
+
+// Ticket.answeredBy → Employee (nhân viên trả lời)
+Employee.hasMany(Ticket, { foreignKey: "answeredBy", as: "answeredTickets" });
+Ticket.belongsTo(Employee, {
+  foreignKey: "answeredBy",
+  as: "answeredByEmployee",
+});
 module.exports = {
   Patient,
   Appointment,
@@ -99,4 +133,7 @@ module.exports = {
   Feedback,
   News,
   Payment,
+  Category,
+  Faq,
+  Ticket,
 };
