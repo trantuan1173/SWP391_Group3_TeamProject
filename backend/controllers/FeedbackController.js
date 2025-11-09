@@ -1,4 +1,4 @@
-const { Feedback, Appointment } = require('../models');
+const { Feedback, Appointment, Patient  } = require('../models');
 
 // Create feedback for an appointment. Only the patient who owns the appointment may submit.
 async function createFeedback(req, res) {
@@ -42,4 +42,40 @@ async function getFeedbackForAppointment(req, res) {
   }
 }
 
-module.exports = { createFeedback, getFeedbackForAppointment };
+async function getFeedbackForDoctor(req, res) {
+  try {
+    const doctorId = parseInt(req.params.id, 10);
+    console.log("[getFeedbackForDoctor] doctorId nhận được:", doctorId);
+    // Lấy tất cả các lịch hẹn của bác sĩ
+    const appointments = await Appointment.findAll({
+      where: { doctorId },
+      attributes: ['id'],
+    });
+
+    const appointmentIds = appointments.map(a => a.id);
+    console.log("[getFeedbackForDoctor] appointmentIds:", appointmentIds);
+    // Nếu không có lịch hẹn thì trả về rỗng
+    if (appointmentIds.length === 0) {
+      return res.json({ data: [] });
+    }
+
+    // Lấy tất cả feedback theo appointmentId
+    const feedbacks = await Feedback.findAll({
+      where: { appointmentId: appointmentIds },
+      include: [
+        {
+          model: Patient,
+          attributes: ['name', 'id'],
+        }
+      ]
+    });
+    console.log("[getFeedbackForDoctor] feedbacks:", feedbacks);
+    res.json({ data: feedbacks });
+  } catch (err) {
+    console.error('[getFeedbackForDoctor] error:', err);
+    res.status(500).json({ error: 'Failed to fetch feedbacks for doctor' });
+  }
+}
+
+
+module.exports = { createFeedback, getFeedbackForAppointment, getFeedbackForDoctor };

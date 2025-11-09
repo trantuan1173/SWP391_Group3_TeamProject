@@ -44,6 +44,7 @@ import SuccessPage from "./page/payment/SuccessPage";
 import CancelPage from "./page/payment/CancelPage";
 import ReceptionistAppointmentCreate from "./page/Receptionist/ReceptionistAppointmentCreate";
 import ResetPassword from "./page/Auth/ResetPassword";
+import ViewFeedback from "./page/doctor/ViewFeedback";
 
 function App() {
   const RedirectPatientId = () => {
@@ -101,6 +102,7 @@ function App() {
           path="/doctor/create-records"
           element={<CreateMedicalRecord />}
         />
+        <Route path="/doctor/view-feedback" element={<ViewFeedback />} />
 
         {/* Admin routes */}
         <Route element={<RequireAuth allowedRoles={["Admin"]} />}>

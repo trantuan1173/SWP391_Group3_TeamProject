@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { getDoctor, getDoctorById, updateDoctor, deleteDoctor, getDoctorAvailable, getDoctorSchedule, getSpecialties, getUniqueSpecialties } = require("../controllers/DoctorController");
 const { protect, authorize } = require("../middleware/authMiddleware.js");
-
+const { getFeedbackForDoctor } = require('../controllers/FeedbackController');
 /**
  * @swagger
  * tags:
@@ -176,4 +176,6 @@ router.get("/specialties", getSpecialties);
 router.post("/available", getDoctorAvailable);
 
 router.get("/doctors/:doctorId/schedules", getDoctorSchedule);
+
+router.get('/:id/feedbacks', getFeedbackForDoctor);
 module.exports = router;

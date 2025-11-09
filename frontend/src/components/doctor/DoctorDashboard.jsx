@@ -43,6 +43,11 @@ export default function DoctorDashboard({ children, doctorInfo }) {
       url: "/doctor/create-records", 
       icon: FileText
     },
+    { 
+      title: "Xem đánh giá", 
+      url: "/doctor/view-feedback", 
+      icon: FileText
+    },
   ];
 
   const handleLogout = () => {
