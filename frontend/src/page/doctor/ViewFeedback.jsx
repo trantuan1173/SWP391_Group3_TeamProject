@@ -20,8 +20,6 @@ const ViewFeedback = () => {
         window.location.href = "/login";
         return;
       }
-
-      // Giả sử bạn đã lưu doctorId trong token hoặc lấy từ API
       const payload = JSON.parse(atob(token.split('.')[1]));
       const doctorId = payload.id || payload.userId || payload.sub;
       console.log("Token payload:", payload);
@@ -34,10 +32,8 @@ const ViewFeedback = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setFeedbacks(res.data.data || []);
-      console.log("Feedbacks sau khi set:", res.data.data || []);
     } catch (err) {
       setError(err.response?.data?.error || "Có lỗi xảy ra");
-      console.error("Lỗi khi gọi API feedback:", err);
     } finally {
       setLoading(false);
     }

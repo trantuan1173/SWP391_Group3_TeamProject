@@ -98,4 +98,5 @@ export const API_ENDPOINTS = {
   GET_ALL_PATIENTS_FOR_RECEPTIONIST: `${baseUrl}/api/patients/getpatients`,
   ROOM_LIST: `${baseUrl}/api/employees/rooms`,
   GET_DOCTOR_FEEDBACKS: (doctorId) => `${baseUrl}/api/doctors/${doctorId}/feedbacks`,
+  GET_DOCTOR_BY_ID: (doctorId) => `${baseUrl}/api/doctors/${doctorId}`,
 };

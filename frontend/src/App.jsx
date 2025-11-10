@@ -46,6 +46,7 @@ import ReceptionistAppointmentCreate from "./page/Receptionist/ReceptionistAppoi
 import ResetPassword from "./page/Auth/ResetPassword";
 import ViewFeedback from "./page/doctor/ViewFeedback";
 import MedicalRecordDetail from "./page/doctor/MedicalRecordDetail";
+import ViewFeedbackForAll from "./page/guest/ViewFeedbackForAll";
 
 function App() {
   const RedirectPatientId = () => {
@@ -72,6 +73,7 @@ function App() {
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/news" element={<News />} />
         <Route path="/news/:id" element={<NewsDetail />} />
+        <Route path="/doctor/:id/feedback" element={<ViewFeedbackForAll />} />
 
         {/* Patient Dashboard routes */}
         <Route path="/patient" element={<PatientLayout />}>

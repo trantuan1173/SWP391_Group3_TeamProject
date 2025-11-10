@@ -89,9 +89,7 @@ const ViewExamRecord = () => {
           }
         }
       );
-      
-      console.log("Full API Response:", response.data); // Debug
-      console.log("Patients array:", response.data.data); // Debug
+
       
       // Kiểm tra cấu trúc dữ liệu
       const patientsData = response.data.data || response.data || [];
@@ -129,11 +127,8 @@ const ViewExamRecord = () => {
   const filteredPatients = patients.filter(patient => {
     const searchLower = searchTerm.toLowerCase();
     return (
-      (patient.patientName?.toLowerCase().includes(searchLower)) ||
       (patient.name?.toLowerCase().includes(searchLower)) ||
-      (patient.patientPhone?.includes(searchTerm)) ||
       (patient.phoneNumber?.includes(searchTerm)) ||
-      (patient.patientEmail?.toLowerCase().includes(searchLower)) ||
       (patient.email?.toLowerCase().includes(searchLower))
     );
   });

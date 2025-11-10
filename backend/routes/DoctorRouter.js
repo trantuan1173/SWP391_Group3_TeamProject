@@ -64,7 +64,7 @@ router.get("/specialties", getUniqueSpecialties);
  *             schema:
  *               $ref: '#/components/schemas/Doctor'
  */
-router.get("/:id", protect, authorize("admin"), getDoctorById);
+router.get("/:id", getDoctorById);
 
 /**
  * @swagger
