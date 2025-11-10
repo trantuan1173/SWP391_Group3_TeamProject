@@ -24,7 +24,8 @@ export default function Appointments() {
   const fetchAppointments = async () => {
     try {
       let url =
-        searchQuery.trim() !== ""
+      // searchQuery.trim() !== ""
+      searchQuery.trim().replace(/\s+/g, " ") !== ""
           ? API_ENDPOINTS.GET_ALL_APPOINTMENTS
           : apiFilter === "today"
             ? API_ENDPOINTS.GET_TODAY_APPOINTMENTS
@@ -35,7 +36,7 @@ export default function Appointments() {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         params: {
-          search: searchQuery,
+          search: searchQuery.trim().replace(/\s+/g, " "),
           page: currentPage,
           limit: itemsPerPage,
           status: statusFilter !== "all" ? statusFilter : undefined,
