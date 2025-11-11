@@ -13,6 +13,11 @@ const ViewExamRecord = () => {
   const [activeMenu, setActiveMenu] = useState('patients');
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
+  const normalizedSearchTerm = searchTerm.replace(/\s+/g, ' ').trim().toLowerCase();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
+  
+
 
   useEffect(() => {
     checkAuthAndFetchData();
@@ -95,13 +100,9 @@ const ViewExamRecord = () => {
       const patientsData = response.data.data || response.data || [];
       
       console.log("Processed patients data:", patientsData); // Debug
-      
-      if (Array.isArray(patientsData)) {
+
         setPatients(patientsData);
-      } else {
-        console.error("Patients data is not an array:", patientsData);
-        setPatients([]);
-      }
+      
     } catch (error) {
       console.error("Fetch patients error:", error);
       console.error("Error response:", error.response?.data);
@@ -123,15 +124,24 @@ const ViewExamRecord = () => {
     navigate(`/doctor/exam-records/${patientId}`);
   };
 
-  // Xử lý search với các trường có thể có
   const filteredPatients = patients.filter(patient => {
-    const searchLower = searchTerm.toLowerCase();
+    const searchLower = normalizedSearchTerm.toLowerCase();
     return (
-      (patient.name?.toLowerCase().includes(searchLower)) ||
-      (patient.phoneNumber?.includes(searchTerm)) ||
-      (patient.email?.toLowerCase().includes(searchLower))
-    );
+    (patient.name?.toLowerCase().replace(/\s+/g, ' ').includes(searchLower)) ||
+    (patient.phoneNumber?.includes(searchTerm)) ||
+    (patient.email?.toLowerCase().includes(searchLower))
+  );
   });
+
+  const totalPages = Math.ceil(filteredPatients.length / itemsPerPage);
+  const paginatedPatients = filteredPatients.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   if (loading) {
     return (
@@ -156,14 +166,11 @@ const ViewExamRecord = () => {
   return (
     <DoctorLayout activeMenu={activeMenu} setActiveMenu={setActiveMenu} doctorInfo={doctorInfo}>
       <div className="p-6">
-        {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <div className="text-sm text-gray-500">
             Hôm nay: {new Date().toLocaleDateString('vi-VN')}
           </div>
         </div>
-
-        {/* Main Content */}
         <div className="bg-white rounded-xl shadow p-6">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-semibold text-gray-800">
@@ -187,8 +194,9 @@ const ViewExamRecord = () => {
                 : "Không tìm thấy bệnh nhân phù hợp"}
             </div>
           ) : (
+            <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredPatients.map((patient, index) => {
+              {paginatedPatients.map((patient, index) => {
                 // Xử lý cả 2 cấu trúc dữ liệu có thể có
                 const patientId = patient.patientId || patient.id;
                 const patientName = patient.patientName || patient.name;
@@ -196,7 +204,6 @@ const ViewExamRecord = () => {
                 const patientEmail = patient.patientEmail || patient.email;
                 const patientGender = patient.patientGender || patient.gender;
                 const patientDOB = patient.patientDOB || patient.dateOfBirth;
-                const patientIdentity = patient.patientIdentityNumber || patient.identityNumber;
                 
                 return (
                   <div
@@ -224,28 +231,7 @@ const ViewExamRecord = () => {
                       <div>
                         <strong>Email:</strong> {patientEmail || 'Chưa có'}
                       </div>
-                      {patientIdentity && (
-                        <div>
-                          <strong>CMND/CCCD:</strong> {patientIdentity}
-                        </div>
-                      )}
                     </div>
-
-                    {patient.appointmentDate && (
-                      <div className="pt-3 border-t border-gray-200 mb-3">
-                        <div className="text-xs text-gray-500 mb-2">
-                          <strong>Lịch hẹn gần nhất:</strong>
-                        </div>
-                        <div className="text-sm mb-2">
-                          📅 {formatDateOnly(patient.appointmentDate)}
-                        </div>
-                        {patient.appointmentTime && (
-                          <div className="text-sm mb-2">
-                            ⏰ {patient.appointmentTime}
-                          </div>
-                        )}
-                      </div>
-                    )}
                     
                     <button
                       onClick={() => handleViewDetail(patientId)}
@@ -257,6 +243,34 @@ const ViewExamRecord = () => {
                 );
               })}
             </div>
+            {totalPages > 1 && (
+                <div className="flex justify-center mt-6 space-x-2">
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1 rounded border bg-gray-100 hover:bg-gray-200 disabled:opacity-50"
+                  >
+                    &lt;
+                  </button>
+                  {[...Array(totalPages)].map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setCurrentPage(i + 1)}
+                      className={`px-3 py-1 rounded border ${currentPage === i + 1 ? 'bg-green-500 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-1 rounded border bg-gray-100 hover:bg-gray-200 disabled:opacity-50"
+                  >
+                    &gt;
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
