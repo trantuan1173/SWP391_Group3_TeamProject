@@ -104,6 +104,12 @@ export default function Header() {
           >
             FAQ
           </a>
+          <a
+            href="/policies"
+            className="text-black font-medium no-underline mx-[25px]"
+          >
+            Chính sách
+          </a>
         </nav>
 
         {/* Auth Buttons OR Avatar */}

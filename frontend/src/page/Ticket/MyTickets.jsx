@@ -41,6 +41,7 @@ export default function MyTickets() {
   const load = useCallback(async () => {
     try {
       const data = await fetchTickets({ page, pageSize, search, status });
+      console.log("Fetched tickets:", data);
       setItems(data.items || []);
       setTotalPages(data.totalPages || 1);
     } catch {
@@ -153,6 +154,7 @@ export default function MyTickets() {
             <TableHead>Trạng thái</TableHead>
             <TableHead>Trả lời</TableHead>
             <TableHead>Thao tác</TableHead>
+            <TableHead>Trả lời bởi</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -195,6 +197,13 @@ export default function MyTickets() {
                 >
                   Xóa
                 </Button>
+              </TableCell>
+              <TableCell>
+                <p>
+                  {t.answeredByEmployee.name
+                    ? t.answeredByEmployee.name
+                    : "Chưa có"}
+                </p>
               </TableCell>
             </TableRow>
           ))}

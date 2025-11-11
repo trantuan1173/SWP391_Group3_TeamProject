@@ -52,6 +52,9 @@ import SendTicket from "./page/Ticket/MyTickets";
 import MyTickets from "./page/Ticket/MyTickets";
 import TicketManagement from "./page/admin/TicketManagement";
 import TicketDetail from "./page/admin/TicketDetail";
+import AdminPolicies from "./page/policices/AdminPolicies";
+import PolicyDetailPage from "./page/policices/PolicyDetailPage";
+import TermsAndPolicies from "./page/guest/TermsAndPolicies";
 
 function App() {
   const RedirectPatientId = () => {
@@ -71,7 +74,7 @@ function App() {
         <Route path="/faq" element={<FaqHome />} />
         <Route path="/faq/category/:id" element={<FaqCategoryPage />} />
         <Route path="/faq/:id" element={<FaqDetail />} />
-
+        <Route path="/policies" element={<TermsAndPolicies />} />
         {/* Auth routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -140,6 +143,8 @@ function App() {
           <Route path="/admin/dashboard" element={<AdminDashboard />}></Route>
           <Route path="/admin/services" element={<AdminService />}></Route>
           <Route path="/admin/faq" element={<AdminFaqManagement />}></Route>
+          <Route path="/admin/policies" element={<AdminPolicies />}></Route>
+          <Route path="/admin/policies/:id" element={<PolicyDetailPage />} />
         </Route>
         <Route element={<RequireAuth allowedRoles={["Receptionist"]} />}>
           <Route path="/receptionist" element={<ReceptionistSideBar />}>

@@ -9,16 +9,6 @@ import { Eye, CalendarDays, User2, BookOpen, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import Footer from "@/components/guestlayout/Footer";
 
-// helpers
-function truncate(str = "", n = 100) {
-  if (!str) return "";
-  const s = String(str).trim();
-  return s.length > n ? s.slice(0, n).trimEnd() + "…" : s;
-}
-function stripHtml(html = "") {
-  return String(html).replace(/<[^>]+>/g, "");
-}
-
 export default function FaqDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -28,7 +18,10 @@ export default function FaqDetail() {
   const [loading, setLoading] = useState(true);
   const [related, setRelated] = useState([]);
 
-  const categoryName = useMemo(() => faq?.category?.name || "FAQ", [faq]);
+  const categoryName = useMemo(
+    () => (faq && faq.category && faq.category.name) || "FAQ",
+    [faq]
+  );
 
   async function loadDetail() {
     try {
@@ -65,10 +58,10 @@ export default function FaqDetail() {
   }, [faqId]);
 
   useEffect(() => {
-    if (faq?.categoryId) {
+    if (faq && faq.categoryId) {
       loadRelated(faq.categoryId);
     }
-  }, [faq?.categoryId]); // khi detail về, kéo related theo
+  }, [faq && faq.categoryId]);
 
   return (
     <>
@@ -84,9 +77,9 @@ export default function FaqDetail() {
             className="hover:underline cursor-pointer"
             onClick={() =>
               navigate(
-                `/faq/category/${faq?.categoryId}?name=${encodeURIComponent(
-                  categoryName
-                )}`
+                `/faq/category/${
+                  faq && faq.categoryId
+                }?name=${encodeURIComponent(categoryName)}`
               )
             }
           >
@@ -105,18 +98,18 @@ export default function FaqDetail() {
           </div>
 
           <h1 className="text-3xl font-bold leading-tight">
-            {loading ? "Đang tải…" : faq?.title}
+            {loading ? "Đang tải…" : faq && faq.title}
           </h1>
 
           <div className="mt-3 flex flex-wrap gap-5 text-sm text-gray-500">
             <div className="flex items-center gap-2">
               <Eye className="w-4 h-4" />
-              <span>{faq?.views ?? 0} views</span>
+              <span>{(faq && faq.views) ?? 0} views</span>
             </div>
             <div className="flex items-center gap-2">
               <CalendarDays className="w-4 h-4" />
               <span>
-                {faq?.createdAt
+                {faq && faq.createdAt
                   ? new Date(faq.createdAt).toLocaleDateString("vi-VN")
                   : "--/--/----"}
               </span>
@@ -134,7 +127,7 @@ export default function FaqDetail() {
             <CardContent className="p-5">
               {loading ? (
                 <div className="text-gray-500">Đang tải nội dung…</div>
-              ) : faq?.content ? (
+              ) : faq && faq.content ? (
                 <div
                   className="prose prose-sm sm:prose lg:prose-lg max-w-none"
                   dangerouslySetInnerHTML={{ __html: faq.content }}
@@ -169,18 +162,37 @@ export default function FaqDetail() {
                 >
                   <CardContent className="p-4">
                     <div className="text-xs font-semibold text-orange-700 mb-2">
-                      {categoryName}
+                      {(r && r.category && r.category.name) ?? categoryName}
                     </div>
+
                     <div className="space-y-1">
-                      <h3 className="font-semibold">{truncate(r.title, 12)}</h3>
+                      {/* Title inline truncate */}
+                      <h3 className="font-semibold">
+                        {(() => {
+                          const t = (r && r.title ? r.title : "").trim();
+                          return t.length > 12
+                            ? t.slice(0, 12).trimEnd() + "…"
+                            : t;
+                        })()}
+                      </h3>
+
+                      {/* Content inline strip-html + truncate */}
                       <p className="text-sm text-gray-500">
-                        {truncate(stripHtml(r.content || ""), 110)}
+                        {(() => {
+                          const raw = r && r.content ? r.content : "";
+                          const txt = raw.replace(/<[^>]*>/g, "").trim();
+                          return txt.length > 110
+                            ? txt.slice(0, 110).trimEnd() + "…"
+                            : txt;
+                        })()}
                       </p>
                     </div>
+
                     <div className="mt-3 text-xs text-gray-400">
                       {new Date(r.createdAt).toLocaleDateString("vi-VN")} •{" "}
                       {r.views} views
                     </div>
+
                     <div className="mt-2">
                       <Button
                         variant="ghost"

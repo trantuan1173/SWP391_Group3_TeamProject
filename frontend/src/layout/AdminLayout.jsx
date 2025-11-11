@@ -20,6 +20,7 @@ import {
   Users,
   ShoppingCart,
   FlaskConical,
+  FileCheckIcon,
   UsersRoundIcon,
   UserCheck,
   KeyRoundIcon,
@@ -58,6 +59,11 @@ const navigationItems = [
     title: "FAQ",
     url: "/admin/faq",
     icon: FlaskConical,
+  },
+  {
+    title: "Policies",
+    url: "/admin/policies",
+    icon: FileCheckIcon,
   },
 ];
 

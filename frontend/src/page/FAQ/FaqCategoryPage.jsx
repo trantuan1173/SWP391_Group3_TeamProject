@@ -1,5 +1,5 @@
 // src/page/FAQ/FaqCategoryPage.jsx
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { fetchFaqList } from "@/api/faqApi";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,56 +11,21 @@ import {
   PaginationLink,
   PaginationPrevious,
   PaginationNext,
-  PaginationEllipsis,
 } from "@/components/ui/pagination";
 import { toast } from "sonner";
 import { User2 } from "lucide-react";
 import Header from "@/components/guestlayout/Header";
 import Footer from "@/components/guestlayout/Footer";
 
-function truncate(str = "", n = 20) {
-  if (!str) return "";
-  const s = String(str).trim();
-  return s.length > n ? s.slice(0, n).trimEnd() + "…" : s;
-}
-function stripHtml(html = "") {
-  return String(html).replace(/<[^>]+>/g, "");
-}
-
-function getPages(current, total) {
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
-
-  const pages = new Set([
-    1,
-    2,
-    total - 1,
-    total,
-    current,
-    current - 1,
-    current + 1,
-  ]);
-  const list = Array.from(pages)
-    .filter((p) => p >= 1 && p <= total)
-    .sort((a, b) => a - b);
-
-  const withDots = [];
-  for (let i = 0; i < list.length; i++) {
-    withDots.push(list[i]);
-    if (i < list.length - 1 && list[i + 1] - list[i] > 1) {
-      withDots.push("dots");
-    }
-  }
-  return withDots;
-}
-
 export default function FaqCategoryPage() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { search } = useLocation();
-  const params = useMemo(() => new URLSearchParams(search), [search]);
-  const categoryName = params.get("name") || "FAQ";
 
+  const params = new URLSearchParams(search);
+  const categoryName = params.get("name") || "FAQ";
   const categoryId = Number(id);
+
   const [faqs, setFaqs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -91,6 +56,7 @@ export default function FaqCategoryPage() {
 
   useEffect(() => {
     loadFaqs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categoryId, page, pageSize]);
 
   const onChangePage = (next) => {
@@ -125,7 +91,8 @@ export default function FaqCategoryPage() {
                 </div>
                 <h1 className="text-2xl font-bold">{categoryName}</h1>
               </div>
-              {/* chọn pageSize giống admin */}
+
+              {/* chọn pageSize đơn giản */}
               <div className="ml-auto">
                 <select
                   value={pageSize}
@@ -183,18 +150,35 @@ export default function FaqCategoryPage() {
                     <div className="text-sm text-blue-600 font-semibold mb-2">
                       {categoryName}
                     </div>
+
                     <div className="space-y-1">
+                      {/* Tiêu đề: truncate inline */}
                       <h3 className="font-semibold text-base">
-                        {truncate(f.title, 60)}
+                        {(() => {
+                          const t = (f.title || "").trim();
+                          return t.length > 60
+                            ? t.slice(0, 60).trimEnd() + "…"
+                            : t;
+                        })()}
                       </h3>
+
+                      {/* Mô tả: strip HTML + truncate inline */}
                       <p className="text-sm text-gray-500 leading-snug">
-                        {truncate(stripHtml(f.content || ""), 120)}
+                        {(() => {
+                          const raw = f.content || "";
+                          const txt = raw.replace(/<[^>]*>/g, "").trim();
+                          return txt.length > 120
+                            ? txt.slice(0, 120).trimEnd() + "…"
+                            : txt;
+                        })()}
                       </p>
                     </div>
+
                     <div className="mt-3 text-xs text-gray-400">
                       {new Date(f.createdAt).toLocaleDateString("vi-VN")} •{" "}
                       {f.views} lượt xem
                     </div>
+
                     <div className="mt-3">
                       <Button
                         variant="ghost"
@@ -209,7 +193,7 @@ export default function FaqCategoryPage() {
               ))}
           </div>
 
-          {/* Pagination kiểu admin + Ellipsis */}
+          {/* Pagination đơn giản: 1..totalPages */}
           {!loading && totalPages > 1 && (
             <div className="mt-6 flex justify-center">
               <Pagination>
@@ -221,12 +205,8 @@ export default function FaqCategoryPage() {
                     />
                   </PaginationItem>
 
-                  {getPages(page, totalPages).map((p, idx) =>
-                    p === "dots" ? (
-                      <PaginationItem key={`dots-${idx}`}>
-                        <PaginationEllipsis />
-                      </PaginationItem>
-                    ) : (
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (p) => (
                       <PaginationItem key={p}>
                         <PaginationLink asChild isActive={page === p}>
                           <button onClick={() => onChangePage(p)}>{p}</button>

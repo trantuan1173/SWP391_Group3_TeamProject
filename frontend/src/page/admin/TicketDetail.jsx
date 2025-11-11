@@ -142,9 +142,11 @@ export default function TicketDetail() {
               <h3 className="font-semibold mb-2">From User</h3>
               <div className="border rounded-md p-3 bg-gray-50 text-sm flex items-center gap-3">
                 <div className="font-medium bg-amber-300 px-2 py-1 rounded-lg text-xs">
-                  {ticket.user.email}
+                  {ticket.user.email ? ticket.user.email : "null"}
                 </div>
-                <div className="font-bold">{ticket.user.name}</div>
+                <div className="font-bold">
+                  {ticket.user.name ? ticket.user.name : "not assigned"}
+                </div>
               </div>
             </div>
 
@@ -188,11 +190,11 @@ export default function TicketDetail() {
                     Clear
                   </Button>
                   <div className="ml-auto flex gap-2">
-                    {ticket.status === "open" && (
+                    {/* {ticket.status === "open" && (
                       <Button variant="secondary" onClick={handleTake}>
                         Nhận xử lý (in-progress)
                       </Button>
-                    )}
+                    )} */}
                     {ticket.status === "open" && (
                       <Button variant="destructive" onClick={handleDelete}>
                         Xóa
@@ -219,14 +221,6 @@ export default function TicketDetail() {
                 <span>{statusBadge(ticket.status)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Assigned To:</span>
-                <span>
-                  {ticket.answeredByEmployee.name
-                    ? `${ticket.answeredByEmployee.name}`
-                    : "-"}
-                </span>
-              </div>
-              <div className="flex justify-between">
                 <span className="text-gray-500">Created:</span>
                 <span>{new Date(ticket.createdAt).toLocaleString()}</span>
               </div>
@@ -237,7 +231,7 @@ export default function TicketDetail() {
             </div>
           </div>
 
-          <div className="rounded-lg border bg-white p-5">
+          {/* <div className="rounded-lg border bg-white p-5">
             <h3 className="font-semibold mb-4">Assignment</h3>
             {ticket.status === "open" ? (
               <Button className="w-full" onClick={handleTake}>
@@ -260,7 +254,7 @@ export default function TicketDetail() {
                 Ticket đã được đóng. Bạn không thể cập nhật trả lời.
               </p>
             )}
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

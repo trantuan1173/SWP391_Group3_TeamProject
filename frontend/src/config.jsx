@@ -119,4 +119,12 @@ export const API_ENDPOINTS = {
   ADMIN_TICKET_STATUS: (id) => `${baseUrl}/api/tickets/${id}/status`,
   ADMIN_TICKET_ANSWER: (id) => `${baseUrl}/api/tickets/${id}/answer`,
   ADMIN_TICKET_DELETE: (id) => `${baseUrl}/api/tickets/delete/${id}`,
+
+  GET_POLICIES: `${baseUrl}/api/policies`,
+  CREATE_POLICY: `${baseUrl}/api/policies`,
+  UPDATE_POLICY: (id) => `${baseUrl}/api/policies/${id}`,
+  DELETE_POLICY: (id) => `${baseUrl}/api/policies/${id}`,
+  GET_POLICY: (id) => `${baseUrl}/api/policies/${id}`,
+  GET_ACTIVE_POLICY_BY_CATEGORY: (category) =>
+    `${baseUrl}/api/policies/category/${category}`,
 };
