@@ -15,6 +15,7 @@ const paymentRouter = require("./PaymentRouter");
 const faqRouter = require("./FaqRouter");
 const ticketRouter = require("./TicketRoutes");
 const AdminPolicyRoutes = require("./AdminPolicyRoutes");
+const MedicineRouter = require("./MedicineRouter");
 
 router.use("/doctors", DoctorRouter);
 router.use("/patients", PatientRouter);
@@ -30,4 +31,5 @@ router.use("/payments", paymentRouter);
 router.use("/faq", faqRouter);
 router.use("/tickets", ticketRouter);
 router.use("/policies", AdminPolicyRoutes);
+router.use("/medicines", MedicineRouter);
 module.exports = router;

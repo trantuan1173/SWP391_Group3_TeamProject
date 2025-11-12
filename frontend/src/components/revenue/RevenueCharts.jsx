@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   LineChart,
   Line,
@@ -11,70 +11,50 @@ import {
   BarChart,
   Bar,
 } from "recharts";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import {
   fetchRevenueSummary,
   fetchRevenueTimeseries,
   fetchRevenueByMethod,
 } from "@/api/dashboardRevenueApi";
 
-function toYMD(dateObj) {
-  const y = dateObj.getFullYear();
-  const m = String(dateObj.getMonth() + 1).padStart(2, "0");
-  const d = String(dateObj.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
+const nfVN = new Intl.NumberFormat("vi-VN");
 
-function computeRange(rangeKey) {
-  const now = new Date();
-
-  const end = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    23,
-    59,
-    59
-  );
-
-  const start = new Date(end);
-  if (rangeKey === "7d") start.setDate(end.getDate() - 6);
-  else if (rangeKey === "30d") start.setDate(end.getDate() - 29);
-  else if (rangeKey === "90d") start.setDate(end.getDate() - 89);
-  else if (rangeKey === "mtd") start.setDate(1);
-  else if (rangeKey === "ytd") {
-    start.setMonth(0, 1);
-  }
-
-  const granularity =
-    rangeKey === "90d" || rangeKey === "ytd" ? "month" : "day";
-
-  return {
-    from: toYMD(start),
-    to: toYMD(end),
-    granularity,
-  };
-}
+const toYMD = (d) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+};
 
 function fillMissingDays(series, from, to) {
-  const map = Object.fromEntries(series.map((s) => [s.bucket, s]));
-  const filled = [];
+  const map = Object.fromEntries((series || []).map((s) => [s.bucket, s]));
+  const out = [];
   let cur = new Date(from);
   const end = new Date(to);
-
   while (cur <= end) {
-    const key = toYMD(cur);
-    filled.push(map[key] || { bucket: key, revenue: 0, payments: 0 });
+    const k = toYMD(cur);
+    out.push(map[k] || { bucket: k, revenue: 0, payments: 0 });
     cur.setDate(cur.getDate() + 1);
   }
-  return filled;
+  return out;
 }
 
 export default function RevenueCharts() {
-  const [range, setRange] = useState("30d");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
-  const [granularity, setGranularity] = useState("day");
+  const [month, setMonth] = useState("");
+  const [year, setYear] = useState("");
 
+  const [granularity, setGranularity] = useState("day");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -87,112 +67,250 @@ export default function RevenueCharts() {
   const [series, setSeries] = useState([]);
   const [byMethod, setByMethod] = useState([]);
 
-  useEffect(() => {
-    const r = computeRange(range);
-    setFrom(r.from);
-    setTo(r.to);
-    setGranularity(r.granularity);
-  }, [range]);
+  const invalidRange = useMemo(() => {
+    if (!from || !to) return false;
+    return new Date(from) > new Date(to);
+  }, [from, to]);
 
-  useEffect(() => {
-    if (!from || !to) return;
-
-    let isMounted = true;
-
-    async function load() {
-      try {
-        setLoading(true);
-        setError("");
-
-        const sum = await fetchRevenueSummary({ from, to });
-        const ts = await fetchRevenueTimeseries({ from, to, granularity });
-        const met = await fetchRevenueByMethod({ from, to });
-
-        if (!isMounted) return;
-
-        setSummary(sum || {});
-
-        const cleanedSeries =
-          granularity === "day"
-            ? fillMissingDays(ts || [], from, to)
-            : ts || [];
-
-        setSeries(cleanedSeries);
-        setByMethod(met || []);
-      } catch (e) {
-        if (isMounted) setError(e?.message || "Lỗi tải dữ liệu");
-      } finally {
-        if (isMounted) setLoading(false);
-      }
+  const computedParams = useMemo(() => {
+    if (month && year) {
+      const start = new Date(Number(year), Number(month) - 1, 1);
+      const end = new Date(Number(year), Number(month), 0);
+      return { from: toYMD(start), to: toYMD(end), granularity: "day" };
     }
+    if (!month && year) {
+      const start = new Date(Number(year), 0, 1);
+      const end = new Date(Number(year), 11, 31);
+      return { from: toYMD(start), to: toYMD(end), granularity: "month" };
+    }
+    if (from || to) return { from, to, granularity: "day" };
 
+    const today = new Date();
+    const end = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+    const start = new Date(end);
+    start.setDate(end.getDate() - 29);
+    return { from: toYMD(start), to: toYMD(end), granularity: "day" };
+  }, [from, to, month, year]);
+
+  async function load() {
+    if ((from || to) && invalidRange) return;
+
+    setLoading(true);
+    setError("");
+    try {
+      const params = {};
+
+      if (computedParams.from)
+        params.from = `${computedParams.from}T00:00:00.000`;
+      if (computedParams.to) params.to = `${computedParams.to}T23:59:59.999`;
+
+      const [sum, ts, met] = await Promise.all([
+        fetchRevenueSummary(params),
+        fetchRevenueTimeseries({
+          ...params,
+          granularity: computedParams.granularity,
+        }),
+        fetchRevenueByMethod(params),
+      ]);
+
+      setGranularity(computedParams.granularity);
+      setSummary(
+        sum || {
+          totalRevenue: 0,
+          totalPayments: 0,
+          averageTicket: 0,
+          todayRevenue: 0,
+        }
+      );
+
+      const tsClean =
+        computedParams.granularity === "day"
+          ? fillMissingDays(ts || [], computedParams.from, computedParams.to)
+          : ts || [];
+      setSeries(tsClean);
+      setByMethod(met || []);
+    } catch (e) {
+      setError(e?.message || "Lỗi tải dữ liệu");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
     load();
-    return () => {
-      isMounted = false;
-    };
-  }, [from, to, granularity]);
+  }, []);
+
+  const moneyTick = (v) => nfVN.format(Math.round(v || 0));
+
+  const tooltipContent = (p) => {
+    if (!p.active || !p.payload?.length) return null;
+    const d = p.payload[0].payload;
+    return (
+      <div className="rounded-xl border bg-white p-3 text-sm shadow">
+        <div className="font-medium">{d.bucket}</div>
+        <div>Doanh thu: {nfVN.format(d.revenue)}</div>
+        <div>Số GD: {nfVN.format(d.payments)}</div>
+      </div>
+    );
+  };
+
+  const years = (() => {
+    const y = new Date().getFullYear();
+    const arr = [];
+    for (let k = y + 1; k >= y - 5; k--) arr.push(String(k));
+    return arr;
+  })();
 
   return (
     <div className="space-y-4">
-      {/* Header + chọn range */}
-      <div className="flex items-center justify-between">
-        <h3 className="text-2xl font-bold">Thống kê doanh thu</h3>
-        <div className="flex gap-2">
-          {["7d", "30d", "90d", "mtd", "ytd"].map((k) => (
-            <button
-              key={k}
-              onClick={() => setRange(k)}
-              className={`px-3 py-1 rounded border ${
-                range === k ? "bg-black text-white" : "bg-white"
-              }`}
+      <h3 className="text-2xl font-bold">Thống kê doanh thu</h3>
+
+      {/* Bộ lọc */}
+      <div className="w-full rounded-lg border p-3 bg-white">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+          {/* From */}
+          <div className="md:col-span-3">
+            <label className="text-sm text-muted-foreground">From</label>
+            <Input
+              type="date"
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
+              disabled={month || year}
+              max={to || undefined}
+            />
+          </div>
+
+          {/* To */}
+          <div className="md:col-span-3">
+            <label className="text-sm text-muted-foreground">To</label>
+            <Input
+              type="date"
+              value={to}
+              onChange={(e) => setTo(e.target.value)}
+              disabled={month || year}
+              min={from || undefined}
+            />
+          </div>
+
+          {/* Tháng */}
+          <div className="md:col-span-2">
+            <label className="text-sm text-muted-foreground">Tháng</label>
+            <Select value={month} onValueChange={setMonth}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="--" />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 12 }, (_, i) => {
+                  const mm = String(i + 1).padStart(2, "0");
+                  return (
+                    <SelectItem key={mm} value={mm}>
+                      {mm}
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Năm */}
+          <div className="md:col-span-2">
+            <label className="text-sm text-muted-foreground">Năm</label>
+            <Select value={year} onValueChange={setYear}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="--" />
+              </SelectTrigger>
+              <SelectContent>
+                {years.map((y) => (
+                  <SelectItem key={y} value={y}>
+                    {y}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Nút */}
+          <div className="md:col-span-2 flex gap-2 md:justify-end">
+            <Button
+              className="w-full md:w-auto"
+              onClick={() => {
+                if (invalidRange) return;
+                if (month || year) {
+                  setFrom("");
+                  setTo("");
+                }
+                load();
+              }}
+              disabled={loading || invalidRange}
             >
-              {k.toUpperCase()}
-            </button>
-          ))}
+              {loading ? "Đang tải..." : "Search"}
+            </Button>
+            <Button
+              className="w-full md:w-auto"
+              variant="secondary"
+              onClick={() => {
+                setFrom("");
+                setTo("");
+                setMonth("");
+                setYear("");
+                load();
+              }}
+            >
+              Reset
+            </Button>
+          </div>
         </div>
+
+        {/* cảnh báo range sai */}
+        {invalidRange && (
+          <p className="mt-2 text-sm text-red-600">
+            Ngày <b>To</b> không được nhỏ hơn ngày <b>From</b>.
+          </p>
+        )}
       </div>
 
       {/* Trạng thái */}
       {loading && <p className="text-sm text-gray-500">Đang tải dữ liệu…</p>}
       {error && <p className="text-sm text-red-600">Lỗi: {error}</p>}
 
-      {/* 4 thẻ số (summary) */}
+      {/* 4 thẻ số */}
       {!loading && !error && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="p-4 border rounded">
             <div className="text-xs text-gray-500">Tổng doanh thu</div>
             <div className="text-2xl font-bold">
-              {Number(summary.totalRevenue || 0).toLocaleString()}
+              {nfVN.format(summary.totalRevenue || 0)}
             </div>
             <div className="text-xs text-gray-500">
-              {from} → {to}
+              {computedParams.from} → {computedParams.to}
             </div>
           </div>
-
           <div className="p-4 border rounded">
             <div className="text-xs text-gray-500">Số giao dịch</div>
             <div className="text-2xl font-bold">
-              {Number(summary.totalPayments || 0).toLocaleString()}
+              {nfVN.format(summary.totalPayments || 0)}
             </div>
           </div>
-
           <div className="p-4 border rounded">
             <div className="text-xs text-gray-500">TB / giao dịch</div>
             <div className="text-2xl font-bold">
-              {Math.round(Number(summary.averageTicket || 0)).toLocaleString()}
+              {nfVN.format(Math.round(summary.averageTicket || 0))}
             </div>
           </div>
-
           <div className="p-4 border rounded">
             <div className="text-xs text-gray-500">Doanh thu hôm nay</div>
             <div className="text-2xl font-bold">
-              {Number(summary.todayRevenue || 0).toLocaleString()}
+              {nfVN.format(summary.todayRevenue || 0)}
             </div>
           </div>
         </div>
       )}
 
-      {/* Biểu đồ đường: doanh thu theo thời gian */}
+      {/* Biểu đồ đường */}
       {!loading && !error && (
         <div className="p-4 border rounded">
           <div className="mb-2 font-semibold">
@@ -206,20 +324,22 @@ export default function RevenueCharts() {
               >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="bucket" />
-                <YAxis />
-                <Tooltip />
+                <YAxis width={70} tickFormatter={moneyTick} />
+                <Tooltip content={tooltipContent} />
                 <Legend />
                 <Line
                   type="monotone"
                   dataKey="revenue"
                   name="Doanh thu"
                   dot={false}
+                  strokeWidth={2}
                 />
                 <Line
                   type="monotone"
                   dataKey="payments"
                   name="Số GD"
                   dot={false}
+                  strokeWidth={2}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -227,7 +347,7 @@ export default function RevenueCharts() {
         </div>
       )}
 
-      {/* Biểu đồ cột: doanh thu theo phương thức */}
+      {/* Biểu đồ cột */}
       {!loading && !error && (
         <div className="p-4 border rounded">
           <div className="mb-2 font-semibold">Doanh thu theo phương thức</div>
@@ -239,8 +359,14 @@ export default function RevenueCharts() {
               >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="method" />
-                <YAxis />
-                <Tooltip />
+                <YAxis width={70} tickFormatter={moneyTick} />
+                <Tooltip
+                  formatter={(v, k) =>
+                    k === "revenue"
+                      ? [nfVN.format(v), "Doanh thu"]
+                      : [nfVN.format(v), "Số GD"]
+                  }
+                />
                 <Legend />
                 <Bar dataKey="revenue" name="Doanh thu" />
                 <Bar dataKey="count" name="Số GD" />

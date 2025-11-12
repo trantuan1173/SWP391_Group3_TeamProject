@@ -127,4 +127,13 @@ export const API_ENDPOINTS = {
   GET_POLICY: (id) => `${baseUrl}/api/policies/${id}`,
   GET_ACTIVE_POLICY_BY_CATEGORY: (category) =>
     `${baseUrl}/api/policies/category/${category}`,
+
+  MEDICINE_LIST: `${baseUrl}/api/medicines`, // GET ?page=&pageSize=&search=
+  MEDICINE_DETAIL: (id) => `${baseUrl}/api/medicines/${id}`, // GET 1 thuốc
+  CREATE_MEDICINE: `${baseUrl}/api/medicines/create`, // POST
+  UPDATE_MEDICINE: (id) => `${baseUrl}/api/medicines/update/${id}`, // PUT
+  DELETE_MEDICINE: (id) => `${baseUrl}/api/medicines/delete/${id}`, // DELETE
+  MEDICINE_EXPIRING_SOON: `${baseUrl}/api/medicines/expiring/soon`, // GET
+
+  GET_MEDICINES: `${baseUrl}/api/medicines`,
 };

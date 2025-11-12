@@ -5,6 +5,7 @@ const {
   Patient,
   MedicalRecord,
   sequelize,
+  MedicalRecordMedicine,
 } = require("../models");
 const {
   sendVerifyEmail,
@@ -287,7 +288,12 @@ const getAppointmentById = async (req, res) => {
         { model: Employee },
         { model: Room, attributes: ["id", "name", "type"] },
         { model: Patient },
-        { model: MedicalRecord },
+        {
+          model: MedicalRecord,
+          include: [
+            { model: MedicalRecordMedicine, as: "prescribedMedicines" },
+          ],
+        },
       ],
     });
     res.status(200).json(appointment);

@@ -6,6 +6,7 @@ const Appointment = require("../models/Appointment");
 const Patient = require("../models/Patient");
 const MedicalRecord = require("../models/MedicalRecord");
 const MedicalRecordService = require("../models/MedicalRecordService");
+const MedicalRecordMedicine = require("../models/MedicalRecordMedicine");
 
 const payos = new PayOS({
   clientId: process.env.PAYOS_CLIENT_ID,
@@ -17,14 +18,6 @@ const createPayment = async (req, res) => {
   try {
     const { appointmentId, patientId, returnUrl, cancelUrl } = req.body;
 
-    console.log("createPayment called with:", {
-      appointmentId,
-      patientId,
-      returnUrl,
-      cancelUrl,
-    });
-
-    // Kiểm tra input
     if (!appointmentId || !patientId) {
       return res.status(400).json({ error: "Thiếu dữ liệu bắt buộc" });
     }
@@ -46,13 +39,30 @@ const createPayment = async (req, res) => {
     const services = await MedicalRecordService.findAll({
       where: { medicalRecordId: medicalRecord.id },
       attributes: ["total"],
+      raw: true,
     });
+    const serviceAmount = services.reduce(
+      (sum, s) => sum + Number(s.total || 0),
+      0
+    );
 
-    const totalAmount = services.reduce((sum, s) => sum + s.total, 0);
-    if (totalAmount <= 0)
+    const medicines = await MedicalRecordMedicine.findAll({
+      where: { medicalRecordId: medicalRecord.id },
+      attributes: ["total"],
+      raw: true,
+    });
+    const medicineAmount = medicines.reduce(
+      (sum, m) => sum + Number(m.total || 0),
+      0
+    );
+
+    const totalAmount = Math.round(serviceAmount + medicineAmount);
+
+    if (totalAmount <= 0) {
       return res
         .status(400)
-        .json({ error: "Không có dịch vụ hoặc tổng tiền bằng 0" });
+        .json({ error: "Không có dịch vụ/thuốc hoặc tổng tiền bằng 0" });
+    }
 
     const orderCode = Math.floor(Date.now() / 1000);
 
@@ -69,6 +79,7 @@ const createPayment = async (req, res) => {
     const payment = await Payment.create({
       appointmentId,
       patientId,
+      orderCode,
       amount: totalAmount,
       method: "payos",
       status: "pending",
@@ -78,6 +89,8 @@ const createPayment = async (req, res) => {
     res.status(201).json({
       message: "Tạo thanh toán thành công",
       checkoutUrl: paymentLink.checkoutUrl,
+      serviceAmount,
+      medicineAmount,
       totalAmount,
       payment,
     });
@@ -90,7 +103,6 @@ const createPayment = async (req, res) => {
   }
 };
 
-// ===== paymentController.js =====
 const payosWebhook = async (req, res) => {
   try {
     const webhookData = req.body;
@@ -138,7 +150,6 @@ const payosWebhook = async (req, res) => {
           transactionDateTime: transactionDateTime,
         });
 
-        //'paid' to 'completed'
         await Appointment.update(
           { status: "completed" },
           { where: { id: paymentByOrderCode.appointmentId } }
@@ -168,14 +179,12 @@ const payosWebhook = async (req, res) => {
       });
     }
 
-    // Cập nhật payment
     await payment.update({
       status: "paid",
       reference: reference,
       transactionDateTime: transactionDateTime,
     });
 
-    // 'paid' to 'completed'
     await Appointment.update(
       { status: "completed" },
       { where: { id: payment.appointmentId } }
@@ -199,7 +208,6 @@ const payosWebhook = async (req, res) => {
   }
 };
 
-// paymentController.js
 const deletePayment = async (req, res) => {
   try {
     const { appointmentId } = req.body;

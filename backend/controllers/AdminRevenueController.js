@@ -23,7 +23,6 @@ const getRevenueSummary = async (req, res) => {
     const totalRevenue = (await Payment.sum("amount", { where })) || 0;
     const totalPayments = (await Payment.count({ where })) || 0;
 
-    // Doanh thu hôm nay (UTC)
     const now = new Date();
     const start = new Date(
       Date.UTC(
@@ -89,7 +88,6 @@ const getRevenueByMethod = async (req, res) => {
       totals[key].count += 1;
     }
 
-    // Chuyển về mảng để dễ trả JSON
     const result = Object.values(totals).sort((a, b) => b.revenue - a.revenue);
 
     res.json(result);

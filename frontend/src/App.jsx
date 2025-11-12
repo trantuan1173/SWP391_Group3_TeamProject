@@ -55,6 +55,7 @@ import TicketDetail from "./page/admin/TicketDetail";
 import AdminPolicies from "./page/policices/AdminPolicies";
 import PolicyDetailPage from "./page/policices/PolicyDetailPage";
 import TermsAndPolicies from "./page/guest/TermsAndPolicies";
+import MedicineManagement from "./page/medicine/MedicineManagement";
 
 function App() {
   const RedirectPatientId = () => {
@@ -160,6 +161,7 @@ function App() {
             />
             <Route path="doctors" element={<ReceptionistDoctor />} />
             <Route path="news" element={<ReceptionistNews />} />
+            <Route path="medicines" element={<MedicineManagement />} />
           </Route>
         </Route>
       </Routes>
