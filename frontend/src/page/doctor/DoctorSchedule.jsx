@@ -12,24 +12,31 @@ const DoctorSchedule = () => {
   const [doctorInfo, setDoctorInfo] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [activeMenu, setActiveMenu] = useState('schedule');
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
 
 
-  const handleClick = (appointment) => {
-    navigate(`/doctor/create-records`, {
-      state: {
-        appointmentId: appointment.id,
-        patient: appointment.patient,
-      },
-    });
-  };
+  const handleClick = (appointment, scheduleDate) => {
+  const today = dayjs().startOf('day');
+  const scheduleDay = dayjs(scheduleDate).startOf('day');
+  if (scheduleDay.isBefore(today)) {
+    setModalMessage("Bạn không thể tạo hồ sơ cho lịch khám này");
+    setShowModal(true);
+    return;
+  }
+  navigate(`/doctor/create-records`, {
+    state: {
+      appointmentId: appointment.id,
+      patient: appointment.patient,
+    },
+  });
+};
 
-  // State cho year và week selector
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedWeek, setSelectedWeek] = useState(getCurrentWeek());
   
   const navigate = useNavigate();
 
-  // Hàm lấy tuần hiện tại
   function getCurrentWeek() {
     const now = new Date();
     const startOfYear = new Date(now.getFullYear(), 0, 1);
@@ -37,7 +44,6 @@ const DoctorSchedule = () => {
     return Math.ceil((days + startOfYear.getDay() + 1) / 7);
   }
 
-  // Hàm tạo danh sách các tuần trong năm
   const getWeeksInYear = (year) => {
     const weeks = [];
     const date = new Date(year, 0, 1);
@@ -45,9 +51,9 @@ const DoctorSchedule = () => {
     
     while (date.getFullYear() === year) {
       const startOfWeek = new Date(date);
-      startOfWeek.setDate(date.getDate() - date.getDay() +1); // Monday
+      startOfWeek.setDate(date.getDate() - date.getDay() +1); //t2
       const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 6); // Sunday
+      endOfWeek.setDate(startOfWeek.getDate() + 6);//cn
       if (startOfWeek.getFullYear() === year || endOfWeek.getFullYear() === year) {
         weeks.push({
           weekNum,
@@ -140,12 +146,14 @@ const DoctorSchedule = () => {
       setError("Không thể tải lịch làm việc.");
     }
   };
-  // Hàm lấy lịch theo tuần
-const getWeeklySchedules = () => {
-  const selectedWeekData = weeks.find(w => w.weekNum === selectedWeek);
-  if (!selectedWeekData) {
-    return { weekDays: [], groupedSchedules: {} };
-  }
+
+  
+
+  const getWeeklySchedules = () => {
+    const selectedWeekData = weeks.find(w => w.weekNum === selectedWeek);
+    if (!selectedWeekData) {
+      return { weekDays: [], groupedSchedules: {} };
+    }
 
   const weekDays = [];
   const groupedSchedules = {};
@@ -156,7 +164,7 @@ const getWeeklySchedules = () => {
     weekDays.push({
       date: day.toDate(),
       key: dayKey,
-      label: day.format('ddd, D/M') // ví dụ: Th 3, 28/10
+      label: day.format('ddd, D/M')
     });
 
     groupedSchedules[dayKey] = schedules.filter(s => s.date === dayKey);
@@ -168,14 +176,11 @@ const getWeeklySchedules = () => {
 
   const { weekDays, groupedSchedules } = getWeeklySchedules();
 
-  // Handler cho việc thay đổi năm
   const handleYearChange = (e) => {
     const newYear = parseInt(e.target.value);
     setSelectedYear(newYear);
     setSelectedWeek(1);
   };
-
-  // Handler cho việc thay đổi tuần
   const handleWeekChange = (e) => {
     setSelectedWeek(parseInt(e.target.value));
   };
@@ -203,22 +208,17 @@ const getWeeklySchedules = () => {
 
   return (
     <DoctorLayout activeMenu={activeMenu} setActiveMenu={setActiveMenu} doctorInfo={doctorInfo}>
-      {/* Main content */}
       <div className="p-6">
-        {/* Top small bar (trắng) */}
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
             {/* <div className="text-gray-700 font-semibold">Xin chào, {doctorInfo?.name || 'Bác Sĩ'}</div> */}
           </div>
           <div className="text-sm text-gray-500">Hôm nay: {new Date().toLocaleDateString('vi-VN')}</div>
         </div>
-
-        {/* White card giống ảnh: title, search, create button, content */}
         <div className="bg-white rounded-xl shadow p-6">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-semibold text-gray-800">Lịch Làm Việc</h1>
           </div>
-           {/* Year Selector */}
               <div className="flex items-center gap-2 h-[50px]">
                 <label className="text-sm font-medium text-gray-600 bg-blue-50 px-3 py-1 rounded" style={{ height:'40px', justifyContent: 'center', alignContent: 'center'}}>
                   Năm
@@ -234,8 +234,6 @@ const getWeeklySchedules = () => {
                   ))}
                 </select>
               </div>
-
-              {/* Week Selector */}
               <div className="flex items-center gap-2 h-[50px]">
                 <label className="text-sm font-medium text-gray-600 bg-blue-50 px-3 py-1 rounded" style={{ height:'40px', justifyContent: 'center', alignContent: 'center'}}>
                   Tuần
@@ -253,8 +251,6 @@ const getWeeklySchedules = () => {
                   ))}
                 </select>
               </div>
-
-          {/* Weekly grid */}
           <div className="bg-gray-50 p-4 rounded-lg">
             <div className="grid grid-cols-7 gap-3 mb-3">
               {weekDays.map(day => (
@@ -271,12 +267,11 @@ const getWeeklySchedules = () => {
                     groupedSchedules[day.key].map((s) => (
                       <div
                         key={s.id || `${day.key}-${Math.random()}`}
-                        onClick={() => handleClick(s)}
+                        onClick={() => handleClick(s, day.key)}
                         className="mb-2 p-2 rounded-md bg-green-50 border border-green-100 text-sm cursor-pointer hover:bg-green-100 transition"
                       >
                         <div className="font-semibold text-sm">{s.title || 'Lịch khám'}</div>
                         <div className="text-xs text-gray-600">🕒 {s.startTime || s.from || s.start} - {s.endTime || s.to || s.end}</div>
-                        {/* Thêm thông tin bệnh nhân */}
                         {s.patient && (
                           <div className="text-xs text-blue-700 mt-1">
                             <div>Tên bệnh nhân: <span className="font-medium">{s.patient.name}</span></div>
@@ -298,6 +293,31 @@ const getWeeklySchedules = () => {
           
         </div>
       </div>
+      {showModal && (
+  <div className="absolute left-1/2 top-1/3 transform -translate-x-1/2 z-50">
+    <div className="bg-white text-black px-6 py-4 rounded-xl shadow-lg relative min-w-[300px] border border-gray-300">
+      <button
+        className="absolute top-2 right-2 text-xl font-bold text-red-500 hover:text-red-700"
+        onClick={() => setShowModal(false)}
+        style={{
+          background: 'transparent',
+          border: 'none',
+          cursor: 'pointer',
+          lineHeight: '1',
+        }}
+        aria-label="Đóng"
+      >
+        ×
+      </button>
+      <div className="text-center text-lg font-semibold">
+        Bạn không thể tạo hồ sơ cho lịch khám này
+      </div>
+    </div>
+  </div>
+)}
+
+
+
     </DoctorLayout>
   );
 };

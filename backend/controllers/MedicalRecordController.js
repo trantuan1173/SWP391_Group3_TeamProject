@@ -46,7 +46,6 @@ const getAllPatients = async (req, res) => {
   }
 };
 
-// controllers/MedicalRecordController.js
 const getAllMedicalRecordsByPatient = async (req, res) => {
   try {
     const patientId = parseInt(req.params.patientId);
@@ -216,7 +215,6 @@ const createMedicalRecord = async (req, res) => {
 
   const { patientId, doctorId, appointmentId, symptoms, diagnosis, treatment, services } = req.body;
   try {
-    // If doctorId provided, ensure it references an Employee
     if (doctorId) {
       const doc = await Employee.findByPk(doctorId);
       if (!doc) return res.status(400).json({ error: 'Invalid doctorId' });
@@ -339,9 +337,7 @@ const getMedicalRecordsByDoctor = async (req, res) => {
     const { doctorId } = req.params;
     const { patientId } = req.query;
 
-    console.log("Getting medical records for doctorId:", doctorId, "patientId:", patientId); // Debug
-
-    // Kiểm tra xem doctorId có khớp với user đang đăng nhập không
+    console.log("Getting medical records for doctorId:", doctorId, "patientId:", patientId);
     if (req.userId && req.userId !== parseInt(doctorId)) {
       return res.status(403).json({
         success: false,
@@ -354,7 +350,7 @@ const getMedicalRecordsByDoctor = async (req, res) => {
       whereConditions.patientId = parseInt(patientId);
     }
 
-    console.log("Where conditions:", whereConditions); // Debug
+    console.log("Where conditions:", whereConditions);
 
     const medicalRecords = await MedicalRecord.findAll({
       where: whereConditions,
@@ -371,7 +367,7 @@ const getMedicalRecordsByDoctor = async (req, res) => {
       order: [['createdAt', 'DESC']]
     });
 
-    console.log("Found medical records:", medicalRecords.length); // Debug
+    console.log("Found medical records:", medicalRecords.length);
 
     const formattedRecords = medicalRecords.map(record => ({
       id: record.id,
@@ -405,30 +401,27 @@ const getMedicalRecordsByDoctor = async (req, res) => {
 const getPatientsByDoctorV = async (req, res) => {
   try {
     const { doctorId } = req.params;
+    const { startDate, endDate } = req.query;
 
-    console.log("Getting patients for doctorId:", doctorId); // Debug
-    console.log("Request userId:", req.userId); // Debug
-
-    // Kiểm tra quyền truy cập
-    if (req.userId && req.userId !== parseInt(doctorId)) {
-      return res.status(403).json({
-        success: false,
-        error: "Bạn chỉ có thể xem danh sách bệnh nhân của mình"
-      });
+    let dateCondition = {};
+    if (startDate && endDate) {
+      dateCondition = { [Op.between]: [startDate, endDate] };
+    } else if (startDate) {
+      dateCondition = { [Op.gte]: startDate };
+    } else if (endDate) {
+      dateCondition = { [Op.lte]: endDate };
     }
 
-    // Lấy danh sách appointments của doctor
     const appointments = await Appointment.findAll({
       where: {
         doctorId: parseInt(doctorId),
-        status: { [Op.in]: ['confirmed', 'completed'] }
+        status: { [Op.in]: ['confirmed', 'completed'] },
+        ...(startDate || endDate ? { date: dateCondition } : {})
       },
       attributes: ['patientId'],
       group: ['patientId'],
       raw: true
     });
-
-    console.log("Found appointments:", appointments); // Debug
 
     if (appointments.length === 0) {
       return res.status(200).json({
@@ -438,19 +431,12 @@ const getPatientsByDoctorV = async (req, res) => {
       });
     }
 
-    // Lấy danh sách patientIds
     const patientIds = appointments.map(a => a.patientId);
-    console.log("Patient IDs:", patientIds); // Debug
 
-    // Lấy thông tin bệnh nhân
     const patients = await Patient.findAll({
-      where: {
-        id: { [Op.in]: patientIds }
-      },
+      where: { id: { [Op.in]: patientIds } },
       attributes: ['id', 'name', 'email', 'phoneNumber', 'dateOfBirth', 'gender']
     });
-
-    console.log("Found patients:", patients.length); // Debug
 
     res.status(200).json({
       success: true,
@@ -458,7 +444,7 @@ const getPatientsByDoctorV = async (req, res) => {
       data: patients
     });
   } catch (error) {
-    console.error("Error in getPatientsByDoctor:", error);
+    console.error("Error in getPatientsByDoctorV:", error);
     res.status(500).json({
       success: false,
       error: "Failed to get patients",
@@ -469,23 +455,18 @@ const getPatientsByDoctorV = async (req, res) => {
 
 
 
-// backend/controllers/MedicalRecordController.js
 
 const getPatientsByDoctor = async (req, res) => {
   try {
     const { doctorId } = req.params;
 
     console.log("Getting patients for doctorId:", doctorId);
-
-    // Kiểm tra quyền truy cập
     if (req.userId && req.userId !== parseInt(doctorId)) {
       return res.status(403).json({
         success: false,
         error: "Bạn chỉ có thể xem danh sách bệnh nhân của mình"
       });
     }
-
-    // Lấy danh sách appointments đang active của doctor
     const appointments = await Appointment.findAll({
       where: {
         doctorId: parseInt(doctorId),
@@ -498,7 +479,7 @@ const getPatientsByDoctor = async (req, res) => {
         {
           model: Patient,
           attributes: ['id', 'name', 'email', 'identityNumber' , 'phoneNumber', 'dateOfBirth', 'gender'],
-          required: true // Đảm bảo chỉ lấy appointment có patient
+          required: true
         }
       ],
       order: [['date', 'ASC'], ['startTime', 'ASC']]
@@ -513,8 +494,6 @@ const getPatientsByDoctor = async (req, res) => {
         data: []
       });
     }
-
-    // Format data - ĐẢM BẢO CÓ ĐẦY ĐỦ THÔNG TIN
     const patientsWithAppointments = appointments.map(apt => {
       if (!apt.Patient) {
         console.error("Missing patient data for appointment:", apt.id);
@@ -534,7 +513,7 @@ const getPatientsByDoctor = async (req, res) => {
         patientDOB: apt.Patient.dateOfBirth || '',
         patientGender: apt.Patient.gender || ''
       };
-    }).filter(item => item !== null); // Loại bỏ các item null
+    }).filter(item => item !== null); 
 
     console.log("Formatted patients:", patientsWithAppointments);
 

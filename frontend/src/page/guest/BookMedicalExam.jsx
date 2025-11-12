@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Header from "../../components/guestlayout/Header";
-import Footer from "../../components/guestlayout/Footer"; // Đường dẫn tới Header.jsx
+import Footer from "../../components/guestlayout/Footer";
 import { API_ENDPOINTS } from '../../config';
 import axios from 'axios';
 
@@ -23,19 +23,16 @@ export default function BookMedicalExam() {
   };
 
   function isValidCCCD(value) {
-  // CCCD phải đúng 12 số
   return /^\d{12}$/.test(value);
 }
 
 function isValidPhoneNumber(value) {
-  // Số điện thoại phải đúng 10 số
   return /^\d{10}$/.test(value);
 }
 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Validate required fields
     if (!name || !identityNumber || !phoneNumber || !date || !startTime) {
       setMessage("Vui lòng điền đầy đủ thông tin bắt buộc.");
       return;
@@ -74,7 +71,6 @@ function isValidPhoneNumber(value) {
   
         <div className="max-w-6xl mx-auto rounded-xl bg-[#f6fff4] p-6 md:p-8 mt-[30px]">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-            {/* Left Form */}
             <form
               onSubmit={handleSubmit}
               className="md:col-span-7 flex flex-col gap-6"
@@ -115,11 +111,8 @@ function isValidPhoneNumber(value) {
                   onChange={(e) => setPhoneNumber(e.target.value)}
                 />
               </div>
-              {/* Move the submit button inside the form */}
               
             </form>
-  
-            {/* Right Form */}
             <div className="md:col-span-5 flex flex-col items-center">
               <div className="w-full bg-[#ede9fe] rounded-2xl p-6">
                 <div className="flex items-center justify-between mb-4">
@@ -139,7 +132,6 @@ function isValidPhoneNumber(value) {
                 </div>
   
                 <div className="flex flex-col gap-4">
-                  {/* Date */}
                   <div>
                     <label className="block text-gray-700 text-base mb-1">
                       Ngày
@@ -151,8 +143,6 @@ function isValidPhoneNumber(value) {
                       onChange={(e) => setDate(e.target.value)}
                     />
                   </div>
-  
-                  {/* Time */}
                   <div>
                     <label className="block text-gray-700 text-base mb-1">
                       Giờ

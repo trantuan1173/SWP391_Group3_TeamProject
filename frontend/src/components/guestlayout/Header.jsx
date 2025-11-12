@@ -11,7 +11,6 @@ export default function Header() {
   const [user, setUser] = useState(null);
   const dropdownRef = useRef(null);
 
-  // Giải mã token để lấy thông tin user
   useEffect(() => {
     if (token) {
       try {
@@ -24,7 +23,6 @@ export default function Header() {
     }
   }, [token]);
 
-  // Ẩn dropdown khi click ra ngoài
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -51,15 +49,12 @@ export default function Header() {
           maxWidth: "80%",
         }}
       >
-        {/* Logo */}
         <div
           className="flex items-center gap-2 cursor-pointer"
           onClick={() => navigate("/")}
         >
           <img src="/icon/logo.png" alt="Logo" className="h-[50px] w-auto" />
         </div>
-
-        {/* Menu */}
         <nav className="flex items-center gap-[50px]">
           <a
             href="/doctor"
@@ -87,7 +82,6 @@ export default function Header() {
           </a>
         </nav>
 
-        {/* Auth Buttons OR Avatar */}
         <div className="flex items-center gap-4 relative" ref={dropdownRef}>
           {token && user ? (
             <>
@@ -113,8 +107,6 @@ export default function Header() {
                   {user?.name || user?.email || "Người dùng"}
                 </span>
               </div>
-
-              {/* Dropdown giữ mở khi hover */}
               {open && (
                 <div
                   className="absolute right-0 top-[60px] bg-white shadow-lg rounded-lg z-50 w-[160px] border border-gray-100 animate-fadeIn"

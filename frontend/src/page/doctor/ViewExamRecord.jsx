@@ -12,16 +12,23 @@ const ViewExamRecord = () => {
   const [currentUserId, setCurrentUserId] = useState(null);
   const [activeMenu, setActiveMenu] = useState('patients');
   const [searchTerm, setSearchTerm] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const navigate = useNavigate();
   const normalizedSearchTerm = searchTerm.replace(/\s+/g, ' ').trim().toLowerCase();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
-  
-
 
   useEffect(() => {
     checkAuthAndFetchData();
   }, []);
+
+
+  useEffect(() => {
+    if (currentUserId) {
+      fetchPatients(currentUserId, localStorage.getItem("token"));
+    }
+  }, [startDate, endDate]);
 
   const checkAuthAndFetchData = async () => {
     try {
@@ -40,9 +47,6 @@ const ViewExamRecord = () => {
 
       const payload = JSON.parse(atob(tokenParts[1]));
       const userId = payload.id || payload.userId || payload.sub;
-      
-      console.log("Current User ID:", userId); // Debug
-      
       setCurrentUserId(userId);
 
       if (!userId) {
@@ -52,14 +56,8 @@ const ViewExamRecord = () => {
 
       const response = await axios.get(
         API_ENDPOINTS.GET_EMPLOYEE_WITH_ROLE(userId),
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      console.log("Employee data:", response.data); // Debug
 
       if (!response.data.isDoctor) {
         alert("Bạn không có quyền truy cập trang này");
@@ -70,7 +68,6 @@ const ViewExamRecord = () => {
       setDoctorInfo(response.data);
       await fetchPatients(userId, token);
     } catch (error) {
-      console.error("Auth check error:", error);
       if (error.response?.status === 401 || error.response?.status === 403) {
         localStorage.removeItem("token");
         navigate("/login");
@@ -84,28 +81,21 @@ const ViewExamRecord = () => {
 
   const fetchPatients = async (doctorId, token) => {
     try {
-      console.log("Fetching patients for doctor:", doctorId); // Debug
-      
+      const params = {};
+      if (startDate) params.startDate = startDate;
+      if (endDate) params.endDate = endDate;
+
       const response = await axios.get(
         API_ENDPOINTS.GET_PATIENTS_BY_DOCTOR(doctorId),
         {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+          headers: { Authorization: `Bearer ${token}` },
+          params,
         }
       );
 
-      
-      // Kiểm tra cấu trúc dữ liệu
       const patientsData = response.data.data || response.data || [];
-      
-      console.log("Processed patients data:", patientsData); // Debug
-
-        setPatients(patientsData);
-      
+      setPatients(patientsData);
     } catch (error) {
-      console.error("Fetch patients error:", error);
-      console.error("Error response:", error.response?.data);
       setError(`Không thể tải danh sách bệnh nhân: ${error.response?.data?.error || error.message}`);
     }
   };
@@ -120,17 +110,16 @@ const ViewExamRecord = () => {
   };
 
   const handleViewDetail = (patientId) => {
-    console.log("Navigating to patient:", patientId); // Debug
     navigate(`/doctor/exam-records/${patientId}`);
   };
 
   const filteredPatients = patients.filter(patient => {
     const searchLower = normalizedSearchTerm.toLowerCase();
     return (
-    (patient.name?.toLowerCase().replace(/\s+/g, ' ').includes(searchLower)) ||
-    (patient.phoneNumber?.includes(searchTerm)) ||
-    (patient.email?.toLowerCase().includes(searchLower))
-  );
+      (patient.name?.toLowerCase().replace(/\s+/g, ' ').includes(searchLower)) ||
+      (patient.phoneNumber?.includes(searchTerm)) ||
+      (patient.email?.toLowerCase().includes(searchLower))
+    );
   });
 
   const totalPages = Math.ceil(filteredPatients.length / itemsPerPage);
@@ -172,20 +161,42 @@ const ViewExamRecord = () => {
           </div>
         </div>
         <div className="bg-white rounded-xl shadow p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-semibold text-gray-800">
-              Danh Sách Bệnh Nhân ({patients.length})
-            </h1>
+          <h4 className="text-2xl font-semibold text-gray-800">
+            Danh Sách Bệnh Nhân ({patients.length})
+          </h4>
+
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 mt-4 space-y-2 md:space-y-0">
+
             <input
               type="text"
               placeholder="Tìm kiếm bệnh nhân..."
-              className="px-4 py-2 border rounded-lg w-80 text-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+              className="px-4 py-2 border rounded-lg w-full md:w-80 text-sm focus:outline-none focus:ring-2 focus:ring-green-400"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-          </div>
 
-          
+            <div className="flex items-center space-x-2">
+              <input
+                type="date"
+                value={startDate}
+                onChange={e => setStartDate(e.target.value)}
+                className="border px-2 py-1 rounded"
+              />
+              <span>-</span>
+              <input
+                type="date"
+                value={endDate}
+                onChange={e => setEndDate(e.target.value)}
+                className="border px-2 py-1 rounded"
+              />
+              <button
+                className="bg-green-500 text-white px-4 py-1 rounded"
+                onClick={() => fetchPatients(currentUserId, localStorage.getItem("token"))}
+              >
+                Lọc
+              </button>
+            </div>
+          </div>
 
           {filteredPatients.length === 0 ? (
             <div className="text-center text-gray-500 py-8">
@@ -195,55 +206,51 @@ const ViewExamRecord = () => {
             </div>
           ) : (
             <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {paginatedPatients.map((patient, index) => {
-                // Xử lý cả 2 cấu trúc dữ liệu có thể có
-                const patientId = patient.patientId || patient.id;
-                const patientName = patient.patientName || patient.name;
-                const patientPhone = patient.patientPhone || patient.phoneNumber;
-                const patientEmail = patient.patientEmail || patient.email;
-                const patientGender = patient.patientGender || patient.gender;
-                const patientDOB = patient.patientDOB || patient.dateOfBirth;
-                
-                return (
-                  <div
-                    key={patientId || index}
-                    className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition"
-                  >
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <div className="font-semibold text-gray-800 text-lg">
-                          {patientName || 'Không có tên'}
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          📞 {patientPhone || 'Chưa có SĐT'}
-                        </div>
-                      </div>
-                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                        {patientGender || 'N/A'}
-                      </span>
-                    </div>
-                    
-                    <div className="text-sm text-gray-600 space-y-1 mb-3">
-                      <div>
-                        <strong>Ngày sinh:</strong> {formatDateOnly(patientDOB)}
-                      </div>
-                      <div>
-                        <strong>Email:</strong> {patientEmail || 'Chưa có'}
-                      </div>
-                    </div>
-                    
-                    <button
-                      onClick={() => handleViewDetail(patientId)}
-                      className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition"
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {paginatedPatients.map((patient, index) => {
+                  const patientId = patient.patientId || patient.id;
+                  const patientName = patient.patientName || patient.name;
+                  const patientPhone = patient.patientPhone || patient.phoneNumber;
+                  const patientEmail = patient.patientEmail || patient.email;
+                  const patientGender = patient.patientGender || patient.gender;
+                  const patientDOB = patient.patientDOB || patient.dateOfBirth;
+                  return (
+                    <div
+                      key={patientId || index}
+                      className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition"
                     >
-                      Xem Hồ Sơ Khám
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-            {totalPages > 1 && (
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <div className="font-semibold text-gray-800 text-lg">
+                            {patientName || 'Không có tên'}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            📞 {patientPhone || 'Chưa có SĐT'}
+                          </div>
+                        </div>
+                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                          {patientGender || 'N/A'}
+                        </span>
+                      </div>
+                      <div className="text-sm text-gray-600 space-y-1 mb-3">
+                        <div>
+                          <strong>Ngày sinh:</strong> {formatDateOnly(patientDOB)}
+                        </div>
+                        <div>
+                          <strong>Email:</strong> {patientEmail || 'Chưa có'}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleViewDetail(patientId)}
+                        className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition"
+                      >
+                        Xem Hồ Sơ Khám
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+              {totalPages > 1 && (
                 <div className="flex justify-center mt-6 space-x-2">
                   <button
                     onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}

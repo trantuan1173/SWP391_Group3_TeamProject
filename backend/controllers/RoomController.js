@@ -4,8 +4,8 @@ const { Room } = require("../models");
 const getAllRooms = async (req, res) => {
   try {
     const rooms = await Room.findAll({
-      attributes: ["id", "name", "type"], // Chỉ lấy các trường cần thiết
-      order: [["name", "ASC"]], // Sắp xếp theo tên phòng nếu muốn
+      attributes: ["id", "name", "type"],
+      order: [["name", "ASC"]],
     });
     res.json({ data: rooms });
   } catch (error) {

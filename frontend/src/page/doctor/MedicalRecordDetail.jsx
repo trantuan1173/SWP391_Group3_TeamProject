@@ -54,14 +54,11 @@ const MedicalRecordDetail = () => {
 
   const fetchMedicalRecords = async (doctorId, token) => {
     try {
-      // Get patient info
       const patientRes = await axios.get(
         API_ENDPOINTS.PATIENT_BY_ID(patientId),
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setPatientInfo(patientRes.data.data);
-
-      // Get medical records
       const recordsRes = await axios.get(
         API_ENDPOINTS.GET_MEDICAL_RECORDS_BY_DOCTOR(doctorId, patientId),
         { headers: { Authorization: `Bearer ${token}` } }
@@ -102,7 +99,6 @@ const MedicalRecordDetail = () => {
   return (
     <DoctorLayout activeMenu={activeMenu} setActiveMenu={setActiveMenu} doctorInfo={doctorInfo}>
       <div className="p-6">
-        {/* Back button */}
         <button
           onClick={() => navigate('/doctor/exam-records')}
           className="mb-4 flex items-center text-gray-600 hover:text-gray-800"
@@ -112,8 +108,6 @@ const MedicalRecordDetail = () => {
           </svg>
           Quay lại danh sách bệnh nhân
         </button>
-
-        {/* Patient Info Card */}
         {patientInfo && (
           <div className="bg-white rounded-xl shadow p-6 mb-6">
             <h2 className="text-xl font-semibold mb-4 text-gray-800">Thông Tin Bệnh Nhân</h2>
@@ -141,8 +135,6 @@ const MedicalRecordDetail = () => {
             </div>
           </div>
         )}
-
-        {/* Medical Records */}
         <div className="bg-white rounded-xl shadow p-6">
           <h2 className="text-xl font-semibold mb-4 text-gray-800">
             Lịch Sử Khám Bệnh

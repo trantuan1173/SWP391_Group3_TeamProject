@@ -1,7 +1,6 @@
 const { DoctorSchedule, Appointment, Employee, Room, Patient  } = require("../models");
 const { Op } = require("sequelize");
 
-// Lấy lịch làm việc của bác sĩ
 const getDoctorSchedule = async (req, res) => {
   try {
     const { doctorId } = req.params;
@@ -47,17 +46,14 @@ const getDoctorSchedule = async (req, res) => {
   }
 };
 
-// Tạo lịch làm việc mới
 const createDoctorSchedule = async (req, res) => {
   try {
     const { doctorId, date, startTime, endTime, roomId } = req.body;
 
-    // Validate input
     if (!doctorId || !date || !startTime || !endTime) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Kiểm tra trùng lịch
     const existingSchedule = await DoctorSchedule.findOne({
       where: {
         doctorId,
@@ -100,7 +96,6 @@ const createDoctorSchedule = async (req, res) => {
   }
 };
 
-// Cập nhật lịch làm việc
 const updateDoctorSchedule = async (req, res) => {
   try {
     const { id } = req.params;
@@ -111,7 +106,6 @@ const updateDoctorSchedule = async (req, res) => {
       return res.status(404).json({ error: "Schedule not found" });
     }
 
-    // Kiểm tra trùng lịch (trừ lịch hiện tại)
     const existingSchedule = await DoctorSchedule.findOne({
       where: {
         id: { [Op.ne]: id },
@@ -158,7 +152,6 @@ const updateDoctorSchedule = async (req, res) => {
   }
 };
 
-// Xóa lịch làm việc
 const deleteDoctorSchedule = async (req, res) => {
   try {
     const { id } = req.params;

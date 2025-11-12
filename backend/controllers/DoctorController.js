@@ -11,7 +11,6 @@ const getDoctor = async (req, res) => {
     const { Sequelize } = require("sequelize");
     const { Feedback, Appointment } = require("../models");
 
-    // Find employees who have the 'doctor' role (roleId = 2)
     const doctors = await Employee.findAll({
       attributes: [
         "id", 
@@ -33,10 +32,8 @@ const getDoctor = async (req, res) => {
       ],
     });
 
-    // Lấy rating trung bình cho mỗi bác sĩ
     const formattedDoctors = await Promise.all(
       doctors.map(async (d) => {
-        // Lấy tất cả appointments của bác sĩ
         const appointments = await Appointment.findAll({
           where: { doctorId: d.id },
           attributes: ['id']
@@ -44,7 +41,6 @@ const getDoctor = async (req, res) => {
 
         const appointmentIds = appointments.map(a => a.id);
 
-        // Tính rating trung bình từ feedback
         let averageRating = 0;
         let totalFeedbacks = 0;
 
@@ -148,16 +144,16 @@ const getDoctorAvailable = async (req, res) => {
         {
           model: Employee,
           attributes: ["id", "name", "email", "phoneNumber", "avatar"],
-          required: true, // INNER JOIN - chỉ lấy Doctor có Employee
+          required: true,
           include: [
             {
               model: EmployeeRole,
               as: 'EmployeeRoles',
-              attributes: [], // Không cần lấy data, chỉ dùng để filter
+              attributes: [],
               where: {
-                roleId: 2 // Chỉ lấy Employee có roleId = 2 (Bác sĩ)
+                roleId: 2
               },
-              required: true // INNER JOIN
+              required: true
             }
           ]
         }
@@ -239,7 +235,6 @@ const getSpecialties = async (req, res) => {
       raw: true
     });
 
-    // Format lại data
     const formattedSpecialties = specialties.map(s => ({
       name: s.speciality,
       doctorCount: parseInt(s.doctorCount) || 0
@@ -267,7 +262,6 @@ const getUniqueSpecialties = async (req, res) => {
       raw: true
     });
 
-    // Format lại data
     const formattedSpecialties = specialties.map(s => ({
       name: s.speciality,
     }));

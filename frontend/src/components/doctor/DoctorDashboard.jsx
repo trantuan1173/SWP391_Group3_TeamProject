@@ -16,7 +16,7 @@ import {
     SidebarMenuButton,
     SidebarFooter,
 } from "@/components/ui/sidebar";
-import { Calendar, Users, FileText } from "lucide-react";
+import { Calendar, Users, FileText, FileType } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function DoctorDashboard({ children, doctorInfo }) {
@@ -46,7 +46,7 @@ export default function DoctorDashboard({ children, doctorInfo }) {
     { 
       title: "Xem đánh giá", 
       url: "/doctor/view-feedback", 
-      icon: FileText
+      icon: FileType
     },
   ];
 
@@ -58,7 +58,6 @@ export default function DoctorDashboard({ children, doctorInfo }) {
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
-        {/* Sidebar */}
         <Sidebar className="border-0 h-screen bg-[#00A646]">
           <SidebarHeader className="p-4 bg-[#00A646]">
             <img
@@ -127,7 +126,7 @@ export default function DoctorDashboard({ children, doctorInfo }) {
           </SidebarFooter>
         </Sidebar>
 
-        {/* Main content */}
+
         <SidebarInset className="flex flex-col flex-1">
           <header className="flex h-16 items-center border-b bg-white px-4">
             <SidebarTrigger className="-ml-1" />

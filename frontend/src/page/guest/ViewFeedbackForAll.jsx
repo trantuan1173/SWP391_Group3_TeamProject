@@ -17,7 +17,6 @@ export default function ViewFeedbackForAll() {
 
   const navigate = useNavigate();
 
-  // Lấy thông tin bác sĩ
   useEffect(() => {
     const fetchDoctor = async () => {
       try {
@@ -31,7 +30,6 @@ export default function ViewFeedbackForAll() {
     fetchDoctor();
   }, [id]);
 
-  // Lấy feedbacks
   useEffect(() => {
     const fetchFeedbacks = async () => {
       setLoading(true);
@@ -49,7 +47,6 @@ export default function ViewFeedbackForAll() {
     fetchFeedbacks();
   }, [id]);
 
-  // Tính toán thống kê
   const calculateStats = () => {
     if (feedbacks.length === 0) return { average: 0, distribution: {} };
     
@@ -69,7 +66,6 @@ export default function ViewFeedbackForAll() {
 
   const { average, distribution } = calculateStats();
 
-  // Hàm sắp xếp feedback
   const getSortedFeedbacks = () => {
     const sorted = [...feedbacks];
     
@@ -89,14 +85,12 @@ export default function ViewFeedbackForAll() {
 
   const sortedFeedbacks = getSortedFeedbacks();
 
-  // Phân trang
   const totalPages = Math.ceil(sortedFeedbacks.length / FEEDBACKS_PER_PAGE);
   const paginatedFeedbacks = sortedFeedbacks.slice(
     (page - 1) * FEEDBACKS_PER_PAGE,
     page * FEEDBACKS_PER_PAGE
   );
 
-  // Hàm render sao
   const renderStars = (rating) => {
     return (
       <div className="flex items-center">
@@ -115,12 +109,10 @@ export default function ViewFeedbackForAll() {
     );
   };
 
-  // Component thống kê rating
   const RatingStats = () => {
     return (
       <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 mb-6 border border-green-200">
         <div className="flex items-start justify-between">
-          {/* Điểm trung bình */}
           <div className="text-center pr-8 border-r border-gray-300">
             <div className="text-5xl font-bold text-green-600">{average}</div>
             <div className="flex justify-center my-2">
@@ -137,8 +129,6 @@ export default function ViewFeedbackForAll() {
             </div>
             <div className="text-sm text-gray-600">{feedbacks.length} đánh giá</div>
           </div>
-
-          {/* Biểu đồ phân bố */}
           <div className="flex-1 pl-8">
             {[5, 4, 3, 2, 1].map((rating) => {
               const count = distribution[rating];
@@ -171,7 +161,6 @@ export default function ViewFeedbackForAll() {
       <Header />
       <div className="bg-[#f6fff4] min-h-screen pt-12 pb-10">
         <div className="w-[70%] mx-auto">
-          {/* Nút quay lại */}
           <div className="mb-8 flex">
             <button
               onClick={() => navigate("/doctor")}
@@ -182,21 +171,18 @@ export default function ViewFeedbackForAll() {
           </div>
 
           <div className="bg-white rounded-xl shadow-lg p-8">
-            {/* Header với tiêu đề và bộ lọc */}
             <div className="flex justify-between items-center mb-4">
               <h4 className="text-2xl font-bold text-green-800">
                 Đánh giá của bệnh nhân với bác sĩ
                 {doctor?.name ? ` ${doctor.name}` : ` #${id}`}
               </h4>
-
-              {/* Bộ lọc sắp xếp */}
               <div className="flex items-center space-x-3">
                 <label className="text-sm font-medium text-gray-700">Sắp xếp:</label>
                 <select
                   value={sortBy}
                   onChange={(e) => {
                     setSortBy(e.target.value);
-                    setPage(1); // Reset về trang 1 khi thay đổi sắp xếp
+                    setPage(1);
                   }}
                   className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-white"
                 >
@@ -208,7 +194,6 @@ export default function ViewFeedbackForAll() {
               </div>
             </div>
 
-            {/* Thống kê rating */}
             {!loading && feedbacks.length > 0 && <RatingStats />}
 
             {loading ? (
@@ -252,7 +237,6 @@ export default function ViewFeedbackForAll() {
                   ))}
                 </div>
 
-                {/* Phân trang */}
                 <div className="flex justify-center items-center mt-8 gap-2">
                   <button
                     disabled={page === 1}

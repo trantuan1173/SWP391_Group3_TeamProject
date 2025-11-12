@@ -28,6 +28,12 @@ const ViewFeedback = () => {
 
       setDoctorInfo(payload); 
 
+      const doctorRes = await axios.get(
+        API_ENDPOINTS.GET_DOCTOR_BY_ID(doctorId),
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setDoctorInfo(doctorRes.data);
+
       const res = await axios.get(
         API_ENDPOINTS.GET_DOCTOR_FEEDBACKS(doctorId),
         { headers: { Authorization: `Bearer ${token}` } }
@@ -40,14 +46,11 @@ const ViewFeedback = () => {
     }
   };
 
-  // Tính toán thống kê
   const calculateStats = () => {
     if (feedbacks.length === 0) return { average: 0, distribution: {} };
     
     const total = feedbacks.reduce((sum, fb) => sum + fb.rating, 0);
     const average = (total / feedbacks.length).toFixed(1);
-    
-    // Đếm số lượng feedback cho mỗi mức rating
     const distribution = {
       5: feedbacks.filter(fb => fb.rating === 5).length,
       4: feedbacks.filter(fb => fb.rating === 4).length,
@@ -61,7 +64,6 @@ const ViewFeedback = () => {
 
   const { average, distribution } = calculateStats();
 
-  // Hàm sắp xếp feedback
   const getSortedFeedbacks = () => {
     const sorted = [...feedbacks];
     
@@ -81,7 +83,6 @@ const ViewFeedback = () => {
 
   const sortedFeedbacks = getSortedFeedbacks();
 
-  // Hàm render sao
   const renderStars = (rating) => {
     return (
       <div className="flex items-center">
@@ -100,14 +101,12 @@ const ViewFeedback = () => {
     );
   };
 
-  // Component thống kê rating
   const RatingStats = () => {
     const maxCount = Math.max(...Object.values(distribution));
     
     return (
       <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 mb-6 border border-green-200">
         <div className="flex items-start justify-between">
-          {/* Điểm trung bình */}
           <div className="text-center pr-8 border-r border-gray-300">
             <div className="text-5xl font-bold text-green-600">{average}</div>
             <div className="flex justify-center my-2">
@@ -124,8 +123,6 @@ const ViewFeedback = () => {
             </div>
             <div className="text-sm text-gray-600">{feedbacks.length} đánh giá</div>
           </div>
-
-          {/* Biểu đồ phân bố */}
           <div className="flex-1 pl-8">
             {[5, 4, 3, 2, 1].map((rating) => {
               const count = distribution[rating];

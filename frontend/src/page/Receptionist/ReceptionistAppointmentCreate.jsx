@@ -3,7 +3,6 @@ import axios from "axios";
 import { API_ENDPOINTS } from "../../config";
 import { useNavigate } from "react-router-dom";
 
-// Component input với label, error, disabled
 function FormInput({ label, ...props }) {
   return (
     <div className="flex flex-col gap-1">
@@ -17,7 +16,6 @@ function FormInput({ label, ...props }) {
   );
 }
 
-// Component select với label, error
 function FormSelect({ label, children, error, ...props }) {
   return (
     <div className="flex flex-col gap-1">
@@ -56,7 +54,6 @@ export default function ReceptionistAppointmentCreate() {
   const [errors, setErrors] = useState({});
   const [search, setSearch] = useState("");
 
-  // Fetch bệnh nhân
   useEffect(() => {
     const fetchPatients = async () => {
       try {
@@ -72,7 +69,6 @@ export default function ReceptionistAppointmentCreate() {
     fetchPatients();
   }, []);
 
-  // Fetch bác sĩ
   useEffect(() => {
     axios
       .get(API_ENDPOINTS.DOCTOR_LIST, {
@@ -82,7 +78,6 @@ export default function ReceptionistAppointmentCreate() {
       .catch(() => setDoctors([]));
   }, []);
 
-  // Fetch phòng
   useEffect(() => {
     axios
       .get(API_ENDPOINTS.ROOM_LIST, {
@@ -96,7 +91,6 @@ export default function ReceptionistAppointmentCreate() {
       .catch(() => setRooms([]));
   }, []);
 
-  // Tự động điền thông tin bệnh nhân
   useEffect(() => {
     if (form.patientId) {
       const selected = patients.find(
@@ -124,7 +118,6 @@ export default function ReceptionistAppointmentCreate() {
     }
   }, [form.patientId, patients]);
 
-  // Kiểm tra bác sĩ rảnh
   useEffect(() => {
     async function checkDoctorAvailable() {
       if (
@@ -154,7 +147,6 @@ export default function ReceptionistAppointmentCreate() {
     checkDoctorAvailable();
   }, [form.date, form.startTime, form.endTime, form.doctorId]);
 
-  // Validate
   function validate() {
     const newErrors = {};
     if (!form.name) newErrors.name = "Vui lòng nhập tên";
@@ -173,7 +165,6 @@ export default function ReceptionistAppointmentCreate() {
     return Object.keys(newErrors).length === 0;
   }
 
-  // Submit
   async function handleSubmit(e) {
     e.preventDefault();
     if (!validate()) return;
@@ -218,7 +209,6 @@ export default function ReceptionistAppointmentCreate() {
     setLoading(false);
   }
 
-  // Lọc bệnh nhân theo search
   const filteredPatients = search.trim() === ""
     ? patients
     : patients.filter(
@@ -232,7 +222,6 @@ export default function ReceptionistAppointmentCreate() {
     <div className="max-w-xl mx-auto bg-white p-8 rounded-lg shadow-lg">
       <h2 className="text-2xl font-bold mb-6 text-blue-700 text-center">Đăng ký lịch khám</h2>
       <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Tìm kiếm bệnh nhân */}
         <FormInput
           label="Tìm tên hoặc số điện thoại"
           type="text"
@@ -240,7 +229,6 @@ export default function ReceptionistAppointmentCreate() {
           onChange={e => setSearch(e.target.value)}
           placeholder="Nhập tên hoặc số điện thoại để tìm nhanh"
         />
-        {/* Chọn bệnh nhân */}
         <FormSelect
           label="Bệnh nhân"
           value={form.patientId}

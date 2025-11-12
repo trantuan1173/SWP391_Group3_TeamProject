@@ -3,7 +3,6 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const {sendVerifyEmail, sendForgotPasswordEmail} = require("../service/sendVerifyEmail");
 
-// Generate JWT token
 function generateToken(id, type) {
   return jwt.sign({ id, type }, process.env.JWT_SECRET || "your_jwt_secret", {
     expiresIn: "2h",
@@ -15,7 +14,6 @@ const getAllPatients = async (req, res) => {
   res.json({ data: patients });
 };
 
-// Patient login
 const patientLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -38,7 +36,6 @@ const patientLogin = async (req, res) => {
     }
 
     const token = generateToken(patient.id, "patient");
-    // Return token and patient info (without password) so frontend can set user state
     const patientJson = patient.toJSON ? patient.toJSON() : { ...patient };
     if (patientJson.password) delete patientJson.password;
     res.json({ message: "Login successful", token, patient: patientJson });
@@ -48,7 +45,6 @@ const patientLogin = async (req, res) => {
   }
 };
 
-// Register patient
 const register = async (req, res) => {
   try {
     const {
@@ -62,7 +58,6 @@ const register = async (req, res) => {
     if (!name || !email || !password)
       return res.status(400).json({ error: "Missing required fields" });
 
-    // Check duplicates
     console.log(`[register] attempt: email=${email} identityNumber=${identityNumber} phone=${phoneNumber}`);
     const existing = await Patient.findOne({ where: { email } });
     if (existing) {
@@ -112,18 +107,15 @@ const register = async (req, res) => {
   }
 };
 
-// Create appointment with login (JWT decoded)
 const createAppointment = async (req, res) => {
   try {
     const { patientId, doctorId, roomId, date, startTime, endTime, status } = req.body;
     console.log('[createAppointment] payload:', req.body);
 
-    // Kiểm tra patientId có tồn tại không
     const patient = await Patient.findByPk(patientId);
     if (!patient)
       return res.status(404).json({ error: "Patient not found" });
 
-    // Nếu có employee đăng nhập, lấy id từ token để gán createById/createByType
     let createById = req.userId;
     let createByType = req.userType || "employee";
 
@@ -149,7 +141,6 @@ const createAppointment = async (req, res) => {
   }
 };
 
-// Create appointment without login
 const createAppointmentWithoutLogin = async (req, res) => {
   try {
     const { name, identityNumber, phoneNumber, date, startTime, endTime } = req.body;
@@ -185,7 +176,6 @@ const createAppointmentWithoutLogin = async (req, res) => {
   }
 };
 
-// Confirm appointment
 const confirmAppointment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -210,7 +200,6 @@ const confirmAppointment = async (req, res) => {
   }
 };
 
-// Get prescriptions
 const getPrescriptions = async (req, res) => {
   try {
     const { patientId } = req.query;
@@ -238,7 +227,6 @@ const getPrescriptions = async (req, res) => {
   }
 };
 
-// Get checkups
 const getCheckups = async (req, res) => {
   try {
     const { patientId } = req.query;
@@ -251,7 +239,6 @@ const getCheckups = async (req, res) => {
   }
 };
 
-// Get documents
 const getDocuments = async (req, res) => {
   try {
     const { patientId } = req.query;
@@ -264,15 +251,12 @@ const getDocuments = async (req, res) => {
   }
 };
 
-// Get patient by id (with appointments + records)
 const getPatientById = async (req, res) => {
   try {
     const { id } = req.params;
 
     console.log(`[getPatientById] request for id=${id}`);
-    // If the route is protected, req.user and req.userType may be set by middleware
     if (req.userType === 'patient') {
-      // Patients can only access their own profile
       if (!req.user || parseInt(req.user.id) !== parseInt(id)) {
         return res.status(403).json({ error: "Forbidden: cannot access other patient's data" });
       }
@@ -286,7 +270,6 @@ const getPatientById = async (req, res) => {
           {
             model: Appointment,
             include: [
-              // doctor stored on Appointment as foreign key to Employee
               { model: Employee, attributes: ["name", "email", "phoneNumber"] },
               { model: Room, attributes: ["name", "type"] },
             ],
@@ -304,14 +287,11 @@ const getPatientById = async (req, res) => {
       });
     } catch (includeError) {
       console.error("[getPatientById] include query failed, falling back to basic fetch. Error:", includeError && includeError.stack ? includeError.stack : includeError);
-      // Try a simpler lookup to avoid returning 500 to the client
       patient = await Patient.findByPk(id);
     }
 
     if (!patient)
       return res.status(404).json({ error: "Patient not found" });
-
-    // If we have full relations, use them; otherwise return a basic profile with empty arrays
     const hasRelations = !!patient.MedicalRecords || !!patient.Appointments;
 
     res.json({
@@ -473,12 +453,10 @@ module.exports = {
   getAllPatients,
 };
 
-// Update patient profile (only patient themself or admin via other routes)
 async function updatePatient(req, res) {
   try {
     const { id } = req.params;
 
-    // Only patient owners can update their profile
     if (req.userType === 'patient') {
       if (!req.user || parseInt(req.user.id) !== parseInt(id)) {
         return res.status(403).json({ error: 'Forbidden: cannot update other patient' });

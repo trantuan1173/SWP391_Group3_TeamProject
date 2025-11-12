@@ -43,7 +43,7 @@ export default function ListDoctor() {
   }, []);
 
   const StarRating = ({ rating, totalReviews }) => {
-  const fullStars = Math.floor(rating); // làm tròn xuống
+  const fullStars = Math.floor(rating);
   const hasHalfStar = rating - fullStars > 0 ? 1 : 0;
 
   

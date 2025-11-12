@@ -6,8 +6,6 @@ export default function ContactUs() {
   return (
     <>
       <Header />
-      
-      {/* Hero Section */}
       <section className="pt-[100px] pb-8 bg-gradient-to-b from-green-50 to-white">
         <div className="w-[80%] mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
@@ -18,13 +16,9 @@ export default function ContactUs() {
           </p>
         </div>
       </section>
-
-      {/* Contact Information Section */}
       <section className="py-12 bg-white">
         <div className="w-[80%] mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            
-            {/* Đường dây nóng & Email */}
             <div className="bg-green-50 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300">
               <div className="w-16 h-16 bg-green-800 rounded-full flex items-center justify-center mb-6">
                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -44,13 +38,11 @@ export default function ContactUs() {
                 <p className="flex items-center gap-2">
                   <span className="font-semibold">Email:</span> 
                   <a href="mailto:info@abc.com.vn" className="text-green-800 hover:underline">
-                    info@abc.com.vn
+                    CMS@abc.com.vn
                   </a>
                 </p>
               </div>
             </div>
-
-            {/* Vị trí của chúng tôi */}
             <div className="bg-blue-50 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300">
               <div className="w-16 h-16 bg-blue-800 rounded-full flex items-center justify-center mb-6">
                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -63,21 +55,16 @@ export default function ContactUs() {
               </h3>
               <div className="space-y-3 text-gray-700">
                 <p>
-                  Đại học FPT Hà Nội
+                  Clinic Management System
                 </p>
                 <p>
-                  Khu Công nghệ cao Hòa Lạc, Km29 Đại lộ Thăng Long
-                </p>
-                <p>
-                  Thạch Thất, Hà Nội, Việt Nam
+                  abc, Q.xyz, TP. Hà Nội
                 </p>
                 <p className="text-sm text-gray-500 italic mt-4">
-                  (Gần Công viên phần mềm Quang Trung)
+                  (Gần Công viên X)
                 </p>
               </div>
             </div>
-
-            {/* Hướng dẫn đỗ xe */}
             <div className="bg-orange-50 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300">
               <div className="w-16 h-16 bg-orange-800 rounded-full flex items-center justify-center mb-6">
                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -106,8 +93,6 @@ export default function ContactUs() {
           </div>
         </div>
       </section>
-
-      {/* Map Section */}
       <section className="py-12 bg-gray-50">
         <div className="w-[80%] mx-auto">
           <div className="text-center mb-8">
@@ -118,16 +103,12 @@ export default function ContactUs() {
               Tìm đường đến phòng khám của chúng tôi
             </p>
           </div>
-
-          {/* Google Map Embed */}
           <div className="rounded-2xl overflow-hidden shadow-2xl">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3723.657837435831!2d105.52460731493236!3d21.01330959313684!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31345b465a4e65fb%3A0xaae6040cfabe8fe!2zxJDhuqFpIGjhu41jIEZQVCBIw6AgTuG7mWk!5e0!3m2!1svi!2s!4v1234567890123!5m2!1svi!2s"
               height="500" width="100%"
             ></iframe>
           </div>
-
-          {/* Directions Button */}
           <div className="text-center mt-8">
             <a
               href="https://www.google.com/maps/dir//Đại+học+FPT+Hà+Nội"

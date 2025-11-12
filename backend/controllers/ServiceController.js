@@ -23,18 +23,15 @@ const getAllService = async (req, res) => {
 
 const getAllServicePagination = async (req, res) => {
   try {
-    // Lấy query params
     const page = parseInt(req.query.page) || 1;
     const pageSize = parseInt(req.query.pageSize) || 10;
     const search = req.query.search ? req.query.search.trim() : "";
     const offset = (page - 1) * pageSize;
 
-    // ===== VALIDATION =====
     if (page <= 0 || pageSize <= 0) {
       return res.status(400).json({ error: "Invalid pagination parameters" });
     }
 
-    // ===== WHERE CONDITION =====
     const whereCondition = {};
     if (search) {
       whereCondition[Op.or] = [
@@ -43,7 +40,6 @@ const getAllServicePagination = async (req, res) => {
       ];
     }
 
-    // ===== QUERY DATABASE =====
     const { rows: services, count: total } = await Service.findAndCountAll({
       attributes: [
         "id",
@@ -59,7 +55,6 @@ const getAllServicePagination = async (req, res) => {
       order: [["createdAt", "DESC"]],
     });
 
-    // ===== RESPONSE =====
     return res.status(200).json({
       success: true,
       message: "Lấy danh sách dịch vụ thành công",
@@ -95,7 +90,6 @@ const createService = async (req, res) => {
   try {
     const { name, description, price } = req.body;
 
-    // ===== VALIDATION =====
     if (!name || !price) {
       return res.status(400).json({
         error: "Tên và giá dịch vụ là bắt buộc",
@@ -108,7 +102,6 @@ const createService = async (req, res) => {
       });
     }
 
-    // Kiểm tra trùng tên
     const existingService = await Service.findOne({ where: { name } });
     if (existingService) {
       return res.status(409).json({
@@ -142,7 +135,6 @@ const updateService = async (req, res) => {
       return res.status(404).json({ error: "Service not found" });
     }
 
-    // ===== VALIDATION =====
     if (!name || !price) {
       return res.status(400).json({
         error: "Tên và giá dịch vụ là bắt buộc",
@@ -155,7 +147,6 @@ const updateService = async (req, res) => {
       });
     }
 
-    // Kiểm tra trùng tên (ngoại trừ chính service hiện tại)
     const duplicateName = await Service.findOne({
       where: {
         name,

@@ -1,5 +1,3 @@
-// frontend/src/page/doctor/CreateMedicalRecord.jsx
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -38,8 +36,6 @@ const CreateMedicalRecord = () => {
         navigate("/login");
         return;
       }
-
-      // Decode JWT
       const tokenParts = token.split('.');
       if (tokenParts.length !== 3) {
         localStorage.removeItem("token");
@@ -49,15 +45,13 @@ const CreateMedicalRecord = () => {
       const payload = JSON.parse(atob(tokenParts[1]));
       const userId = payload.id || payload.userId || payload.sub;
 
-      console.log("User ID:", userId); // Debug
-
-      // Kiểm tra role
+      console.log("User ID:", userId);
       const response = await axios.get(
         API_ENDPOINTS.GET_EMPLOYEE_WITH_ROLE(userId),
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
-      console.log("Doctor info:", response.data); // Debug
+      console.log("Doctor info:", response.data);
 
       if (!response.data.isDoctor) {
         alert("Bạn không có quyền truy cập trang này");
@@ -65,28 +59,23 @@ const CreateMedicalRecord = () => {
         return;
       }
       setDoctorInfo(response.data);
-
-      // Lấy danh sách bệnh nhân
       const patientsRes = await axios.get(
         API_ENDPOINTS.GET_PATIENT_BY_DOCTOR(userId),
         { headers: { Authorization: `Bearer ${token}` }}
       );
 
-      console.log("Patients response:", patientsRes.data); // Debug
+      console.log("Patients response:", patientsRes.data);
 
       const patientsList = patientsRes.data.data || [];
-      console.log("Patients list:", patientsList); // Debug
+      console.log("Patients list:", patientsList);
 
       setPatientsWithAppointments(patientsList);
-      // Nếu có appointmentId truyền vào, tự động chọn bệnh nhân tương ứng
       if (appointmentId && patientsList.length > 0) {
         const matchedPatient = patientsList.find(p => p.appointmentId === Number(appointmentId));
         if (matchedPatient) {
           setSelectedPatient(matchedPatient);
         }
       }
-
-      // Lấy danh sách dịch vụ
       const servicesRes = await axios.get(
         API_ENDPOINTS.GET_SERVICES,
         { headers: { Authorization: `Bearer ${token}` } }
@@ -95,7 +84,7 @@ const CreateMedicalRecord = () => {
 
     } catch (error) {
       console.error("Error fetching data:", error);
-      console.error("Error details:", error.response?.data); // Debug
+      console.error("Error details:", error.response?.data);
       setError(error.response?.data?.error || "Có lỗi xảy ra. Vui lòng thử lại!");
     } finally {
       setLoading(false);
@@ -214,7 +203,7 @@ const CreateMedicalRecord = () => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Chọn bệnh nhân */}
+
           <div className="bg-blue-50 p-4 rounded-lg">
             <label className="block font-semibold mb-3 text-lg">
               1. Chọn bệnh nhân <span className="text-red-500">*</span>
@@ -234,7 +223,7 @@ const CreateMedicalRecord = () => {
                     const patient = patientsWithAppointments.find(
                       p => p.appointmentId === Number(e.target.value)
                     );
-                    console.log("Selected patient:", patient); // Debug
+                    console.log("Selected patient:", patient);
                     setSelectedPatient(patient);
                   }}
                   required
@@ -268,7 +257,6 @@ const CreateMedicalRecord = () => {
             )}
           </div>
 
-          {/* Các phần còn lại giữ nguyên */}
           <div>
             <label className="block font-semibold mb-2 text-lg">
               2. Triệu chứng <span className="text-red-500">*</span>

@@ -2,15 +2,12 @@ const { Employee, Role, EmployeeRole} = require("../models");
 const jwt = require("jsonwebtoken");
 const { sendVerifyEmail } = require("../service/sendVerifyEmail");
 
-// Generate JWT token
 function generateToken(id, type) {
   return jwt.sign({ id: id, type: type }, process.env.JWT_SECRET || "your_jwt_secret", {
     expiresIn: "2h",
   });
 }
 
-
-// Lấy thông tin employee kèm role
 const getEmployeeWithRole = async (req, res) => {
   try {
     const { id } = req.params;
@@ -23,14 +20,14 @@ const getEmployeeWithRole = async (req, res) => {
           through: { attributes: [] }, 
           attributes: ["id", "name"]
         }
-      ]
+      ],
+      attributes: ["avatar"]
     });
 
     if (!employee) {
       return res.status(404).json({ error: "Không tìm thấy role" });
     }
 
-    // Lấy danh sách roles
     const roles = employee.roles.map(role => ({
       id: role.id,
       name: role.name
@@ -42,8 +39,10 @@ const getEmployeeWithRole = async (req, res) => {
       email: employee.email,
       phoneNumber: employee.phoneNumber,
       address: employee.address,
+      avatar: employee.avatar ?  `${req.protocol}://${req.get('host')}${employee.avatar}` 
+        : null,
       roles,
-      isDoctor: roles.some(role => role.name.toLowerCase() === "doctor") // Check nếu có role Doctor
+      isDoctor: roles.some(role => role.name.toLowerCase() === "doctor")
     });
 
   } catch (error) {
@@ -52,8 +51,6 @@ const getEmployeeWithRole = async (req, res) => {
   }
 };
 
-
-//Employee login (Log)
 const employeeLogin = async (req, res) => {
   try {
     const { email, password } = req.body;

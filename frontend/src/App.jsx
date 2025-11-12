@@ -99,15 +99,13 @@ function App() {
         <Route path="/patient-dashboard/:id" element={<RedirectPatientId />} />
 
         {/* Doctor Dashboard routes */}
-        <Route path="/doctor/schedule" element={<DoctorSchedule />} />
-        <Route path="/doctor/exam-records" element={<ViewExamRecord />} />
-        <Route
-          path="/doctor/create-records"
-          element={<CreateMedicalRecord />}
-        />
-        <Route path="/doctor/view-feedback" element={<ViewFeedback />} />
-        <Route path="/doctor/exam-records/:patientId" element={<MedicalRecordDetail />} />
-
+        <Route element={<RequireAuth allowedRoles={["Doctor"]} />}>
+          <Route path="/doctor/schedule" element={<DoctorSchedule />} />
+          <Route path="/doctor/exam-records" element={<ViewExamRecord />} />
+          <Route path="/doctor/create-records" element={<CreateMedicalRecord />} />
+          <Route path="/doctor/view-feedback" element={<ViewFeedback />} />
+          <Route path="/doctor/exam-records/:patientId" element={<MedicalRecordDetail />} />
+        </Route>
         {/* Admin routes */}
         <Route element={<RequireAuth allowedRoles={["Admin"]} />}>
           <Route path="/admin/user" element={<UserManagement />}></Route>
