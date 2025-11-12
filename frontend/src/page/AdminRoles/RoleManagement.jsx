@@ -93,7 +93,6 @@ export default function RoleManagement() {
   return (
     <AdminLayout>
       <div className="bg-white h-full p-5 rounded-lg shadow-md">
-        {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h4 className="text-xl font-bold">Quản lý vai trò</h4>
           <Button
@@ -104,7 +103,6 @@ export default function RoleManagement() {
           </Button>
         </div>
 
-        {/* Search */}
         <Input
           placeholder="Tìm kiếm vai trò..."
           value={searchInput}
@@ -115,7 +113,6 @@ export default function RoleManagement() {
           className="max-w-sm mb-4"
         />
 
-        {/* Table */}
         <Table>
           <TableCaption>Danh sách vai trò</TableCaption>
           <TableHeader>
@@ -166,7 +163,6 @@ export default function RoleManagement() {
           </TableBody>
         </Table>
 
-        {/* Pagination */}
         <div className="mt-4 flex justify-center">
           <Pagination>
             <PaginationContent>
@@ -196,7 +192,6 @@ export default function RoleManagement() {
           </Pagination>
         </div>
 
-        {/* Dialogs */}
         <RoleFormDialog
           open={dialogOpen}
           setOpen={setDialogOpen}

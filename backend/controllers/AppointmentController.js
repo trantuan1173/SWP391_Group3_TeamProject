@@ -190,7 +190,6 @@ const getAvailableDoctors = async (req, res) => {
   }
 };
 
-// Get available rooms for a specific time slot
 const getAvailableRooms = async (req, res) => {
   const { date, startTime, endTime } = req.query;
 
@@ -237,15 +236,13 @@ const getAvailableRooms = async (req, res) => {
   }
 };
 
-//Get all appointment
 const getAppointment = async (req, res) => {
   try {
     const search = req.query.search || "";
     const page = req.query.page || 1;
     const limit = req.query.limit || 8;
     const status = req.query.status || "all";
-    // const searchPhone = req.query.searchPhone || "";
-    // const patientName = req.query.patientName || "";
+
     const whereClause = {};
 
     if (status !== "all") {
@@ -279,7 +276,6 @@ const getAppointment = async (req, res) => {
   }
 };
 
-//Get appointment by id
 const getAppointmentById = async (req, res) => {
   try {
     console.log("bên trang appoint page");
@@ -303,7 +299,6 @@ const getAppointmentById = async (req, res) => {
   }
 };
 
-//Get all appointmenr today
 const getAppointmentToday = async (req, res) => {
   const searchPhone = req.query.searchPhone || "";
   const patientName = req.query.patientName || "";
@@ -347,7 +342,6 @@ const getAppointmentToday = async (req, res) => {
   }
 };
 
-//Receptionist Dashboard info
 const getAppointmentDashboard = async (req, res) => {
   try {
     const staff = await Appointment.findAll({
@@ -374,7 +368,6 @@ const getAppointmentDashboard = async (req, res) => {
   }
 };
 
-//Update appointment
 const updateAppointment = async (req, res) => {
   try {
     const appointment = await Appointment.findByPk(req.params.id);
@@ -388,7 +381,6 @@ const updateAppointment = async (req, res) => {
   }
 };
 
-//Delete appointment
 const deleteAppointment = async (req, res) => {
   try {
     const appointment = await Appointment.destroy({
@@ -401,12 +393,10 @@ const deleteAppointment = async (req, res) => {
   }
 };
 
-//Get appointment by patient id with filtering, search and pagination
 const getAppointmentByPatientId = async (req, res) => {
   try {
     const patientId = parseInt(req.params.id, 10);
 
-    // Enforce at controller level that a patient can only fetch their own appointments
     if (req.userType === "patient" && req.userId !== patientId) {
       return res.status(403).json({
         success: false,
@@ -414,7 +404,6 @@ const getAppointmentByPatientId = async (req, res) => {
       });
     }
 
-    // Query params for filtering and pagination
     const {
       page = 1,
       limit = 20,
@@ -451,7 +440,6 @@ const getAppointmentByPatientId = async (req, res) => {
       }
     }
 
-    // Build search across related models (employee name and room name)
     const include = [
       {
         model: Employee,
@@ -460,7 +448,6 @@ const getAppointmentByPatientId = async (req, res) => {
       { model: Room, attributes: ["id", "name", "type"] },
     ];
 
-    // If search provided, use $Model.field$ syntax in where with OR
     const finalWhere = { ...where };
     if (search && typeof search === "string" && search.trim().length > 0) {
       const like = { [Op.like]: `%${search.trim()}%` };
@@ -496,7 +483,6 @@ const getAppointmentByPatientId = async (req, res) => {
   }
 };
 
-//Get appointment by doctor id
 const getAppointmentByDoctorId = async (req, res) => {
   try {
     const appointment = await Appointment.findAll({
@@ -516,7 +502,6 @@ const getAppointmentByDoctorId = async (req, res) => {
   }
 };
 
-//Get appointment by status
 const getAppointmentByStatus = async (req, res) => {
   try {
     const appointment = await Appointment.findAll({

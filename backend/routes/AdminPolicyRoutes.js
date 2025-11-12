@@ -10,14 +10,12 @@ const {
   getActivePolicyByCategory,
 } = require("../controllers/PolicyController");
 
-// CRUD
 router.post("/", createPolicy);
 router.get("/", getPolicies);
 router.get("/:id", getPolicyById);
 router.put("/:id", updatePolicy);
 router.delete("/:id", deletePolicy);
 
-// public
 router.get("/category/:category", getActivePolicyByCategory);
 
 module.exports = router;

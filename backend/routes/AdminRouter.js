@@ -36,10 +36,9 @@ const {
   getRevenueTimeseries,
 } = require("../controllers/AdminRevenueController.js");
 
-// ================== Multer config ==================
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/avatars"); // thư mục lưu avatar
+    cb(null, "uploads/avatars");
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
@@ -48,7 +47,6 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
-// ===================================================
 
 // routes
 /**
@@ -221,11 +219,7 @@ router.get("/employees", getEmployees);
 router.delete("/employees/:id", deleteEmployee);
 router.put("/employees/update-status/:id", updateActiveStatus);
 router.get("/employees/:id", getEmployeeById);
-router.put(
-  "/employees/:id",
-  upload.single("avatar"), // middleware multer xử lý file
-  updateEmployee
-);
+router.put("/employees/:id", upload.single("avatar"));
 router.put("/employees/update-speciality/:id", updateDoctorSpeciality);
 router.post("/patients", createPatient);
 router.get("/patients/get-all", getPatients);

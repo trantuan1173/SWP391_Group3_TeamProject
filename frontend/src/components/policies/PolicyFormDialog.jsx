@@ -45,7 +45,6 @@ export default function PolicyFormDialog({
   );
   const [lastEditedBy, setLastEditedBy] = useState("");
 
-  // reset form mỗi lần mở dialog
   useEffect(() => {
     if (open) {
       setTitle(initialData?.title || "");
@@ -57,7 +56,6 @@ export default function PolicyFormDialog({
     }
   }, [open, initialData]);
 
-  // modules/toolbars (ổn định UI, tránh undefined)
   const quillModules = useMemo(
     () => ({
       toolbar: [
@@ -90,7 +88,6 @@ export default function PolicyFormDialog({
     []
   );
 
-  // key giúp quill re-init khi chuyển giữa create/edit
   const quillKey = useMemo(
     () =>
       (initialData
@@ -168,7 +165,6 @@ export default function PolicyFormDialog({
                 modules={quillModules}
                 formats={quillFormats}
                 onChange={(_html, _delta, _source, editor) => {
-                  // react-quill-new: editor.getHTML() / getContents() OK
                   const html = editor.getHTML();
                   const delta = editor.getContents();
                   setContentHtml(html);

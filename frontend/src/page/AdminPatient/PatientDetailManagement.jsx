@@ -34,7 +34,6 @@ export default function PatientDetailManagement() {
   return (
     <AdminLayout>
       <div className="p-6 bg-gray-100 rounded-md h-full">
-        {/* Nút quay lại */}
         <Button
           className="!mb-6 !rounded-md"
           onClick={() => navigate("/admin/patients")}
@@ -43,7 +42,6 @@ export default function PatientDetailManagement() {
         </Button>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Avatar & Thông tin cơ bản */}
           <Card className="col-span-1 flex flex-col items-center p-6">
             <Avatar className="w-40 h-40">
               <AvatarImage
@@ -68,7 +66,6 @@ export default function PatientDetailManagement() {
             </div>
           </Card>
 
-          {/* Thông tin chi tiết */}
           <Card className="col-span-3 p-10">
             <CardHeader>
               <CardTitle className="text-2xl font-bold">

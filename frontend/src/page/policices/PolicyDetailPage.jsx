@@ -26,7 +26,6 @@ export default function PolicyDetailPage() {
   const [policy, setPolicy] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Lấy policy theo id
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -34,7 +33,7 @@ export default function PolicyDetailPage() {
         setLoading(true);
         const data = await fetchPolicyById(id);
         if (!mounted) return;
-        // Chuẩn hoá key đề phòng backend trả khác nhau
+
         const normalized = {
           id: data.id,
           title: data.title,
@@ -103,18 +102,14 @@ export default function PolicyDetailPage() {
   return (
     <AdminLayout>
       <div className="p-6">
-        {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <Button variant="outline" onClick={() => navigate(-1)}>
             ← Quay lại danh sách
           </Button>
-          {/* Read-only: không có nút Sửa/Lưu */}
         </div>
 
-        {/* Title */}
         <h1 className="text-2xl font-bold mb-2">{policy.title}</h1>
 
-        {/* Meta grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-500 w-28">Danh mục</span>
@@ -146,12 +141,10 @@ export default function PolicyDetailPage() {
           </div>
         </div>
 
-        {/* Content */}
         <div className="bg-white rounded-lg border p-4 shadow-sm">
           <div className="mb-3 font-semibold">Nội dung</div>
           <div
             className="prose max-w-none"
-            // Read-only: render HTML đã lưu
             dangerouslySetInnerHTML={{ __html: policy.contentHtml || "" }}
           />
         </div>

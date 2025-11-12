@@ -5,27 +5,27 @@ const Employee = require("./Employee");
 const Medicine = sequelize.define("Medicine", {
   name: {
     type: DataTypes.STRING,
-    allowNull: false, // Tên thuốc bắt buộc
+    allowNull: false,
   },
   description: {
     type: DataTypes.TEXT,
-    allowNull: true, // Mô tả / công dụng
+    allowNull: true,
   },
   unit: {
     type: DataTypes.STRING,
-    allowNull: false, // Đơn vị: viên, hộp, chai...
+    allowNull: false,
   },
   form: {
     type: DataTypes.STRING,
-    allowNull: true, // Dạng bào chế: viên nén, siro...
+    allowNull: true,
   },
   route: {
     type: DataTypes.STRING,
-    allowNull: true, // Đường dùng: uống, tiêm...
+    allowNull: true,
   },
   strength: {
     type: DataTypes.STRING,
-    allowNull: true, // Hàm lượng: 500mg, 5mg/ml...
+    allowNull: true,
   },
   price: {
     type: DataTypes.DECIMAL(14, 2),
@@ -48,11 +48,11 @@ const Medicine = sequelize.define("Medicine", {
   isPrescription: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
-    defaultValue: true, // Có cần đơn bác sĩ không
+    defaultValue: true,
   },
   createdBy: {
     type: DataTypes.INTEGER,
-    allowNull: false, // id nhân viên lễ tân tạo thuốc
+    allowNull: false,
   },
   createdAt: {
     type: DataTypes.DATE,

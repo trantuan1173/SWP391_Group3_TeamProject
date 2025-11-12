@@ -37,9 +37,8 @@ import {
 } from "@/components/ui/pagination";
 
 export default function AdminFaqManagement() {
-  // ===== state chính =====
-  const [categories, setCategories] = useState([]); // [{id, category(name), description, count}]
-  const [categoryId, setCategoryId] = useState(""); // filter
+  const [categories, setCategories] = useState([]);
+  const [categoryId, setCategoryId] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const search = useDebounce(searchInput, 500);
 
@@ -48,7 +47,6 @@ export default function AdminFaqManagement() {
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
 
-  // dialog
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -56,14 +54,13 @@ export default function AdminFaqManagement() {
   const [selectedFaq, setSelectedFaq] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // ===== Load categories (card summary) =====
   const loadCategories = async () => {
     try {
       const data = await fetchFaqCategorySummary();
-      // Chuẩn hóa về [{id,name}] cho form dialog
+
       const normalized = (data || []).map((c) => ({
         id: c.id,
-        name: c.category, // server trả "category" = name
+        name: c.category,
         description: c.description,
         count: c.count,
       }));
@@ -74,7 +71,6 @@ export default function AdminFaqManagement() {
     }
   };
 
-  // ===== Load list FAQ =====
   const loadFaqs = async () => {
     try {
       setLoading(true);
@@ -95,17 +91,14 @@ export default function AdminFaqManagement() {
     }
   };
 
-  // init
   useEffect(() => {
     loadCategories();
   }, []);
 
-  // reload khi filter / phân trang thay đổi
   useEffect(() => {
     loadFaqs();
   }, [currentPage, pageSize, search, categoryId]);
 
-  // ===== handlers =====
   const handleOpenCreate = () => {
     setCreateOpen(true);
   };
@@ -113,7 +106,7 @@ export default function AdminFaqManagement() {
   const handleOpenEdit = async (row) => {
     try {
       setLoading(true);
-      // Nếu row có đủ dữ liệu rồi thì có thể bỏ fetch detail.
+
       const detail = await fetchFaqById(row.id);
       setSelectedFaq(detail);
       setEditOpen(true);
@@ -131,7 +124,7 @@ export default function AdminFaqManagement() {
       await createFaq(payload);
       toast.success("Tạo FAQ thành công!", { id: toastId });
       setCreateOpen(false);
-      // refresh cả list + category count
+
       loadFaqs();
       loadCategories();
     } catch (err) {
@@ -168,7 +161,7 @@ export default function AdminFaqManagement() {
       toast.success("Xóa FAQ thành công", { id: toastId });
       setDeleteOpen(false);
       setSelectedFaq(null);
-      // khi xóa, nếu trang hiện tại không còn item, lùi 1 trang
+
       if (faqs.length === 1 && currentPage > 1) {
         setCurrentPage((p) => p - 1);
       } else {
@@ -184,11 +177,9 @@ export default function AdminFaqManagement() {
   return (
     <AdminLayout>
       <div className="bg-white h-full p-5 rounded-lg shadow-md">
-        {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h4 className="text-xl font-bold">Quản lý FAQ</h4>
           <div className="flex gap-3">
-            {/* page size */}
             <select
               value={pageSize}
               onChange={(e) => {
@@ -202,7 +193,6 @@ export default function AdminFaqManagement() {
               <option value="20">20 / trang</option>
             </select>
 
-            {/* filter category */}
             <select
               value={categoryId}
               onChange={(e) => {
@@ -228,7 +218,6 @@ export default function AdminFaqManagement() {
           </div>
         </div>
 
-        {/* Search */}
         <div className="mb-4">
           <Input
             type="text"
@@ -242,7 +231,6 @@ export default function AdminFaqManagement() {
           />
         </div>
 
-        {/* Category summary cards (optional hiển thị nhanh) */}
         {categories.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
             {categories.map((c) => (
@@ -260,7 +248,6 @@ export default function AdminFaqManagement() {
           </div>
         )}
 
-        {/* Table */}
         <Table>
           <TableCaption>Danh sách FAQ</TableCaption>
           <TableHeader>
@@ -323,7 +310,6 @@ export default function AdminFaqManagement() {
           </TableBody>
         </Table>
 
-        {/* Pagination */}
         <div className="mt-4 flex justify-center">
           <Pagination>
             <PaginationContent>
@@ -354,7 +340,6 @@ export default function AdminFaqManagement() {
           </Pagination>
         </div>
 
-        {/* Dialogs */}
         <FaqFormDialog
           open={createOpen}
           setOpen={setCreateOpen}

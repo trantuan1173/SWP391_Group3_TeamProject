@@ -67,7 +67,6 @@ export default function FaqDetail() {
     <>
       <Header />
       <div className="max-w-5xl mx-auto px-6 py-8">
-        {/* Breadcrumb */}
         <div className="text-sm text-gray-500 flex items-center gap-1 mb-4">
           <button className="hover:underline" onClick={() => navigate(-1)}>
             Help Center
@@ -89,7 +88,6 @@ export default function FaqDetail() {
           <span className="text-gray-700">Chi tiết</span>
         </div>
 
-        {/* Header block */}
         <div className="rounded-xl bg-white p-5 shadow-sm border">
           <div className="mb-3">
             <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100">
@@ -121,7 +119,6 @@ export default function FaqDetail() {
           </div>
         </div>
 
-        {/* Content */}
         <div className="mt-5">
           <Card>
             <CardContent className="p-5">
@@ -141,7 +138,6 @@ export default function FaqDetail() {
           </Card>
         </div>
 
-        {/* Related Articles */}
         <div className="mt-8">
           <div className="flex items-center gap-2 text-lg font-semibold mb-3">
             <BookOpen className="w-5 h-5 text-gray-700" />
@@ -166,7 +162,6 @@ export default function FaqDetail() {
                     </div>
 
                     <div className="space-y-1">
-                      {/* Title inline truncate */}
                       <h3 className="font-semibold">
                         {(() => {
                           const t = (r && r.title ? r.title : "").trim();
@@ -176,7 +171,6 @@ export default function FaqDetail() {
                         })()}
                       </h3>
 
-                      {/* Content inline strip-html + truncate */}
                       <p className="text-sm text-gray-500">
                         {(() => {
                           const raw = r && r.content ? r.content : "";
@@ -209,7 +203,6 @@ export default function FaqDetail() {
           )}
         </div>
 
-        {/* Ask a Question CTA */}
         <div className="mt-10 flex justify-center">
           <Button
             className="bg-blue-600 hover:bg-blue-700"

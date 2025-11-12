@@ -31,7 +31,7 @@ import {
   PaginationNext,
 } from "@/components/ui/pagination";
 import MedicineFormDialog from "@/components/medicines/MedicineFormDialog";
-import DeleteConfirmDialog from "@/components/users/DeleteConfirmDialog"; // reuse
+import DeleteConfirmDialog from "@/components/users/DeleteConfirmDialog";
 import useDebounce from "@/hooks/useDebounce";
 
 export default function MedicineManagement() {
@@ -85,9 +85,7 @@ export default function MedicineManagement() {
       try {
         const { expiring } = await fetchExpiringSoon();
         setExpiringSoon(expiring || []);
-      } catch {
-        /* ignore */
-      }
+      } catch {}
     })();
   }, []);
 
@@ -151,7 +149,6 @@ export default function MedicineManagement() {
   return (
     <>
       <div className="bg-white h-full p-5 rounded-lg shadow-md">
-        {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h4 className="text-xl font-bold">Quản lý thuốc</h4>
           <div className="flex gap-3">
@@ -177,7 +174,6 @@ export default function MedicineManagement() {
           </div>
         </div>
 
-        {/* Search */}
         <div className="mb-4 flex items-center gap-3">
           <Input
             type="text"
@@ -196,7 +192,6 @@ export default function MedicineManagement() {
           </div>
         </div>
 
-        {/* Table */}
         <Table>
           <TableCaption>Danh sách thuốc</TableCaption>
           <TableHeader>
@@ -281,7 +276,6 @@ export default function MedicineManagement() {
           </TableBody>
         </Table>
 
-        {/* Pagination */}
         <div className="mt-4 flex justify-center">
           <Pagination>
             <PaginationContent>
@@ -312,7 +306,6 @@ export default function MedicineManagement() {
           </Pagination>
         </div>
 
-        {/* Dialogs */}
         <MedicineFormDialog
           open={dialogOpen}
           setOpen={setDialogOpen}

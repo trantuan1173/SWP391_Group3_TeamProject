@@ -1,4 +1,3 @@
-// models/MedicalRecordMedicine.js
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../config/db");
 

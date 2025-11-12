@@ -94,7 +94,6 @@ export default function MyTickets() {
 
   return (
     <div className="bg-white h-full p-5 rounded-lg shadow-md">
-      {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h4 className="text-xl font-bold">Ticket của tôi</h4>
         <div className="flex gap-3">
@@ -131,7 +130,6 @@ export default function MyTickets() {
         </div>
       </div>
 
-      {/* Search */}
       <div className="mb-4">
         <Input
           placeholder="Tìm theo tiêu đề hoặc nội dung..."
@@ -144,7 +142,6 @@ export default function MyTickets() {
         />
       </div>
 
-      {/* Table */}
       <Table>
         <TableCaption>Danh sách ticket của bạn</TableCaption>
         <TableHeader>
@@ -217,7 +214,6 @@ export default function MyTickets() {
         </TableBody>
       </Table>
 
-      {/* Pagination */}
       <div className="mt-4 flex justify-center">
         <Pagination>
           <PaginationContent>
@@ -244,7 +240,6 @@ export default function MyTickets() {
         </Pagination>
       </div>
 
-      {/* Dialogs */}
       <TicketFormDialog
         open={dialogOpen}
         setOpen={setDialogOpen}

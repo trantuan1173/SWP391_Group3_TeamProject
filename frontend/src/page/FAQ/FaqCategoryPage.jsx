@@ -1,4 +1,3 @@
-// src/page/FAQ/FaqCategoryPage.jsx
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { fetchFaqList } from "@/api/faqApi";
@@ -56,7 +55,6 @@ export default function FaqCategoryPage() {
 
   useEffect(() => {
     loadFaqs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categoryId, page, pageSize]);
 
   const onChangePage = (next) => {
@@ -73,7 +71,6 @@ export default function FaqCategoryPage() {
       <Header />
       <div className="max-w-6xl mx-auto p-6 space-y-6">
         <div className="px-6 py-8">
-          {/* Header */}
           <div className="mb-6">
             <div className="flex items-center gap-3 rounded-xl bg-white p-5 shadow-sm border">
               <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
@@ -92,7 +89,6 @@ export default function FaqCategoryPage() {
                 <h1 className="text-2xl font-bold">{categoryName}</h1>
               </div>
 
-              {/* chọn pageSize đơn giản */}
               <div className="ml-auto">
                 <select
                   value={pageSize}
@@ -111,7 +107,6 @@ export default function FaqCategoryPage() {
             </div>
           </div>
 
-          {/* Title */}
           <div className="flex items-end justify-between mb-2">
             <h2 className="text-xl font-semibold">Các câu hỏi thường gặp</h2>
             {!loading && totalItems > 0 && (
@@ -121,7 +116,6 @@ export default function FaqCategoryPage() {
             )}
           </div>
 
-          {/* Grid cards */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {loading && (
               <Card>
@@ -152,7 +146,6 @@ export default function FaqCategoryPage() {
                     </div>
 
                     <div className="space-y-1">
-                      {/* Tiêu đề: truncate inline */}
                       <h3 className="font-semibold text-base">
                         {(() => {
                           const t = (f.title || "").trim();
@@ -162,7 +155,6 @@ export default function FaqCategoryPage() {
                         })()}
                       </h3>
 
-                      {/* Mô tả: strip HTML + truncate inline */}
                       <p className="text-sm text-gray-500 leading-snug">
                         {(() => {
                           const raw = f.content || "";
@@ -193,7 +185,6 @@ export default function FaqCategoryPage() {
               ))}
           </div>
 
-          {/* Pagination đơn giản: 1..totalPages */}
           {!loading && totalPages > 1 && (
             <div className="mt-6 flex justify-center">
               <Pagination>

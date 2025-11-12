@@ -87,7 +87,6 @@ export default function UserManagement() {
   const [pageSize, setPageSize] = useState(5);
   const navigate = useNavigate();
 
-  // ===== FETCH USERS =====
   const loadUsers = async () => {
     try {
       const data = await fetchUsers(
@@ -140,7 +139,6 @@ export default function UserManagement() {
     }
   };
 
-  // ===== UPDATE =====
   const handleEditUser = (user) => {
     setSelectedUserId(user.id);
     setEditDialogOpen(true);
@@ -158,7 +156,6 @@ export default function UserManagement() {
     }
   };
 
-  // ===== DELETE =====
   const handleDeleteUser = (user) => {
     setSelectedUser(user);
     setDeleteDialogOpen(true);
@@ -179,7 +176,6 @@ export default function UserManagement() {
     }
   };
 
-  // ===== SPECIALTY =====
   const handleSelectSpecialty = (user) => {
     setSelectedUser(user);
     setSelectedSpecialty(user.specialty || "");
@@ -202,7 +198,6 @@ export default function UserManagement() {
     }
   };
 
-  // ===== TOGGLE ACTIVE =====
   const handleToggleActive = async (user, checked) => {
     const toastId = toast.loading("Đang cập nhật trạng thái...");
     try {
@@ -228,7 +223,6 @@ export default function UserManagement() {
   return (
     <AdminLayout>
       <div className="bg-white h-full p-5 rounded-lg shadow-md">
-        {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h4 className="text-xl font-bold">Quản lý nhân viên</h4>
           <div className="flex gap-3">
@@ -267,7 +261,6 @@ export default function UserManagement() {
           </div>
         </div>
 
-        {/* Search */}
         <div className="mb-4">
           <Input
             type="text"
@@ -281,7 +274,6 @@ export default function UserManagement() {
           />
         </div>
 
-        {/* Table */}
         <Table>
           <TableCaption>Danh sách nhân viên</TableCaption>
           <TableHeader>
@@ -394,7 +386,6 @@ export default function UserManagement() {
           </TableBody>
         </Table>
 
-        {/* Pagination */}
         <div className="mt-4 flex justify-center">
           <Pagination>
             <PaginationContent>
@@ -425,7 +416,6 @@ export default function UserManagement() {
           </Pagination>
         </div>
 
-        {/* Dialogs */}
         <UserFormDialog
           open={dialogOpen}
           setOpen={setDialogOpen}
@@ -452,7 +442,6 @@ export default function UserManagement() {
           onConfirm={confirmDelete}
         />
 
-        {/* Chọn chuyên khoa */}
         <Dialog
           open={specialtyDialogOpen}
           onOpenChange={setSpecialtyDialogOpen}

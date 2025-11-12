@@ -95,7 +95,6 @@ export default function AdminPolicies() {
 
   useEffect(() => {
     loadPolicies();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, pageSize, search, categoryFilter, statusFilter]);
 
   const visiblePolicies = useMemo(() => policies, [policies]);
@@ -154,7 +153,6 @@ export default function AdminPolicies() {
   return (
     <AdminLayout>
       <div className="bg-white h-full p-5 rounded-lg shadow-md">
-        {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h4 className="text-xl font-bold">Quản lý chính sách</h4>
           <div className="flex gap-3">
@@ -171,7 +169,6 @@ export default function AdminPolicies() {
               <option value="20">20 / trang</option>
             </select>
 
-            {/* Category filter: dùng "all" thay cho "" */}
             <Select
               value={categoryFilter || "all"}
               onValueChange={(v) => {
@@ -192,7 +189,6 @@ export default function AdminPolicies() {
               </SelectContent>
             </Select>
 
-            {/* Status filter: dùng "all" thay cho "" */}
             <Select
               value={statusFilter || "all"}
               onValueChange={(v) => {
@@ -220,7 +216,6 @@ export default function AdminPolicies() {
           </div>
         </div>
 
-        {/* Search */}
         <div className="mb-4">
           <Input
             type="text"
@@ -234,7 +229,6 @@ export default function AdminPolicies() {
           />
         </div>
 
-        {/* Table */}
         <Table>
           <TableCaption>Danh sách chính sách</TableCaption>
           <TableHeader>
@@ -323,7 +317,6 @@ export default function AdminPolicies() {
           </TableBody>
         </Table>
 
-        {/* Pagination (không dùng asChild) */}
         <div className="mt-4 flex justify-center">
           <Pagination>
             <PaginationContent>
@@ -367,7 +360,6 @@ export default function AdminPolicies() {
           </Pagination>
         </div>
 
-        {/* Dialogs */}
         <PolicyFormDialog
           open={formOpen}
           setOpen={setFormOpen}

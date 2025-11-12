@@ -115,7 +115,6 @@ export default function TicketDetail() {
       </Button>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-        {/* Left: main content */}
         <div className="lg:col-span-2 space-y-4">
           <div className="rounded-lg border bg-white p-5">
             <div className="flex items-center gap-3">
@@ -129,7 +128,6 @@ export default function TicketDetail() {
               </span>
             </div>
 
-            {/* Question */}
             <div className="mt-6">
               <h3 className="font-semibold mb-2">Question</h3>
               <div className="border rounded-md p-3 bg-gray-50 text-sm">
@@ -137,7 +135,6 @@ export default function TicketDetail() {
               </div>
             </div>
 
-            {/* From User */}
             <div className="mt-6">
               <h3 className="font-semibold mb-2">From User</h3>
               <div className="border rounded-md p-3 bg-gray-50 text-sm flex items-center gap-3">
@@ -150,7 +147,6 @@ export default function TicketDetail() {
               </div>
             </div>
 
-            {/* Existing Answer (hiển thị nếu đã có) */}
             {ticket.answer && (
               <div className="mt-6">
                 <h3 className="font-semibold mb-2">Answer</h3>
@@ -160,7 +156,6 @@ export default function TicketDetail() {
               </div>
             )}
 
-            {/* Response form (ẩn khi resolved) */}
             {!isResolved && (
               <div className="mt-6">
                 <h3 className="font-semibold mb-2">Your Response</h3>

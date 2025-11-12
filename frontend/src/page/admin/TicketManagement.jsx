@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 import useDebounce from "@/hooks/useDebounce";
-import { fetchTickets, fetchTicketsAdmin } from "@/api/ticketApi"; // receptionist dùng list chung theo BE bạn đang để
+import { fetchTickets, fetchTicketsAdmin } from "@/api/ticketApi";
 
 export default function TicketManagement() {
   const navigate = useNavigate();
@@ -74,7 +74,6 @@ export default function TicketManagement() {
 
   return (
     <div className="bg-white h-full p-5 rounded-lg shadow-md">
-      {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h4 className="text-xl font-bold">Quản lý ticket</h4>
         <div className="flex gap-3">
@@ -118,7 +117,6 @@ export default function TicketManagement() {
         </div>
       </div>
 
-      {/* Search */}
       <div className="mb-4 flex gap-3">
         <Input
           type="text"
@@ -132,7 +130,6 @@ export default function TicketManagement() {
         />
       </div>
 
-      {/* Table */}
       <Table>
         <TableCaption>Danh sách ticket</TableCaption>
         <TableHeader>
@@ -177,7 +174,6 @@ export default function TicketManagement() {
         </TableBody>
       </Table>
 
-      {/* Pagination */}
       <div className="mt-4 flex justify-center">
         <Pagination>
           <PaginationContent>

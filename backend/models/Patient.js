@@ -10,7 +10,6 @@ const Patient = sequelize.define("Patient", {
   email: {
     type: DataTypes.STRING,
     allowNull: true,
-    // unique: true,
   },
   password: {
     type: DataTypes.STRING,
@@ -61,7 +60,6 @@ const Patient = sequelize.define("Patient", {
   },
 });
 
-// Hash password before saving
 Patient.beforeCreate(async (patient, options) => {
   if (patient.password) {
     const salt = await bcrypt.genSalt(10);
@@ -76,7 +74,6 @@ Patient.beforeUpdate(async (patient, options) => {
   }
 });
 
-// Method to compare passwords
 Patient.prototype.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };

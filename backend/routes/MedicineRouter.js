@@ -10,17 +10,16 @@ const {
 } = require("../controllers/MedicineController");
 const { authorize, protect } = require("../middleware/authMiddleware");
 
-// Route cho lễ tân CRUD thuốc
 router.post(
   "/create",
   protect,
   authorize("receptionist", "admin"),
   createMedicine
-); // Thêm thuốc
-router.get("/", getMedicines); // Lấy danh sách
-router.get("/:id", getMedicineById); // Lấy 1 thuốc
-router.put("/update/:id", updateMedicine); // Cập nhật
-router.delete("/delete/:id", deleteMedicine); // Xóa
-router.get("/expiring/soon", getExpiringMedicines); // Thuốc sắp hết hạn
+);
+router.get("/", getMedicines);
+router.get("/:id", getMedicineById);
+router.put("/update/:id", updateMedicine);
+router.delete("/delete/:id", deleteMedicine);
+router.get("/expiring/soon", getExpiringMedicines);
 
 module.exports = router;

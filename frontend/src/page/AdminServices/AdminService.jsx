@@ -21,7 +21,7 @@ import {
 import { toast } from "sonner";
 import useDebounce from "@/hooks/useDebounce";
 import ServiceFormDialog from "@/components/services/ServiceFormDialog";
-import DeleteConfirmDialog from "@/components/users/DeleteConfirmDialog"; // dùng lại dialog xóa người dùng
+import DeleteConfirmDialog from "@/components/users/DeleteConfirmDialog";
 import {
   createService,
   deleteService,
@@ -42,7 +42,6 @@ export default function AdminService() {
   const [searchInput, setSearchInput] = useState("");
   const search = useDebounce(searchInput, 500);
 
-  // === FETCH ===
   const loadServices = async () => {
     try {
       const data = await fetchServices(currentPage, pageSize, search);
@@ -58,7 +57,6 @@ export default function AdminService() {
     loadServices();
   }, [currentPage, pageSize, search]);
 
-  // === CREATE ===
   const handleCreate = async (formData) => {
     const toastId = toast.loading("Đang tạo dịch vụ...");
     try {
@@ -73,7 +71,6 @@ export default function AdminService() {
     }
   };
 
-  // === UPDATE ===
   const handleUpdate = async (id, formData) => {
     const toastId = toast.loading("Đang cập nhật dịch vụ...");
     try {
@@ -88,7 +85,6 @@ export default function AdminService() {
     }
   };
 
-  // === DELETE ===
   const handleDelete = (service) => {
     setSelectedService(service);
     setDeleteDialogOpen(true);
@@ -111,7 +107,6 @@ export default function AdminService() {
   return (
     <AdminLayout>
       <div className="bg-white h-full p-5 rounded-lg shadow-md">
-        {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h4 className="text-xl font-bold">Quản lý dịch vụ</h4>
           <div className="flex gap-3">
@@ -136,7 +131,6 @@ export default function AdminService() {
           </div>
         </div>
 
-        {/* Search */}
         <div className="mb-4">
           <Input
             placeholder="Tìm kiếm dịch vụ theo tên hoặc mô tả..."
@@ -149,7 +143,6 @@ export default function AdminService() {
           />
         </div>
 
-        {/* Table */}
         <Table>
           <TableHeader>
             <TableRow>
@@ -204,7 +197,6 @@ export default function AdminService() {
           </TableBody>
         </Table>
 
-        {/* Pagination */}
         <div className="mt-4 flex justify-center">
           <Pagination>
             <PaginationContent>
@@ -235,7 +227,6 @@ export default function AdminService() {
           </Pagination>
         </div>
 
-        {/* Dialogs */}
         <ServiceFormDialog
           open={dialogOpen}
           setOpen={setDialogOpen}

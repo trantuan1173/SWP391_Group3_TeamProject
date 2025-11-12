@@ -2,7 +2,6 @@ const { Op } = require("sequelize");
 const Medicine = require("../models/Medicine");
 const Employee = require("../models/Employee");
 
-// ===== Create Medicine =====
 const createMedicine = async (req, res) => {
   try {
     const {
@@ -55,7 +54,6 @@ const createMedicine = async (req, res) => {
   }
 };
 
-// ===== Get All Medicines (with pagination + search) =====
 const getMedicines = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -90,7 +88,6 @@ const getMedicines = async (req, res) => {
   }
 };
 
-// ===== Get Medicine by ID =====
 const getMedicineById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -108,7 +105,6 @@ const getMedicineById = async (req, res) => {
   }
 };
 
-// ===== Update Medicine =====
 const updateMedicine = async (req, res) => {
   try {
     const { id } = req.params;
@@ -127,7 +123,6 @@ const updateMedicine = async (req, res) => {
   }
 };
 
-// ===== Delete Medicine =====
 const deleteMedicine = async (req, res) => {
   try {
     const { id } = req.params;
@@ -145,7 +140,6 @@ const deleteMedicine = async (req, res) => {
   }
 };
 
-// ===== Get Medicines Expiring Soon =====
 const getExpiringMedicines = async (req, res) => {
   try {
     const now = new Date();

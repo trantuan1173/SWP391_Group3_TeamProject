@@ -29,7 +29,6 @@ export default function FaqHome() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ===== FETCH FAQ CATEGORIES =====
   const loadCategories = async () => {
     try {
       setLoading(true);
@@ -52,7 +51,6 @@ export default function FaqHome() {
     <>
       <Header />
       <div className="max-w-6xl mx-auto p-6 space-y-6">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">Trung tâm trợ giúp</h1>
@@ -65,7 +63,6 @@ export default function FaqHome() {
           </Button>
         </div>
 
-        {/* Loading */}
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array.from({ length: 6 }).map((_, i) => (
