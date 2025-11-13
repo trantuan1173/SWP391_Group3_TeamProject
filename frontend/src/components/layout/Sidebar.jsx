@@ -38,7 +38,9 @@ const PatientSidebar = ({ patient }) => {
     },
     {
       title: "Lịch khám",
-      url: user?.id ? `/patient/${user.id}/appointments` : "/patient/appointments",
+      url: user?.id
+        ? `/patient/${user.id}/appointments`
+        : "/patient/appointments",
       icon: Clock,
     },
     {
@@ -56,10 +58,15 @@ const PatientSidebar = ({ patient }) => {
       url: "/patient/doctors",
       icon: Users,
     },
-     {
+    {
       title: "Trang Tin tức",
       url: "/patient/news",
       icon: ScrollTextIcon,
+    },
+    {
+      title: "Quản lí ticket",
+      url: "/patient/ticket",
+      icon: Clock,
     },
   ];
 

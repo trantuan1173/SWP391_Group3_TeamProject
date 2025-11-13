@@ -49,21 +49,17 @@ export default function ReceptionistAppointmentDetail() {
     if (!startTime) return "";
     const now = dayjs();
     const [hours, minutes] = startTime.split(":").map(Number);
-
     const startDateTime = now.hour(hours).minute(minutes).second(0);
     const endDateTime = startDateTime.add(1, "hour");
-
     return endDateTime.format("HH:mm");
   };
 
   const handleStatusChange = (e) => {
     const selectedStatus = e.target.value;
-
     if (appointment.status === "completed" && selectedStatus === "to-payment") {
       setError("Không thể chuyển từ trạng thái COMPLETED về TO-PAYMENT.");
       return;
     }
-
     setError("");
     setNewStatus(selectedStatus);
   };
@@ -83,26 +79,17 @@ export default function ReceptionistAppointmentDetail() {
         },
       });
       const data = res.data;
-      console.log(data);
       setAppointment(data);
 
-      // Khởi tạo giá trị cho các input mới
+      // Khởi tạo input
       setNewDate(new Date(data.date).toISOString().split("T")[0]); // YYYY-MM-DD
-
       const dbStartTime = data.startTime.substring(0, 5);
       setNewStartTime(dbStartTime);
-      setNewEndTime(calculateEndTime(dbStartTime)); // Tính lại cho slot 1 giờ
-
+      setNewEndTime(calculateEndTime(dbStartTime));
       setNewStatus(data.status);
-
       setSelectedDoctorId(data.doctorId || "");
       setSelectedRoomId(data.roomId || "");
-
-      if (data.Employee?.speciality) {
-        setSelectedSpeciality(data.Employee.speciality);
-      } else {
-        setSelectedSpeciality("");
-      }
+      setSelectedSpeciality(data.Employee?.speciality || "");
     } catch (err) {
       console.error("Failed to fetch appointment details:", err);
       toast.error("Lỗi khi tải chi tiết lịch hẹn.");
@@ -117,13 +104,11 @@ export default function ReceptionistAppointmentDetail() {
 
   const fetchAvailability = async () => {
     if (!newDate || !newStartTime || !newEndTime) return;
-
     setFetchingAvailability(true);
 
     const date = newDate;
     const startTime = newStartTime + ":00";
     const endTime = newEndTime + ":00";
-
     const specialityToSearch = selectedSpeciality;
 
     try {
@@ -141,14 +126,15 @@ export default function ReceptionistAppointmentDetail() {
       });
       setAvailableRooms(roomRes.data);
 
-      // Logic thông báo
       if (
         doctorRes.data.availableDoctors?.length === 0 &&
         doctorRes.data.suggestedSlots?.length > 0
       ) {
         toast(
-          `Không có bác sĩ khả dụng trong ${selectedSpeciality || "chuyên khoa này"
-          } vào khung giờ ${newStartTime}-${newEndTime}. Đã tìm thấy ${doctorRes.data.suggestedSlots.length
+          `Không có bác sĩ khả dụng trong ${
+            selectedSpeciality || "chuyên khoa này"
+          } vào khung giờ ${newStartTime}-${newEndTime}. Đã tìm thấy ${
+            doctorRes.data.suggestedSlots.length
           } gợi ý.`,
           { icon: "💡" }
         );
@@ -253,6 +239,7 @@ export default function ReceptionistAppointmentDetail() {
   const currentSelectedRoom =
     availableRooms.find((r) => r.id === selectedRoomId) || a.Room;
 
+  // -------- Helpers: dịch vụ & thuốc + tổng tiền --------
   const getServicesFromMedicalRecord = (medicalRecord) => {
     if (!medicalRecord || !medicalRecord.orderDetails) return [];
     try {
@@ -263,22 +250,43 @@ export default function ReceptionistAppointmentDetail() {
       return [];
     }
   };
-  const currentServices = getServicesFromMedicalRecord(a?.MedicalRecord);
-  const calculateTotalAmount = (services) => {
-    return services.reduce((sum, service) => sum + (service.total || 0), 0);
+
+  const getMedicinesFromMedicalRecord = (medicalRecord) => {
+    if (!medicalRecord) return [];
+    const arr =
+      medicalRecord.prescribedMedicines ||
+      medicalRecord.MedicalRecordMedicines ||
+      [];
+    return (arr || []).map((m) => ({
+      name: m.name || "-",
+      quantity: Number(m.quantity || 0),
+      priceAtUse: Number(m.priceAtUse || 0),
+      dose: m.dose || "",
+      frequency: m.frequency || "",
+      duration: m.duration || "",
+      route: m.route || "",
+      instructions: m.instructions || "",
+      total: Number(m.total || 0),
+    }));
   };
 
-  const totalAmount = calculateTotalAmount(currentServices);
+  const calculateTotal = (items) =>
+    items.reduce((sum, it) => sum + Number(it.total || 0), 0);
+
+  const currentServices = getServicesFromMedicalRecord(a?.MedicalRecord);
+  const totalServiceAmount = calculateTotal(currentServices);
+
+  const currentMedicines = getMedicinesFromMedicalRecord(a?.MedicalRecord);
+  const totalMedicineAmount = calculateTotal(currentMedicines);
+
+  const grandTotal =
+    Number(totalServiceAmount || 0) + Number(totalMedicineAmount || 0);
+
+  // -------- Thanh toán & In hoá đơn --------
   const handlePayment = async (appointment) => {
     try {
-      console.log("💸 Thanh toán cho cuộc hẹn:", appointment);
-
       const token = localStorage.getItem("token");
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      console.log(
-        appointment.id,
-        appointment.PatientId || appointment.patientId
-      );
       const res = await axios.post(
         "http://localhost:1118/api/payments",
         {
@@ -301,79 +309,115 @@ export default function ReceptionistAppointmentDetail() {
     }
   };
 
-  const handlePrintInvoice = (appointment, services, amount) => {
+  const handlePrintInvoice = (appointment, services, medicines, amount) => {
     const printWindow = window.open("", "", "height=600,width=800");
 
-    //Nội dung hoá đơn
+    const servicesRows = (services || [])
+      .map(
+        (s, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${s.name}</td>
+            <td>${s.quantity || 1}</td>
+            <td>${new Intl.NumberFormat("vi-VN").format(s.price)} VND</td>
+            <td>${new Intl.NumberFormat("vi-VN").format(s.total)} VND</td>
+          </tr>
+        `
+      )
+      .join("");
+
+    const medicineRows = (medicines || [])
+      .map(
+        (m, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td>
+              ${m.name}
+              ${
+                m.instructions
+                  ? `<div style="font-size:11px;color:#6b7280">HD: ${m.instructions}</div>`
+                  : ""
+              }
+            </td>
+            <td>${m.dose || "-"}</td>
+            <td>${m.frequency || "-"}</td>
+            <td>${m.duration || "-"}</td>
+            <td>${m.route || "-"}</td>
+            <td>${m.quantity}</td>
+            <td>${new Intl.NumberFormat("vi-VN").format(m.priceAtUse)} VND</td>
+            <td>${new Intl.NumberFormat("vi-VN").format(m.total)} VND</td>
+          </tr>
+        `
+      )
+      .join("");
+
     const invoiceContent = `
-        <style>
-            body { font-family: 'Arial', sans-serif; padding: 20px; }
-            h1 { text-align: center; color: #4a5568; }
-            .info { margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
-            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #f3f4f6; }
-            .total { font-size: 1.2em; font-weight: bold; text-align: right; padding-top: 10px; }
-        </style>
-        <h1>HÓA ĐƠN DỊCH VỤ KHÁM CHỮA BỆNH</h1>
-        <div class="info">
-            <p><strong>Mã Lịch Hẹn:</strong> ${appointment.id}</p>
-            <p><strong>Ngày Thanh Toán:</strong> ${dayjs().format(
-      "DD/MM/YYYY HH:mm"
-    )}</p>
-            <p><strong>Bệnh Nhân:</strong> ${appointment.Patient?.name || "N/A"
-      }</p>
-            <p><strong>Bác Sĩ Khám:</strong> ${appointment.Employee?.name || "N/A"
-      }</p>
-            <p><strong>Liên hệ Bác Sĩ Khám:</strong> ${"Email: " +
-      appointment.Employee?.email +
-      (appointment.Employee?.phoneNumber &&
-        " SDT: " + appointment.Employee.phoneNumber) || "N/A"
-      }</p>
-        </div>
+      <style>
+        body { font-family: 'Arial', sans-serif; padding: 20px; }
+        h1 { text-align: center; color: #4a5568; }
+        h2 { color: #374151; margin-top: 24px; }
+        .info { margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: top; }
+        th { background-color: #f3f4f6; }
+        .total { font-size: 1.2em; font-weight: bold; text-align: right; padding-top: 10px; }
+      </style>
+      <h1>HÓA ĐƠN KHÁM CHỮA BỆNH</h1>
+      <div class="info">
+        <p><strong>Mã Lịch Hẹn:</strong> ${appointment.id}</p>
+        <p><strong>Ngày Thanh Toán:</strong> ${dayjs().format(
+          "DD/MM/YYYY HH:mm"
+        )}</p>
+        <p><strong>Bệnh Nhân:</strong> ${appointment.Patient?.name || "N/A"}</p>
+        <p><strong>Bác Sĩ Khám:</strong> ${
+          appointment.Employee?.name || "N/A"
+        }</p>
+        <p><strong>Liên hệ Bác Sĩ:</strong> ${
+          (appointment.Employee?.email
+            ? "Email: " + appointment.Employee.email
+            : "") +
+            (appointment.Employee?.phoneNumber
+              ? " — SDT: " + appointment.Employee.phoneNumber
+              : "") || "N/A"
+        }</p>
+      </div>
 
-        <h2>Chi tiết Dịch vụ</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>STT</th>
-                    <th>Tên Dịch vụ</th>
-                    <th>SL</th>
-                    <th>Đơn giá</th>
-                    <th>Thành tiền</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${services
-        .map(
-          (s, i) => `
-                    <tr>
-                        <td>${i + 1}</td>
-                        <td>${s.name}</td>
-                        <td>${s.quantity || 1}</td>
-                        <td>${new Intl.NumberFormat("vi-VN").format(
-            s.price
-          )} VND</td>
-                        <td>${new Intl.NumberFormat("vi-VN").format(
-            s.total
-          )} VND</td>
-                    </tr>
-                `
-        )
-        .join("")}
-            </tbody>
-        </table>
+      <h2>Chi tiết Dịch vụ</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>STT</th><th>Tên Dịch vụ</th><th>SL</th><th>Đơn giá</th><th>Thành tiền</th>
+          </tr>
+        </thead>
+        <tbody>${
+          servicesRows || `<tr><td colspan="5">Không có dịch vụ</td></tr>`
+        }</tbody>
+      </table>
 
-        <div class="total">
-            Tổng Cộng: ${new Intl.NumberFormat("vi-VN").format(amount)} VND
-        </div>
-        <p style="text-align: center; margin-top: 30px;">Xin chân thành cảm ơn!</p>
+      <h2>Thuốc đã kê</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>STT</th><th>Tên thuốc</th><th>Liều</th><th>Tần suất</th><th>Thời gian</th>
+            <th>Đường dùng</th><th>SL</th><th>Đơn giá</th><th>Thành tiền</th>
+          </tr>
+        </thead>
+        <tbody>${
+          medicineRows || `<tr><td colspan="9">Không có thuốc</td></tr>`
+        }</tbody>
+      </table>
+
+      <div class="total">Tổng cộng: ${new Intl.NumberFormat("vi-VN").format(
+        amount
+      )} VND</div>
+      <p style="text-align: center; margin-top: 30px;">Xin chân thành cảm ơn!</p>
     `;
 
     printWindow.document.write(invoiceContent);
     printWindow.document.close();
     printWindow.print();
   };
+
   return (
     <div className="p-6 bg-white rounded-lg shadow-md">
       <div className="flex items-center justify-between mb-6">
@@ -429,8 +473,9 @@ export default function ReceptionistAppointmentDetail() {
             <p>
               <strong>Trạng thái:</strong>{" "}
               <span
-                className={`font-medium text-${a.status === "confirmed" ? "blue" : "yellow"
-                  }-600`}
+                className={`font-medium text-${
+                  a.status === "confirmed" ? "blue" : "yellow"
+                }-600`}
               >
                 {a.status}
               </span>
@@ -444,6 +489,7 @@ export default function ReceptionistAppointmentDetail() {
             </p>
           </div>
         </div>
+
         {a.MedicalRecord && (
           <div className="border border-green-500 rounded-lg p-4 bg-green-50 md:col-span-3">
             <h2 className="text-lg font-bold mb-4 text-green-800 flex items-center">
@@ -481,6 +527,7 @@ export default function ReceptionistAppointmentDetail() {
 
             <hr className="my-4 border-green-300" />
 
+            {/* DỊCH VỤ */}
             <h3 className="text-md font-bold mb-3 text-green-800">
               Dịch vụ đã sử dụng
             </h3>
@@ -521,15 +568,15 @@ export default function ReceptionistAppointmentDetail() {
                         <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
                           {service.price
                             ? new Intl.NumberFormat("vi-VN").format(
-                              service.price
-                            ) + " VND"
+                                service.price
+                              ) + " VND"
                             : "N/A"}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap text-sm font-semibold text-gray-700">
                           {service.total
                             ? new Intl.NumberFormat("vi-VN").format(
-                              service.total
-                            ) + " VND"
+                                service.total
+                              ) + " VND"
                             : "N/A"}
                         </td>
                       </tr>
@@ -542,55 +589,165 @@ export default function ReceptionistAppointmentDetail() {
                 Không có dịch vụ nào được ghi nhận trong hồ sơ bệnh án này.
               </p>
             )}
-          </div>
-        )}
-        {a.MedicalRecord && currentServices.length > 0 && (
-          <div className="border border-purple-500 rounded-lg p-4 bg-purple-50 md:col-span-3">
-            <h2 className="text-lg font-bold mb-4 text-purple-800 flex items-center">
-              Hóa đơn & Thanh toán
-            </h2>
 
-            <div className="flex justify-between items-center text-xl font-bold p-3 bg-purple-100 rounded-md mb-4">
-              <p className="text-purple-800">TỔNG CỘNG:</p>
-              <p className="text-purple-900">
-                {new Intl.NumberFormat("vi-VN").format(totalAmount)} VND
+            {/* THUỐC */}
+            <h3 className="text-md font-bold mt-6 mb-3 text-green-800">
+              Thuốc đã kê
+            </h3>
+            {currentMedicines.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-green-200 border border-green-300">
+                  <thead className="bg-green-100">
+                    <tr>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-green-700 uppercase tracking-wider">
+                        STT
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-green-700 uppercase tracking-wider">
+                        Tên thuốc
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-green-700 uppercase tracking-wider">
+                        Liều
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-green-700 uppercase tracking-wider">
+                        Tần suất
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-green-700 uppercase tracking-wider">
+                        Thời gian
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-green-700 uppercase tracking-wider">
+                        Đường dùng
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-green-700 uppercase tracking-wider">
+                        SL
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-green-700 uppercase tracking-wider">
+                        Đơn giá
+                      </th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-green-700 uppercase tracking-wider">
+                        Thành tiền
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-green-200">
+                    {currentMedicines.map((m, idx) => (
+                      <tr key={idx}>
+                        <td className="px-4 py-2 text-sm text-gray-500">
+                          {idx + 1}
+                        </td>
+                        <td className="px-4 py-2 text-sm font-medium text-gray-900">
+                          {m.name}
+                          {m.instructions ? (
+                            <div className="text-xs text-gray-500 italic mt-1">
+                              HD: {m.instructions}
+                            </div>
+                          ) : null}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-gray-700">
+                          {m.dose || "-"}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-gray-700">
+                          {m.frequency || "-"}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-gray-700">
+                          {m.duration || "-"}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-gray-700">
+                          {m.route || "-"}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-gray-700">
+                          {m.quantity}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-gray-700">
+                          {new Intl.NumberFormat("vi-VN").format(m.priceAtUse)}{" "}
+                          VND
+                        </td>
+                        <td className="px-4 py-2 text-sm font-semibold text-gray-700">
+                          {new Intl.NumberFormat("vi-VN").format(m.total)} VND
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-gray-600 italic text-sm">
+                Không có thuốc nào được kê trong hồ sơ này.
               </p>
-            </div>
-
-            <p className="text-sm text-gray-700 mb-4">
-              Trạng thái hiện tại:{" "}
-              <span className="font-semibold text-red-600">
-                {newStatus.toUpperCase()}
-              </span>
-              .
-            </p>
-
-            <div className="flex gap-4">
-              {newStatus === "to-payment" && (
-                <button
-                  onClick={() => handlePayment(a)}
-                  disabled={newStatus === "completed" || isUpdating}
-                  className={`flex-1 px-4 py-2 text-white font-semibold rounded-md transition-colors ${newStatus === "completed" || isUpdating
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-green-600 hover:bg-green-700"
-                    }`}
-                >
-                  {isUpdating ? "Đang xử lý..." : "Thanh toán PayOS"}
-                </button>
-              )}
-
-              <button
-                onClick={() => {
-                  toast.success("Đang tiến hành tạo mẫu in hóa đơn...");
-                  handlePrintInvoice(a, currentServices, totalAmount);
-                }}
-                className="flex-1 px-4 py-2 text-purple-600 font-semibold border border-purple-600 rounded-md hover:bg-purple-100 transition-colors"
-              >
-                <span className="mr-1">🖨️</span> In Hóa đơn
-              </button>
-            </div>
+            )}
           </div>
         )}
+
+        {a.MedicalRecord &&
+          (currentServices.length > 0 || currentMedicines.length > 0) && (
+            <div className="border border-purple-500 rounded-lg p-4 bg-purple-50 md:col-span-3">
+              <h2 className="text-lg font-bold mb-4 text-purple-800 flex items-center">
+                Hóa đơn & Thanh toán
+              </h2>
+
+              <div className="flex flex-col gap-2 p-3 bg-purple-100 rounded-md mb-4">
+                <div className="flex justify-between text-base">
+                  <span className="text-purple-800">Tổng dịch vụ:</span>
+                  <span className="text-purple-900 font-semibold">
+                    {new Intl.NumberFormat("vi-VN").format(totalServiceAmount)}{" "}
+                    VND
+                  </span>
+                </div>
+                <div className="flex justify-between text-base">
+                  <span className="text-purple-800">Tổng thuốc:</span>
+                  <span className="text-purple-900 font-semibold">
+                    {new Intl.NumberFormat("vi-VN").format(totalMedicineAmount)}{" "}
+                    VND
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-xl font-bold">
+                  <span className="text-purple-800">TỔNG CỘNG:</span>
+                  <span className="text-purple-900">
+                    {new Intl.NumberFormat("vi-VN").format(grandTotal)} VND
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-sm text-gray-700 mb-4">
+                Trạng thái hiện tại:{" "}
+                <span className="font-semibold text-red-600">
+                  {newStatus.toUpperCase()}
+                </span>
+                .
+              </p>
+
+              <div className="flex gap-4">
+                {newStatus === "to-payment" && (
+                  <button
+                    onClick={() => handlePayment(a)}
+                    disabled={newStatus === "completed" || isUpdating}
+                    className={`flex-1 px-4 py-2 text-white font-semibold rounded-md transition-colors ${
+                      newStatus === "completed" || isUpdating
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-green-600 hover:bg-green-700"
+                    }`}
+                  >
+                    {isUpdating ? "Đang xử lý..." : "Thanh toán PayOS"}
+                  </button>
+                )}
+
+                <button
+                  onClick={() => {
+                    toast.success("Đang tiến hành tạo mẫu in hóa đơn...");
+                    handlePrintInvoice(
+                      a,
+                      currentServices,
+                      currentMedicines,
+                      grandTotal
+                    );
+                  }}
+                  className="flex-1 px-4 py-2 text-purple-600 font-semibold border border-purple-600 rounded-md hover:bg-purple-100 transition-colors"
+                >
+                  <span className="mr-1">🖨️</span> In Hóa đơn
+                </button>
+              </div>
+            </div>
+          )}
+
         {/* CẬP NHẬT CHUNG */}
         <div className="border border-blue-400 rounded-lg p-4 bg-blue-50 md:col-span-2">
           <h2 className="text-lg font-bold mb-4 text-blue-800">
@@ -633,22 +790,6 @@ export default function ReceptionistAppointmentDetail() {
             </div>
           </div>
 
-          {/* <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Trạng thái:
-            </label>
-            <select
-              value={newStatus}
-              onChange={(e) => setNewStatus(e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-            >
-              {STATUS_OPTIONS.map((status) => (
-                <option key={status} value={status}>
-                  {status.toUpperCase()}
-                </option>
-              ))}
-            </select>
-          </div> */}
           <div className="form-group">
             <label>Trạng thái</label>
             <select
@@ -662,7 +803,6 @@ export default function ReceptionistAppointmentDetail() {
               <option value="to-payment">To Payment</option>
               <option value="completed">Completed</option>
             </select>
-
             {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
           </div>
 
@@ -706,10 +846,11 @@ export default function ReceptionistAppointmentDetail() {
               <button
                 onClick={fetchAvailability}
                 disabled={fetchingAvailability || isUpdating}
-                className={`px-4 py-2 text-sm rounded-md transition-colors ${fetchingAvailability
+                className={`px-4 py-2 text-sm rounded-md transition-colors ${
+                  fetchingAvailability
                     ? "bg-gray-400"
                     : "bg-indigo-600 hover:bg-indigo-700 text-white"
-                  }`}
+                }`}
               >
                 {fetchingAvailability ? "Đang tải..." : "Tải lại DS"}
               </button>
@@ -755,14 +896,17 @@ export default function ReceptionistAppointmentDetail() {
               <ul className="list-disc list-inside text-sm text-red-700 space-y-1">
                 {suggestedSlots.map((slot, index) => (
                   <li key={index}>
-                    **{slot.date}** lúc **{slot.startTime} - {slot.endTime}**: (
-                    {slot.availableDoctorsCount} bác sĩ khả dụng)
+                    <strong>{slot.date}</strong> lúc{" "}
+                    <strong>
+                      {slot.startTime} - {slot.endTime}
+                    </strong>
+                    : ({slot.availableDoctorsCount} bác sĩ khả dụng)
                   </li>
                 ))}
               </ul>
               <p className="text-red-800 text-xs mt-2 font-semibold">
-                **Hành động:** Bạn có thể nhập Ngày và Thời gian gợi ý vào các ô
-                trên để kiểm tra và Cập nhật.
+                Bạn có thể nhập Ngày và Thời gian gợi ý vào các ô trên để kiểm
+                tra và Cập nhật.
               </p>
             </div>
           )}
@@ -775,13 +919,14 @@ export default function ReceptionistAppointmentDetail() {
               isUpdating ||
               fetchingAvailability
             }
-            className={`w-full mt-4 px-4 py-2 text-white font-semibold rounded-md transition-colors ${!selectedDoctorId ||
-                !selectedRoomId ||
-                isUpdating ||
-                fetchingAvailability
+            className={`w-full mt-4 px-4 py-2 text-white font-semibold rounded-md transition-colors ${
+              !selectedDoctorId ||
+              !selectedRoomId ||
+              isUpdating ||
+              fetchingAvailability
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-blue-600 hover:bg-blue-700"
-              }`}
+            }`}
           >
             {isUpdating ? "Đang cập nhật..." : "Lưu Thay Đổi (UPDATE)"}
           </button>

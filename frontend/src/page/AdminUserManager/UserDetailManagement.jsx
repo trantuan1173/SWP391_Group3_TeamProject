@@ -34,20 +34,19 @@ export default function UserDetailManagement() {
   const getRoleStyles = (role) => {
     switch (role) {
       case "admin":
-        return "bg-red-500 text-white"; // Quản trị viên
+        return "bg-red-500 text-white";
       case "patient":
-        return "bg-blue-500 text-white"; // Bệnh nhân
+        return "bg-blue-500 text-white";
       case "doctor":
-        return "bg-green-500 text-white"; // Bác sĩ
+        return "bg-green-500 text-white";
       default:
-        return "bg-gray-400 text-white"; // Mặc định
+        return "bg-gray-400 text-white";
     }
   };
 
   return (
     <AdminLayout>
       <div className="p-6 bg-gray-100 rounded-md h-full">
-        {/* Nút Quay lại */}
         <Button
           className="!mb-6 !rounded-md"
           onClick={() => navigate("/admin/user")}
@@ -56,7 +55,6 @@ export default function UserDetailManagement() {
         </Button>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Thẻ Avatar */}
           <Card className="col-span-1 flex flex-col items-center p-6">
             <Avatar className="w-40 h-40">
               <AvatarImage
@@ -80,7 +78,6 @@ export default function UserDetailManagement() {
             </div>
           </Card>
 
-          {/* Thẻ Thông tin */}
           <Card className="col-span-3 p-10">
             <CardHeader>
               <CardTitle className="text-2xl font-bold">

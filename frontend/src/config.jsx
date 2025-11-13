@@ -99,4 +99,45 @@ export const API_ENDPOINTS = {
   ROOM_LIST: `${baseUrl}/api/employees/rooms`,
   GET_DOCTOR_FEEDBACKS: (doctorId) => `${baseUrl}/api/doctors/${doctorId}/feedbacks`,
   GET_DOCTOR_BY_ID: (doctorId) => `${baseUrl}/api/doctors/${doctorId}`,
+  GET_REVENUE_SUMMARY: `${baseUrl}/api/admin/revenue/summary`,
+  GET_REVENUE_TIMESERIES: `${baseUrl}/api/admin/revenue/timeseries`,
+  GET_REVENUE_BY_METHOD: `${baseUrl}/api/admin/revenue/by-method`,
+
+  FETCH_FAQ_CATEGORY_SUMMARY: `${baseUrl}/api/faq/categories/summary`,
+
+  FAQ_LIST: `${baseUrl}/api/faq`,
+  FAQ_DETAIL: (id) => `${baseUrl}/api/faq/get-faq/${id}`,
+  CREATE_FAQ: `${baseUrl}/api/faq/create`,
+  UPDATE_FAQ: (id) => `${baseUrl}/api/faq/${id}`,
+  DELETE_FAQ: (id) => `${baseUrl}/api/faq/delete/${id}`,
+
+  // ===== Tickets =====
+  TICKET_LIST: `${baseUrl}/api/tickets`,
+  TICKET_DETAIL: (id) => `${baseUrl}/api/tickets/get-ticket/${id}`,
+  TICKET_CREATE: `${baseUrl}/api/tickets/create`,
+  TICKET_UPDATE_STATUS: (id) => `${baseUrl}/api/tickets/${id}/status`,
+  TICKET_ANSWER: (id) => `${baseUrl}/api/tickets/${id}/answer`,
+  TICKET_DELETE: (id) => `${baseUrl}/api/tickets/delete/${id}`,
+
+  ADMIN_TICKET_LIST: `${baseUrl}/api/tickets/receptionist/list-tickets`,
+  ADMIN_TICKET_STATUS: (id) => `${baseUrl}/api/tickets/${id}/status`,
+  ADMIN_TICKET_ANSWER: (id) => `${baseUrl}/api/tickets/${id}/answer`,
+  ADMIN_TICKET_DELETE: (id) => `${baseUrl}/api/tickets/delete/${id}`,
+
+  GET_POLICIES: `${baseUrl}/api/policies`,
+  CREATE_POLICY: `${baseUrl}/api/policies`,
+  UPDATE_POLICY: (id) => `${baseUrl}/api/policies/${id}`,
+  DELETE_POLICY: (id) => `${baseUrl}/api/policies/${id}`,
+  GET_POLICY: (id) => `${baseUrl}/api/policies/${id}`,
+  GET_ACTIVE_POLICY_BY_CATEGORY: (category) =>
+    `${baseUrl}/api/policies/category/${category}`,
+
+  MEDICINE_LIST: `${baseUrl}/api/medicines`, // GET ?page=&pageSize=&search=
+  MEDICINE_DETAIL: (id) => `${baseUrl}/api/medicines/${id}`, // GET 1 thuốc
+  CREATE_MEDICINE: `${baseUrl}/api/medicines/create`, // POST
+  UPDATE_MEDICINE: (id) => `${baseUrl}/api/medicines/update/${id}`, // PUT
+  DELETE_MEDICINE: (id) => `${baseUrl}/api/medicines/delete/${id}`, // DELETE
+  MEDICINE_EXPIRING_SOON: `${baseUrl}/api/medicines/expiring/soon`, // GET
+
+  GET_MEDICINES: `${baseUrl}/api/medicines`,
 };

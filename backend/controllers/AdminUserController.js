@@ -7,7 +7,6 @@ const EmployeeRole = require("../models/EmployeeRole");
 const { sendStaffVerifyEmail } = require("../service/sendVerifyEmail");
 const bcrypt = require("bcrypt");
 
-//Create role
 const createRole = async (req, res) => {
   try {
     const { name } = req.body;
@@ -26,7 +25,6 @@ const createRole = async (req, res) => {
   }
 };
 
-//Get all roles
 const getRoles = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -59,7 +57,6 @@ const getRoles = async (req, res) => {
   }
 };
 
-//Update role
 const updateRole = async (req, res) => {
   try {
     const { id } = req.params;
@@ -77,7 +74,6 @@ const updateRole = async (req, res) => {
   }
 };
 
-//Delete role
 const deleteRole = async (req, res) => {
   try {
     const { id } = req.params;
@@ -106,29 +102,25 @@ const getRoleById = async (req, res) => {
     res.status(500).json({ error: "Vai trò lấy thất bại" });
   }
 };
-//Create employee
+
 const createEmployee = async (req, res) => {
   try {
     let { roles, ...userData } = req.body;
 
-    // Parse roles nếu là string (từ FormData)
     if (typeof roles === "string") {
       roles = roles.split(",").map((r) => r.trim());
     }
 
-    // Validate roles
     if (!roles || !Array.isArray(roles) || roles.length === 0) {
       return res.status(400).json({ error: "Ít nhất một role phải được chọn" });
     }
 
-    // Validate required fields
     if (!userData.name || !userData.email || !userData.password) {
       return res
         .status(400)
         .json({ error: "Tên, email và mật khẩu là bắt buộc" });
     }
 
-    // Check duplicates
     const existingIdentityNumber = await Employee.findOne({
       where: { identityNumber: userData.identityNumber },
     });
@@ -149,20 +141,16 @@ const createEmployee = async (req, res) => {
       return res.status(409).json({ error: "SĐT đã tồn tại" });
     }
 
-    // Handle avatar upload
     if (req.file) {
       userData.avatar = `/uploads/avatars/${req.file.filename}`;
     }
 
-    // Create employee
     const employee = await Employee.create({ ...userData });
 
-    // Assign roles
     const employeeRoles = [];
     for (const roleName of roles) {
       const roleRecord = await Role.findOne({ where: { name: roleName } });
       if (!roleRecord) {
-        // Rollback: delete employee if role not found
         await employee.destroy();
         return res
           .status(404)
@@ -180,10 +168,8 @@ const createEmployee = async (req, res) => {
       });
     }
 
-    // Send verification email
     await sendStaffVerifyEmail(employee.email, userData.password);
 
-    // Prepare response
     const cleanEmployee = employee.get({ plain: true });
 
     const responseData = {
@@ -213,17 +199,16 @@ const createEmployee = async (req, res) => {
   }
 };
 
-//Get all employees with role
 const getEmployees = async (req, res) => {
   try {
-    // Lấy query params
-    const page = parseInt(req.query.page) || 1; // trang hiện tại
-    const pageSize = parseInt(req.query.pageSize) || 10; // số record mỗi trang
-    const search = req.query.search ? req.query.search.trim() : ""; // từ khóa tìm kiếm
+    console.log(req.query);
+
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const search = req.query.search ? req.query.search.trim() : "";
     const role = req.query.role ? req.query.role.trim() : "";
     const offset = (page - 1) * pageSize;
 
-    // Điều kiện where cho search
     const whereCondition = {};
     const roleCondition = role
       ? { name: { [Op.like]: `%${role}%` } }
@@ -237,7 +222,6 @@ const getEmployees = async (req, res) => {
       ];
     }
 
-    // Query với phân trang + count tổng
     const { rows: employees, count: total } = await Employee.findAndCountAll({
       attributes: [
         "id",
@@ -280,13 +264,11 @@ const getEmployees = async (req, res) => {
   }
 };
 
-//Const Delete employee
 const deleteEmployee = async (req, res) => {
   try {
     const { id } = req.params;
     await EmployeeRole.destroy({ where: { employeeId: id } });
-    // await Doctor.destroy({ where: { employeeId: id } });
-    // await Patient.destroy({ where: { employeeId: id } });
+
     const deleted = await Employee.destroy({ where: { id } });
     if (!deleted)
       return res.status(404).json({ error: "Không tìm thấy nhân viên" });
@@ -297,7 +279,6 @@ const deleteEmployee = async (req, res) => {
   }
 };
 
-//Const Get Employee By Id
 const getEmployeeById = async (req, res) => {
   try {
     const user = await Employee.findByPk(req.params.id, {
@@ -321,7 +302,6 @@ const updateActiveStatus = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Ép kiểu boolean
     user.isActive = isActive === true || isActive === "true";
 
     await user.save();
@@ -340,12 +320,10 @@ const updateEmployee = async (req, res) => {
     const { id } = req.params;
     let { roles, speciality, ...updateData } = req.body;
 
-    // Parse roles nếu là string (từ FormData)
     if (typeof roles === "string") {
       roles = roles.split(",").map((r) => r.trim());
     }
 
-    // Lấy thông tin nhân viên hiện tại
     const existingUser = await Employee.findOne({
       where: { id },
       include: [{ model: Role, as: "roles" }],
@@ -355,32 +333,25 @@ const updateEmployee = async (req, res) => {
       return res.status(404).json({ error: "Nhân viên không tìm thấy" });
     }
 
-    // ==== VALIDATE BẮT BUỘC ====
     if (!updateData.name || !updateData.email) {
       return res.status(400).json({ error: "Tên và email là bắt buộc" });
     }
 
-    // ==== Xử lý avatar ====
     if (req.file) {
       updateData.avatar = `/uploads/avatars/${req.file.filename}`;
     }
 
-    // ==== Xử lý password ====
     if (!updateData.password || updateData.password.trim() === "") {
       delete updateData.password;
     } else {
       updateData.password = await bcrypt.hash(updateData.password, 10);
     }
 
-    // ==== Cập nhật thông tin cơ bản ====
     await Employee.update(updateData, { where: { id } });
 
-    // ==== Cập nhật roles nếu có ====
     if (roles && Array.isArray(roles) && roles.length > 0) {
-      // Xóa tất cả roles cũ
       await EmployeeRole.destroy({ where: { employeeId: id } });
 
-      // Thêm roles mới
       for (const roleName of roles) {
         const roleRecord = await Role.findOne({ where: { name: roleName } });
         if (!roleRecord) {
@@ -395,17 +366,14 @@ const updateEmployee = async (req, res) => {
         });
       }
 
-      // Cập nhật speciality nếu có role Doctor
       const hasDoctor = roles.some((r) => r.toLowerCase() === "doctor");
       if (hasDoctor && speciality !== undefined) {
         await Employee.update({ speciality }, { where: { id } });
       } else if (!hasDoctor) {
-        // Xóa speciality nếu không còn là Doctor
         await Employee.update({ speciality: null }, { where: { id } });
       }
     }
 
-    // ==== Lấy lại dữ liệu sau khi cập nhật ====
     const updatedUser = await Employee.findByPk(id, {
       include: [{ model: Role, as: "roles" }],
       attributes: { exclude: ["password"] },
@@ -423,7 +391,6 @@ const updateEmployee = async (req, res) => {
   }
 };
 
-// ===== Create Patient =====
 const createPatient = async (req, res) => {
   try {
     const {
@@ -437,12 +404,10 @@ const createPatient = async (req, res) => {
       gender,
     } = req.body;
 
-    // Validate required fields
     if (!name || !identityNumber) {
       return res.status(400).json({ error: "Tên và CCCD/CMND là bắt buộc" });
     }
 
-    // Check for duplicates
     const existingIdentity = await Patient.findOne({
       where: { identityNumber },
     });
@@ -464,7 +429,6 @@ const createPatient = async (req, res) => {
       return res.status(409).json({ error: "SĐT đã tồn tại" });
     }
 
-    // Create patient
     const patient = await Patient.create({
       name,
       email,
@@ -478,35 +442,37 @@ const createPatient = async (req, res) => {
     });
 
     const cleanPatient = patient.get({ plain: true });
-    delete cleanPatient.password; // không gửi password về client
+    delete cleanPatient.password;
 
     res.status(201).json({
       message: "Bệnh nhân tạo thành công",
       patient: cleanPatient,
+      l,
     });
   } catch (error) {
     res.status(500).json({ error: "Bệnh nhân tạo thất bại" });
   }
 };
 
-// ===== Get All Patients (with pagination + search) =====
 const getPatients = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const pageSize = parseInt(req.query.pageSize) || 10;
     const search = req.query.search ? req.query.search.trim() : "";
 
+    console.log("Search query:", search);
+
     const offset = (page - 1) * pageSize;
 
     const whereCondition = {};
 
     if (search) {
-      whereCondition[Op.or] = [
-        { name: { [Op.like]: `%${search}%` } },
-        { email: { [Op.like]: `%${search}%` } },
-        { phoneNumber: { [Op.like]: `%${search}%` } },
-        { identityNumber: { [Op.like]: `%${search}%` } },
-      ];
+      const keywords = search.split(/\s+/).filter(Boolean);
+
+      whereCondition[Op.or] = keywords.flatMap((keyword) => [
+        { name: { [Op.like]: `%${keyword}%` } },
+        { email: { [Op.like]: `%${keyword}%` } },
+      ]);
     }
 
     const { rows: patients, count: total } = await Patient.findAndCountAll({
@@ -529,7 +495,6 @@ const getPatients = async (req, res) => {
   }
 };
 
-// ===== Get Patient By ID =====
 const getPatientById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -546,7 +511,6 @@ const getPatientById = async (req, res) => {
   }
 };
 
-// ===== Update Patient =====
 const updatePatient = async (req, res) => {
   try {
     const { id } = req.params;
@@ -566,7 +530,6 @@ const updatePatient = async (req, res) => {
     if (!patient)
       return res.status(404).json({ error: "Bệnh nhân không tìm thấy" });
 
-    // kiểm tra trùng email, sđt, CCCD (trừ chính nó)
     if (identityNumber && identityNumber !== patient.identityNumber) {
       const existingIdentity = await Patient.findOne({
         where: { identityNumber },
@@ -613,7 +576,6 @@ const updatePatient = async (req, res) => {
   }
 };
 
-// ===== Delete Patient =====
 const deletePatient = async (req, res) => {
   try {
     const { id } = req.params;
@@ -744,17 +706,14 @@ const updateDoctorSpeciality = async (req, res) => {
     const { id } = req.params;
     const { speciality } = req.body;
 
-    // Tìm employee theo ID
     const employee = await Employee.findByPk(id, {
       include: [{ model: Role, as: "roles" }],
     });
 
-    // Kiểm tra tồn tại
     if (!employee) {
       return res.status(404).json({ error: "Employee not found" });
     }
 
-    // Kiểm tra role có phải là doctor không
     const isDoctor = employee.roles?.some(
       (r) => r.name && r.name.toLowerCase() === "doctor"
     );
@@ -764,7 +723,6 @@ const updateDoctorSpeciality = async (req, res) => {
         .json({ error: "This employee is not assigned as a doctor" });
     }
 
-    // Cập nhật trường speciality trực tiếp trong bảng Employees
     employee.speciality = speciality;
     await employee.save();
 

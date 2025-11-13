@@ -69,7 +69,6 @@ export default function ServiceFormDialog({
             })}
             className="space-y-4"
           >
-            {/* Tên dịch vụ */}
             <FormField
               control={form.control}
               name="name"
@@ -84,7 +83,6 @@ export default function ServiceFormDialog({
               )}
             />
 
-            {/* Mô tả */}
             <FormField
               control={form.control}
               name="description"
@@ -102,7 +100,6 @@ export default function ServiceFormDialog({
               )}
             />
 
-            {/* Giá dịch vụ */}
             <FormField
               control={form.control}
               name="price"
@@ -121,7 +118,6 @@ export default function ServiceFormDialog({
               )}
             />
 
-            {/* Nút hành động */}
             <Button
               type="submit"
               className="w-full bg-green-500 text-white hover:bg-green-600"

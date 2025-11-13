@@ -30,11 +30,15 @@ const {
   getRecentEmployees,
   updateDoctorSpeciality,
 } = require("../controllers/AdminUserController.js");
+const {
+  getRevenueSummary,
+  getRevenueByMethod,
+  getRevenueTimeseries,
+} = require("../controllers/AdminRevenueController.js");
 
-// ================== Multer config ==================
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/avatars"); // thư mục lưu avatar
+    cb(null, "uploads/avatars");
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
@@ -43,7 +47,6 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
-// ===================================================
 
 // routes
 /**
@@ -216,11 +219,7 @@ router.get("/employees", getEmployees);
 router.delete("/employees/:id", deleteEmployee);
 router.put("/employees/update-status/:id", updateActiveStatus);
 router.get("/employees/:id", getEmployeeById);
-router.put(
-  "/employees/:id",
-  upload.single("avatar"), // middleware multer xử lý file
-  updateEmployee
-);
+router.put("/employees/:id", upload.single("avatar"));
 router.put("/employees/update-speciality/:id", updateDoctorSpeciality);
 router.post("/patients", createPatient);
 router.get("/patients/get-all", getPatients);
@@ -235,6 +234,10 @@ router.get("/dashboard/active-patients", getActivePatients);
 router.get("/dashboard/available-roles", getAvailableRoles);
 router.get("/dashboard/recent-patients", getRecentPatients);
 router.get("/dashboard/recent-employees", getRecentEmployees);
+
+router.get("/revenue/summary", getRevenueSummary);
+router.get("/revenue/by-method", getRevenueByMethod);
+router.get("/revenue/timeseries", getRevenueTimeseries);
 
 // router.get("/users/:id", protect, authorize("admin"), getUserById);
 // router.delete("/users/:id", protect, authorize("admin"), deleteUser);

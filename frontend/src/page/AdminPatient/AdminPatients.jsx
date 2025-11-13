@@ -51,10 +51,11 @@ export default function AdminPatients() {
 
   const navigate = useNavigate();
 
-  // ===== FETCH PATIENTS =====
   const loadPatients = async () => {
     try {
-      const data = await fetchPatients(currentPage, pageSize, search);
+      const verifySearch = search.trim().replace(/\s+/g, " ").toLowerCase();
+      const data = await fetchPatients(currentPage, pageSize, verifySearch);
+
       setPatients(data.patients || []);
       setTotalPages(data.totalPages || 1);
     } catch {
@@ -66,7 +67,6 @@ export default function AdminPatients() {
     loadPatients();
   }, [currentPage, search]);
 
-  // ===== CREATE =====
   const handleCreate = async (data) => {
     const t = toast.loading("Đang tạo bệnh nhân...");
     try {
@@ -81,7 +81,6 @@ export default function AdminPatients() {
     }
   };
 
-  // ===== UPDATE =====
   const handleUpdate = async (id, data) => {
     const t = toast.loading("Đang cập nhật thông tin...");
     try {
@@ -96,7 +95,6 @@ export default function AdminPatients() {
     }
   };
 
-  // ===== DELETE =====
   const handleDelete = (p) => {
     setSelectedPatient(p);
     setDeleteDialogOpen(true);
@@ -116,7 +114,6 @@ export default function AdminPatients() {
     }
   };
 
-  // ===== TOGGLE ACTIVE STATUS =====
   const handleToggleActive = async (patient, checked) => {
     const t = toast.loading("Đang cập nhật trạng thái...");
     try {
@@ -136,7 +133,6 @@ export default function AdminPatients() {
   return (
     <AdminLayout>
       <div className="bg-white h-full p-5 rounded-lg shadow-md">
-        {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h4 className="text-xl font-bold">Quản lý bệnh nhân</h4>
           <Button
@@ -147,7 +143,6 @@ export default function AdminPatients() {
           </Button>
         </div>
 
-        {/* Search */}
         <div className="mb-4">
           <Input
             type="text"
@@ -161,7 +156,6 @@ export default function AdminPatients() {
           />
         </div>
 
-        {/* Table */}
         <Table>
           <TableCaption>Danh sách bệnh nhân</TableCaption>
           <TableHeader>
@@ -257,7 +251,6 @@ export default function AdminPatients() {
           </TableBody>
         </Table>
 
-        {/* Pagination */}
         <div className="mt-4 flex justify-center">
           <Pagination>
             <PaginationContent>
@@ -288,7 +281,6 @@ export default function AdminPatients() {
           </Pagination>
         </div>
 
-        {/* Dialogs */}
         <PatientFormDialog
           open={dialogOpen}
           setOpen={setDialogOpen}

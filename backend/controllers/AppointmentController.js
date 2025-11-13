@@ -5,6 +5,7 @@ const {
   Patient,
   MedicalRecord,
   sequelize,
+  MedicalRecordMedicine,
 } = require("../models");
 const {
   sendVerifyEmail,
@@ -241,8 +242,7 @@ const getAppointment = async (req, res) => {
     const page = req.query.page || 1;
     const limit = req.query.limit || 8;
     const status = req.query.status || "all";
-    // const searchPhone = req.query.searchPhone || "";
-    // const patientName = req.query.patientName || "";
+
     const whereClause = {};
 
     if (status !== "all") {
@@ -284,7 +284,12 @@ const getAppointmentById = async (req, res) => {
         { model: Employee },
         { model: Room, attributes: ["id", "name", "type"] },
         { model: Patient },
-        { model: MedicalRecord },
+        {
+          model: MedicalRecord,
+          include: [
+            { model: MedicalRecordMedicine, as: "prescribedMedicines" },
+          ],
+        },
       ],
     });
     res.status(200).json(appointment);

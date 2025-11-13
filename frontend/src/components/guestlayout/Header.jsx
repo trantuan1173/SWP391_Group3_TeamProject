@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { jwtDecode } from "jwt-decode";
+import { fetchUserById } from "@/api/userApi";
 
 export default function Header() {
   const navigate = useNavigate();
@@ -9,13 +10,15 @@ export default function Header() {
 
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [userId, setUserId] = useState(null);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
     if (token) {
       try {
         const decoded = jwtDecode(token);
-        setUser(decoded);
+        console.log("✅ Token decoded successfully:", decoded);
+        setUserIdser(decoded.id);
       } catch (err) {
         console.error("❌ Token decode error:", err);
         localStorage.removeItem("token");
@@ -23,6 +26,17 @@ export default function Header() {
     }
   }, [token]);
 
+  useEffect(() => {
+    try {
+      const userInfo = fetchUserById(userId.id);
+      setUser(userInfo);
+    } catch (err) {
+      console.error("❌ Token decode error:", err);
+      localStorage.removeItem("token");
+    }
+  });
+
+  // Ẩn dropdown khi click ra ngoài
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -79,6 +93,18 @@ export default function Header() {
             className="text-black font-medium no-underline mx-[25px]"
           >
             Blog
+          </a>
+          <a
+            href="/faq"
+            className="text-black font-medium no-underline mx-[25px]"
+          >
+            FAQ
+          </a>
+          <a
+            href="/policies"
+            className="text-black font-medium no-underline mx-[25px]"
+          >
+            Chính sách
           </a>
         </nav>
 

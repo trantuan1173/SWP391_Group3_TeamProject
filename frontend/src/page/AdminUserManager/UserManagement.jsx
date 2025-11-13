@@ -19,6 +19,7 @@ import {
   updateUser,
   updateUserStatus,
   updateDoctorSpeciality,
+  fetchRoles,
 } from "@/api/userApi";
 import UserDetailDialog from "@/components/users/UserDetailDialog";
 
@@ -52,6 +53,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { set } from "zod";
 
 const SPECIALTIES = [
   "Nội khoa",
@@ -79,14 +81,20 @@ export default function UserManagement() {
 
   const [searchInput, setSearchInput] = useState("");
   const search = useDebounce(searchInput, 500);
+  const [roleFilter, setRoleFilter] = useState("");
+  const [role, setRole] = useState([]);
 
   const [pageSize, setPageSize] = useState(5);
   const navigate = useNavigate();
 
-  // ===== FETCH USERS =====
   const loadUsers = async () => {
     try {
-      const data = await fetchUsers(currentPage, pageSize, search);
+      const data = await fetchUsers(
+        currentPage,
+        pageSize,
+        search.trim(),
+        roleFilter
+      );
       setUsers(data.employees);
       setTotalPages(data.totalPages);
     } catch {
@@ -96,7 +104,20 @@ export default function UserManagement() {
 
   useEffect(() => {
     loadUsers();
-  }, [currentPage, search, pageSize]);
+  }, [currentPage, search, pageSize, roleFilter]);
+
+  // useEffect(() => {
+  //   const loadRoles = async () => {
+  //     try {
+  //       const data = await fetchRoles();
+  //       // console.log(data);
+  //       setRole(data.roles);
+  //     } catch (err) {
+  //       console.error("Lỗi khi load roles:", err);
+  //     }
+  //   };
+  //   loadRoles();
+  // }, []);
 
   // ===== CREATE USER =====
   const handleCreateUser = async (data) => {
@@ -118,7 +139,6 @@ export default function UserManagement() {
     }
   };
 
-  // ===== UPDATE =====
   const handleEditUser = (user) => {
     setSelectedUserId(user.id);
     setEditDialogOpen(true);
@@ -136,7 +156,6 @@ export default function UserManagement() {
     }
   };
 
-  // ===== DELETE =====
   const handleDeleteUser = (user) => {
     setSelectedUser(user);
     setDeleteDialogOpen(true);
@@ -157,7 +176,6 @@ export default function UserManagement() {
     }
   };
 
-  // ===== SPECIALTY =====
   const handleSelectSpecialty = (user) => {
     setSelectedUser(user);
     setSelectedSpecialty(user.specialty || "");
@@ -180,7 +198,6 @@ export default function UserManagement() {
     }
   };
 
-  // ===== TOGGLE ACTIVE =====
   const handleToggleActive = async (user, checked) => {
     const toastId = toast.loading("Đang cập nhật trạng thái...");
     try {
@@ -206,7 +223,6 @@ export default function UserManagement() {
   return (
     <AdminLayout>
       <div className="bg-white h-full p-5 rounded-lg shadow-md">
-        {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h4 className="text-xl font-bold">Quản lý nhân viên</h4>
           <div className="flex gap-3">
@@ -222,6 +238,19 @@ export default function UserManagement() {
               <option value="10">10 / trang</option>
               <option value="20">20 / trang</option>
             </select>
+            <select
+              value={roleFilter}
+              onChange={(e) => {
+                setRoleFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="border border-gray-300 rounded-md p-2"
+            >
+              <option value="">Tất cả vai trò</option>
+              <option value="Admin">Admin</option>
+              <option value="Receptionist">Employee</option>
+              <option value="Doctor">Doctor</option>
+            </select>
 
             <Button
               onClick={() => setDialogOpen(true)}
@@ -232,7 +261,6 @@ export default function UserManagement() {
           </div>
         </div>
 
-        {/* Search */}
         <div className="mb-4">
           <Input
             type="text"
@@ -246,7 +274,6 @@ export default function UserManagement() {
           />
         </div>
 
-        {/* Table */}
         <Table>
           <TableCaption>Danh sách nhân viên</TableCaption>
           <TableHeader>
@@ -359,7 +386,6 @@ export default function UserManagement() {
           </TableBody>
         </Table>
 
-        {/* Pagination */}
         <div className="mt-4 flex justify-center">
           <Pagination>
             <PaginationContent>
@@ -390,7 +416,6 @@ export default function UserManagement() {
           </Pagination>
         </div>
 
-        {/* Dialogs */}
         <UserFormDialog
           open={dialogOpen}
           setOpen={setDialogOpen}
@@ -417,7 +442,6 @@ export default function UserManagement() {
           onConfirm={confirmDelete}
         />
 
-        {/* Chọn chuyên khoa */}
         <Dialog
           open={specialtyDialogOpen}
           onOpenChange={setSpecialtyDialogOpen}

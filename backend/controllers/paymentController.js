@@ -6,6 +6,7 @@ const Appointment = require("../models/Appointment");
 const Patient = require("../models/Patient");
 const MedicalRecord = require("../models/MedicalRecord");
 const MedicalRecordService = require("../models/MedicalRecordService");
+const MedicalRecordMedicine = require("../models/MedicalRecordMedicine");
 
 const payos = new PayOS({
   clientId: process.env.PAYOS_CLIENT_ID,
@@ -17,14 +18,6 @@ const createPayment = async (req, res) => {
   try {
     const { appointmentId, patientId, returnUrl, cancelUrl } = req.body;
 
-    console.log("createPayment called with:", {
-      appointmentId,
-      patientId,
-      returnUrl,
-      cancelUrl,
-    });
-
-    // Kiểm tra input
     if (!appointmentId || !patientId) {
       return res.status(400).json({ error: "Thiếu dữ liệu bắt buộc" });
     }
@@ -46,17 +39,33 @@ const createPayment = async (req, res) => {
     const services = await MedicalRecordService.findAll({
       where: { medicalRecordId: medicalRecord.id },
       attributes: ["total"],
+      raw: true,
     });
+    const serviceAmount = services.reduce(
+      (sum, s) => sum + Number(s.total || 0),
+      0
+    );
 
-    const totalAmount = services.reduce((sum, s) => sum + s.total, 0);
-    if (totalAmount <= 0)
+    const medicines = await MedicalRecordMedicine.findAll({
+      where: { medicalRecordId: medicalRecord.id },
+      attributes: ["total"],
+      raw: true,
+    });
+    const medicineAmount = medicines.reduce(
+      (sum, m) => sum + Number(m.total || 0),
+      0
+    );
+
+    const totalAmount = Math.round(serviceAmount + medicineAmount);
+
+    if (totalAmount <= 0) {
       return res
         .status(400)
-        .json({ error: "Không có dịch vụ hoặc tổng tiền bằng 0" });
+        .json({ error: "Không có dịch vụ/thuốc hoặc tổng tiền bằng 0" });
+    }
 
     const orderCode = Math.floor(Date.now() / 1000);
 
-    // Dùng URL frontend truyền xuống, fallback nếu thiếu
     const paymentLink = await payos.paymentRequests.create({
       orderCode,
       amount: totalAmount,
@@ -70,6 +79,7 @@ const createPayment = async (req, res) => {
     const payment = await Payment.create({
       appointmentId,
       patientId,
+      orderCode,
       amount: totalAmount,
       method: "payos",
       status: "pending",
@@ -79,11 +89,13 @@ const createPayment = async (req, res) => {
     res.status(201).json({
       message: "Tạo thanh toán thành công",
       checkoutUrl: paymentLink.checkoutUrl,
+      serviceAmount,
+      medicineAmount,
       totalAmount,
       payment,
     });
   } catch (error) {
-    console.error("❌ createPayment error:", error);
+    console.error("createPayment error:", error);
     res.status(500).json({
       error: "Lỗi tạo thanh toán PayOS",
       detail: error.message,
@@ -91,14 +103,13 @@ const createPayment = async (req, res) => {
   }
 };
 
-// ===== paymentController.js =====
 const payosWebhook = async (req, res) => {
   try {
     const webhookData = req.body;
-    console.log("📥 Webhook received:", JSON.stringify(webhookData, null, 2));
+    console.log("Webhook received:", JSON.stringify(webhookData, null, 2));
 
     const verifiedData = await payos.webhooks.verify(webhookData);
-    console.log("✅ Webhook verified:", verifiedData);
+    console.log("Webhook verified:", verifiedData);
 
     const {
       orderCode,
@@ -111,21 +122,21 @@ const payosWebhook = async (req, res) => {
     } = verifiedData;
 
     if (code !== "00") {
-      console.log("⚠️ Payment failed:", { code, desc });
+      console.log("Payment failed:", { code, desc });
       return res.status(200).json({
         error: 0,
         message: "Payment failed",
       });
     }
 
-    console.log("💰 Processing payment:", { orderCode, paymentLinkId });
+    console.log("Processing payment:", { orderCode, paymentLinkId });
 
     const payment = await Payment.findOne({
       where: { transactionId: paymentLinkId },
     });
 
     if (!payment) {
-      console.log("⚠️ Payment not found for paymentLinkId:", paymentLinkId);
+      console.log("Payment not found for paymentLinkId:", paymentLinkId);
 
       const paymentByOrderCode = await Payment.findOne({
         where: { orderCode: orderCode },
@@ -139,14 +150,13 @@ const payosWebhook = async (req, res) => {
           transactionDateTime: transactionDateTime,
         });
 
-        // ✅ Đổi 'paid' → 'completed'
         await Appointment.update(
           { status: "completed" },
           { where: { id: paymentByOrderCode.appointmentId } }
         );
 
         console.log(
-          `✅ Updated payment ${paymentByOrderCode.id} and appointment to completed`
+          `Updated payment ${paymentByOrderCode.id} and appointment to completed`
         );
 
         return res.status(200).json({
@@ -162,28 +172,26 @@ const payosWebhook = async (req, res) => {
     }
 
     if (payment.status === "paid") {
-      console.log("⚠️ Already processed");
+      console.log("Already processed");
       return res.status(200).json({
         error: 0,
         message: "Already processed",
       });
     }
 
-    // Cập nhật payment
     await payment.update({
       status: "paid",
       reference: reference,
       transactionDateTime: transactionDateTime,
     });
 
-    // ✅ Đổi 'paid' → 'completed'
     await Appointment.update(
       { status: "completed" },
       { where: { id: payment.appointmentId } }
     );
 
     console.log(
-      `✅ Payment ${payment.id} marked as paid, Appointment marked as completed!`
+      `Payment ${payment.id} marked as paid, Appointment marked as completed!`
     );
 
     return res.status(200).json({
@@ -191,7 +199,7 @@ const payosWebhook = async (req, res) => {
       message: "Success",
     });
   } catch (error) {
-    console.error("❌ Error:", error);
+    console.error("Error:", error);
     return res.status(200).json({
       error: -1,
       message: "Error",
@@ -200,7 +208,6 @@ const payosWebhook = async (req, res) => {
   }
 };
 
-// paymentController.js
 const deletePayment = async (req, res) => {
   try {
     const { appointmentId } = req.body;

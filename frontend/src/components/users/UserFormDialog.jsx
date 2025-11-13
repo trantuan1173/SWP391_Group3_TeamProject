@@ -28,7 +28,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { fetchRoles, fetchUserById } from "@/api/userApi";
 
-// ===== Schema cho CREATE =====
 const createSchema = z.object({
   name: z.string().min(3, "Vui lòng nhập họ tên"),
   email: z.string().email("Email không hợp lệ"),
@@ -42,7 +41,6 @@ const createSchema = z.object({
   avatar: z.any().optional(),
 });
 
-// ===== Schema cho EDIT =====
 const editSchema = z.object({
   name: z.string().min(3, "Vui lòng nhập họ tên"),
   email: z.string().email("Email không hợp lệ"),
@@ -300,7 +298,7 @@ export default function UserFormDialog({ open, setOpen, onSubmit, userId }) {
                   )}
                 />
 
-                {/* Vai trò (multi-select có tag xuống dòng) */}
+                {/* Vai trò  */}
                 <FormField
                   control={form.control}
                   name="roles"

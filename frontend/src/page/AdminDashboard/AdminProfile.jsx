@@ -37,7 +37,6 @@ export default function AdminProfile() {
   };
 
   const handleSave = () => {
-    // Gọi API cập nhật thông tin user ở đây
     console.log("Lưu thông tin:", formData);
     setIsEditing(false);
   };
@@ -45,7 +44,6 @@ export default function AdminProfile() {
   return (
     <AdminLayout>
       <div className="flex flex-col md:flex-row gap-6 p-6 bg-gray-50 min-h-screen">
-        {/* Cột trái: avatar + nút hành động */}
         <Card className="w-full md:w-1/3 shadow-md border-green-100">
           <CardHeader className="flex flex-col items-center gap-3">
             <div className="w-28 h-28 rounded-full overflow-hidden bg-gradient-to-br from-green-200 to-green-100 flex items-center justify-center text-green-700 text-3xl font-bold">
@@ -91,7 +89,6 @@ export default function AdminProfile() {
           </CardContent>
         </Card>
 
-        {/* Cột phải: thông tin chi tiết */}
         <Card className="w-full md:w-2/3 shadow-md border-green-100">
           <CardHeader>
             <CardTitle>Thông tin cá nhân</CardTitle>
@@ -156,7 +153,7 @@ export default function AdminProfile() {
                   onClick={handleSave}
                   className="bg-green-500 text-white"
                 >
-                  💾 Lưu thay đổi
+                  Lưu thay đổi
                 </Button>
               </div>
             )}

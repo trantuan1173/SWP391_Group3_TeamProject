@@ -43,19 +43,16 @@ const Payment = sequelize.define("Payment", {
     allowNull: true,
   },
 
-  // ✅ Thêm orderCode
   orderCode: {
     type: DataTypes.BIGINT,
     allowNull: true,
   },
 
-  // ✅ Thêm reference (mã GD ngân hàng)
   reference: {
     type: DataTypes.STRING,
     allowNull: true,
   },
 
-  // ✅ Thêm transactionDateTime
   transactionDateTime: {
     type: DataTypes.DATE,
     allowNull: true,

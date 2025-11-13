@@ -22,6 +22,7 @@ import {
   fetchRecentEmployees,
 } from "@/api/dashboardApi";
 import { useAuth } from "@/context/AuthContext";
+import RevenueCharts from "@/components/revenue/RevenueCharts";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -83,7 +84,6 @@ export default function AdminDashboard() {
   return (
     <AdminLayout>
       <div className="p-6 space-y-6">
-        {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h2 className="!text-3xl !font-bold">Xin chào, {user.name}!</h2>
           <div className="flex gap-2">
@@ -106,7 +106,6 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -171,11 +170,11 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
+        <RevenueCharts />
+
         <Separator />
 
-        {/* Lists */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Recent Patients */}
           <Card className="shadow-sm">
             <CardHeader className="flex items-center justify-between">
               <CardTitle>Các bệnh nhân gần đây</CardTitle>
@@ -229,7 +228,6 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
 
-          {/* Recent Employees */}
           <Card className="shadow-sm">
             <CardHeader className="flex items-center justify-between">
               <CardTitle>Các nhân viên gần đây</CardTitle>

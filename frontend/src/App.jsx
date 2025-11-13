@@ -47,6 +47,18 @@ import ResetPassword from "./page/Auth/ResetPassword";
 import ViewFeedback from "./page/doctor/ViewFeedback";
 import MedicalRecordDetail from "./page/doctor/MedicalRecordDetail";
 import ViewFeedbackForAll from "./page/guest/ViewFeedbackForAll";
+import FaqHome from "./page/FAQ/FaqHome";
+import AdminFaqManagement from "./page/AdminFaq/AdminFaqManagement";
+import FaqCategoryPage from "./page/FAQ/FaqCategoryPage";
+import FaqDetail from "./page/FAQ/FaqDetail";
+import SendTicket from "./page/Ticket/MyTickets";
+import MyTickets from "./page/Ticket/MyTickets";
+import TicketManagement from "./page/admin/TicketManagement";
+import TicketDetail from "./page/admin/TicketDetail";
+import AdminPolicies from "./page/policices/AdminPolicies";
+import PolicyDetailPage from "./page/policices/PolicyDetailPage";
+import TermsAndPolicies from "./page/guest/TermsAndPolicies";
+import MedicineManagement from "./page/medicine/MedicineManagement";
 
 function App() {
   const RedirectPatientId = () => {
@@ -62,6 +74,11 @@ function App() {
         {/* Payment routes */}
         <Route path="/payments/success" element={<SuccessPage />} />
         <Route path="/payments/cancel" element={<CancelPage />} />
+
+        <Route path="/faq" element={<FaqHome />} />
+        <Route path="/faq/category/:id" element={<FaqCategoryPage />} />
+        <Route path="/faq/:id" element={<FaqDetail />} />
+        <Route path="/policies" element={<TermsAndPolicies />} />
         {/* Auth routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -81,8 +98,10 @@ function App() {
           <Route path="doctors" element={<Doctors />} />
           <Route path=":id/edit" element={<PatientEdit />} />
           <Route path=":id/profile" element={<PatientProfile />} />
+
           <Route element={<PatientOnly />}>
             <Route path=":id" element={<PatientDashboard />} />
+            <Route path="ticket" element={<MyTickets />} />
             <Route path=":id/appointments" element={<AppointmentPage />} />
             <Route path=":id/book" element={<BookPage />} />
             <Route path=":id/records" element={<MedicalRecordPage />} />
@@ -128,9 +147,15 @@ function App() {
           ></Route>
           <Route path="/admin/dashboard" element={<AdminDashboard />}></Route>
           <Route path="/admin/services" element={<AdminService />}></Route>
+          <Route path="/admin/faq" element={<AdminFaqManagement />}></Route>
+          <Route path="/admin/policies" element={<AdminPolicies />}></Route>
+          <Route path="/admin/policies/:id" element={<PolicyDetailPage />} />
         </Route>
         <Route element={<RequireAuth allowedRoles={["Receptionist"]} />}>
           <Route path="/receptionist" element={<ReceptionistSideBar />}>
+            <Route path="tickets" element={<TicketManagement />} />
+            <Route path="tickets/:id" element={<TicketDetail />} />
+
             <Route path="dashboard" element={<ReceptionistDashboard />} />
             <Route path="patients" element={<ReceptionistPatient />} />
             <Route path="appointments" element={<ReceptionistAppointment />} />
@@ -142,6 +167,7 @@ function App() {
 
             <Route path="doctors" element={<ReceptionistDoctor />} />
             <Route path="news" element={<ReceptionistNews />} />
+            <Route path="medicines" element={<MedicineManagement />} />
           </Route>
         </Route>
       </Routes>
