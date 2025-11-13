@@ -23,7 +23,6 @@ import * as z from "zod";
 import { fetchMedicineById } from "@/api/medicineApi";
 import { toast } from "sonner";
 
-// ví dụ lấy id nhân viên từ localStorage/session
 const getCurrentEmployeeId = () => {
   const raw = localStorage.getItem("authUser");
   try {
@@ -33,7 +32,6 @@ const getCurrentEmployeeId = () => {
   }
 };
 
-// Schema CREATE / EDIT (giống nhau, nhưng name & unit bắt buộc)
 const schema = z.object({
   name: z.string().min(2, "Vui lòng nhập tên thuốc"),
   description: z.string().optional(),

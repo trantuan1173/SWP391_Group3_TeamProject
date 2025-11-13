@@ -49,7 +49,6 @@ export const fetchPolicyById = async (id) => {
   const res = await axios.get(API_ENDPOINTS.GET_POLICY(id), {
     headers: getAuthHeaders(),
   });
-  // backend nên trả { message, policy }
   return res.data;
 };
 

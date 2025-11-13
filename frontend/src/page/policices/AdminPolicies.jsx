@@ -237,7 +237,7 @@ export default function AdminPolicies() {
               <TableHead>Tiêu đề</TableHead>
               <TableHead>Danh mục</TableHead>
               <TableHead>Trạng thái</TableHead>
-              <TableHead>Người sửa</TableHead>
+              {/* <TableHead>Người sửa</TableHead> */}
               <TableHead>Cập nhật</TableHead>
               <TableHead className="w-[260px]">Thao tác</TableHead>
             </TableRow>
@@ -273,9 +273,9 @@ export default function AdminPolicies() {
                       {p.status === "active" ? "Hoạt động" : "Tạm ẩn"}
                     </span>
                   </TableCell>
-                  <TableCell className="text-sm">
+                  {/* <TableCell className="text-sm">
                     {p.lastEditedBy || "—"}
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell className="text-sm">
                     {p.updatedAt ? new Date(p.updatedAt).toLocaleString() : "—"}
                   </TableCell>

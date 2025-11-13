@@ -175,11 +175,7 @@ export default function PolicyFormDialog({
             )}
           </div>
 
-          <Input
-            placeholder="Người chỉnh sửa gần nhất (tuỳ chọn)"
-            value={lastEditedBy}
-            onChange={(e) => setLastEditedBy(e.target.value)}
-          />
+          <div className="text-right"></div>
         </div>
 
         <DialogFooter className="mt-6">

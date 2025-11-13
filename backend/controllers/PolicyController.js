@@ -3,9 +3,8 @@ const Policy = require("../models/Policy");
 
 const createPolicy = async (req, res) => {
   try {
-    const { title, contentHtml, contentDelta, category, status, lastEditedBy } =
-      req.body;
-
+    const { title, contentHtml, contentDelta, category, status } = req.body;
+    const lastEditedBy = req.userId;
     if (!title || !contentHtml) {
       return res.status(400).json({ error: "Tiêu đề và nội dung là bắt buộc" });
     }
@@ -131,20 +130,20 @@ const getActivePolicyByCategory = async (req, res) => {
   try {
     const { category } = req.params;
 
-    const policy = await Policy.findOne({
+    const policies = await Policy.findAll({
       where: { category, status: "active" },
       order: [["updatedAt", "DESC"]],
     });
 
-    if (!policy) {
+    if (!policies || policies.length === 0) {
       return res
         .status(404)
         .json({ error: "Không tìm thấy chính sách trong danh mục này" });
     }
 
-    res.json(policy);
+    res.json(policies);
   } catch (error) {
-    console.error("getActivePolicyByCategory error:", error);
+    console.error("getActivePoliciesByCategory error:", error);
     res.status(500).json({ error: "Không thể lấy chính sách" });
   }
 };
