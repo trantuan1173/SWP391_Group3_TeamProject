@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useNavigate, useLocation } from 'react-router-dom';
+// frontend/src/page/doctor/CreateMedicalRecord.jsx
+
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useNavigate, useLocation } from "react-router-dom";
 import DoctorLayout from "../../components/doctor/DoctorDashboard";
 import { API_ENDPOINTS } from "../../config";
 
@@ -37,7 +39,9 @@ const CreateMedicalRecord = () => {
         navigate("/login");
         return;
       }
-      const tokenParts = token.split('.');
+
+      // Decode JWT (lấy userId)
+      const tokenParts = token.split(".");
       if (tokenParts.length !== 3) {
         localStorage.removeItem("token");
         navigate("/login");
@@ -46,13 +50,11 @@ const CreateMedicalRecord = () => {
       const payload = JSON.parse(atob(tokenParts[1]));
       const userId = payload.id || payload.userId || payload.sub;
 
-      console.log("User ID:", userId);
+      // Kiểm tra role
       const response = await axios.get(
         API_ENDPOINTS.GET_EMPLOYEE_WITH_ROLE(userId),
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      
-      console.log("Doctor info:", response.data);
 
       if (!response.data.isDoctor) {
         alert("Bạn không có quyền truy cập trang này");
@@ -60,33 +62,38 @@ const CreateMedicalRecord = () => {
         return;
       }
       setDoctorInfo(response.data);
+      console.log("Doctor info:", response.data);
+
+      // Lấy danh sách bệnh nhân (theo lịch khám)
       const patientsRes = await axios.get(
         API_ENDPOINTS.GET_PATIENT_BY_DOCTOR(userId),
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      console.log("Patients response:", patientsRes.data);
-
       const patientsList = patientsRes.data.data || [];
-      console.log("Patients list:", patientsList);
-
       setPatientsWithAppointments(patientsList);
+
       if (appointmentId && patientsList.length > 0) {
         const matchedPatient = patientsList.find(
           (p) => p.appointmentId === Number(appointmentId)
         );
         if (matchedPatient) setSelectedPatient(matchedPatient);
       }
-      const servicesRes = await axios.get(
-        API_ENDPOINTS.GET_SERVICES,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+
+      // Lấy danh sách dịch vụ
+      const servicesRes = await axios.get(API_ENDPOINTS.GET_SERVICES, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setServices(servicesRes.data.data || []);
 
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      console.error("Error details:", error.response?.data);
-      setError(error.response?.data?.error || "Có lỗi xảy ra. Vui lòng thử lại!");
+      // Lấy danh sách thuốc  << thêm
+      const medsRes = await axios.get(API_ENDPOINTS.GET_MEDICINES, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      // API có thể trả { medicines } hoặc { data }
+      setMedicines(medsRes.data.medicines || medsRes.data.data || []);
+    } catch (err) {
+      console.error("Error fetching data:", err);
+      setError(err.response?.data?.error || "Có lỗi xảy ra. Vui lòng thử lại!");
     } finally {
       setLoading(false);
     }
@@ -210,6 +217,8 @@ const CreateMedicalRecord = () => {
         })),
       };
 
+      console.log("Payload:", payload);
+
       await axios.post(API_ENDPOINTS.CREATE_MEDICAL_RECORD, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -290,6 +299,7 @@ const CreateMedicalRecord = () => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* 1. Chọn bệnh nhân */}
           <div className="bg-blue-50 p-4 rounded-lg">
             <label className="block font-semibold mb-3 text-lg">
               1. Chọn bệnh nhân <span className="text-red-500">*</span>
@@ -311,8 +321,7 @@ const CreateMedicalRecord = () => {
                     const patient = patientsWithAppointments.find(
                       (p) => p.appointmentId === Number(e.target.value)
                     );
-                    console.log("Selected patient:", patient);
-                    setSelectedPatient(patient);
+                    setSelectedPatient(patient || null);
                   }}
                   required
                 >
@@ -330,24 +339,42 @@ const CreateMedicalRecord = () => {
 
                 {selectedPatient && (
                   <div className="mt-3 p-3 bg-white rounded border border-blue-200">
-                    <p className="text-sm"><strong>Họ tên:</strong> {selectedPatient.patientName}</p>
-                    <p className="text-sm"><strong>SĐT:</strong> {selectedPatient.patientPhone}</p>
-                    <p className="text-sm"><strong>CCCD:</strong> {selectedPatient.patientIdentityNumber}</p>
-                    <p className="text-sm"><strong>Email:</strong> {selectedPatient.patientEmail ? selectedPatient.patientEmail : 'N/A'}</p>
-                    <p className="text-sm"><strong>Giới tính:</strong> {selectedPatient.patientGender ? selectedPatient.patientGender : 'N/A'}</p>
-                    <p className="text-sm"><strong>Ngày sinh:</strong> {
-                      selectedPatient.patientDOB ? 
-                      new Date(selectedPatient.patientDOB).toLocaleDateString('vi-VN') : 
-                      'N/A'
-                    }</p>
-                    <p className="text-sm"><strong>Ngày khám:</strong> {selectedPatient.appointmentDate}</p>
-                    <p className="text-sm"><strong>Giờ khám:</strong> {selectedPatient.appointmentTime}</p>
+                    <p className="text-sm">
+                      <strong>Họ tên:</strong> {selectedPatient.patientName}
+                    </p>
+                    <p className="text-sm">
+                      <strong>SĐT:</strong> {selectedPatient.patientPhone}
+                    </p>
+                    <p className="text-sm">
+                      <strong>Email:</strong> {selectedPatient.patientEmail}
+                    </p>
+                    <p className="text-sm">
+                      <strong>Giới tính:</strong>{" "}
+                      {selectedPatient.patientGender}
+                    </p>
+                    <p className="text-sm">
+                      <strong>Ngày sinh:</strong>{" "}
+                      {selectedPatient.patientDOB
+                        ? new Date(
+                            selectedPatient.patientDOB
+                          ).toLocaleDateString("vi-VN")
+                        : "N/A"}
+                    </p>
+                    <p className="text-sm">
+                      <strong>Ngày khám:</strong>{" "}
+                      {selectedPatient.appointmentDate}
+                    </p>
+                    <p className="text-sm">
+                      <strong>Giờ khám:</strong>{" "}
+                      {selectedPatient.appointmentTime}
+                    </p>
                   </div>
                 )}
               </>
             )}
           </div>
 
+          {/* 2. Triệu chứng */}
           <div>
             <label className="block font-semibold mb-2 text-lg">
               2. Triệu chứng <span className="text-red-500">*</span>

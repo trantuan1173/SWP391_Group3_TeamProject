@@ -296,15 +296,21 @@ const createMedicalRecord = async (req, res) => {
 
   const t = await sequelize.transaction();
   try {
-    if (doctorId) {
-      const doc = await Employee.findByPk(doctorId);
-      if (!doc) return res.status(400).json({ error: 'Invalid doctorId' });
-    }
+    // if (doctorId) {
+    //   const doc = await Employee.findByPk(doctorId);
+    //   if (!doc) return res.status(400).json({ error: 'Invalid doctorId' });
+    // }
     const serviceIds = services.map(s => s.serviceId);
     const serviceList = await Service.findAll({
       where: { id: serviceIds },
       raw: true,
     });
+    const svcList = serviceIds.length
+      ? await Service.findAll({
+          where: { id: serviceIds },
+          transaction: t,
+        })
+      : [];
 
     const orderServiceDetails = svcList.map((svc) => {
       const input = services.find((i) => i.serviceId === svc.id);

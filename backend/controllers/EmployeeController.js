@@ -21,7 +21,7 @@ const getEmployeeWithRole = async (req, res) => {
           attributes: ["id", "name"]
         }
       ],
-      attributes: ["avatar"]
+      attributes: ["avatar", "id", "name", "email", "phoneNumber", "address", "isActive"]
     });
 
     if (!employee) {
