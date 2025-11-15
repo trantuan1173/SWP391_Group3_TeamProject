@@ -80,7 +80,7 @@ export const updateUser = async (userId, data) => {
 export const updateUserStatus = async (id, isActive) => {
   console.log("api:", id, isActive);
   const res = await axios.put(
-    `http://localhost:1118/api/admin/employees/update-status/${id}`,
+    `https://swp.gicunhco.com/api/admin/employees/update-status/${id}`,
     {
       isActive,
     }
@@ -90,7 +90,7 @@ export const updateUserStatus = async (id, isActive) => {
 
 export const updateDoctorSpeciality = async (id, speciality) => {
   const res = await axios.put(
-    `http://localhost:1118/api/admin/employees/update-speciality/${id}`,
+    `https://swp.gicunhco.com/api/admin/employees/update-speciality/${id}`,
     {
       speciality,
     },

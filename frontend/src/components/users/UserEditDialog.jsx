@@ -100,7 +100,7 @@ export default function UserEditDialog({ open, setOpen, user, onSubmit }) {
       if (user.avatar) {
         const previewUrl = user.avatar.startsWith("http")
           ? user.avatar
-          : `http://localhost:1118${user.avatar}`;
+          : `https://swp.gicunhco.com${user.avatar}`;
         setPreview(previewUrl);
       } else {
         setPreview(null);
@@ -185,7 +185,7 @@ export default function UserEditDialog({ open, setOpen, user, onSubmit }) {
                           setPreview(
                             user.avatar.startsWith("http")
                               ? user.avatar
-                              : `http://localhost:1118${user.avatar}`
+                              : `https://swp.gicunhco.com${user.avatar}`
                           );
                         } else {
                           setPreview(null);

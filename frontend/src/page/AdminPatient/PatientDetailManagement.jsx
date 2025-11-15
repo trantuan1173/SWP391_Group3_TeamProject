@@ -45,7 +45,7 @@ export default function PatientDetailManagement() {
           <Card className="col-span-1 flex flex-col items-center p-6">
             <Avatar className="w-40 h-40">
               <AvatarImage
-                src={`http://localhost:1118${patient.avatar || ""}`}
+                src={`https://swp.gicunhco.com${patient.avatar || ""}`}
                 alt={patient.name}
               />
               <AvatarFallback>

@@ -102,7 +102,7 @@ const DoctorSchedule = () => {
       }
 
       const response = await axios.get(
-        `http://localhost:1118/api/employees/${userId}/with-role`,
+        `https://swp.gicunhco.com/api/employees/${userId}/with-role`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -133,7 +133,7 @@ const DoctorSchedule = () => {
   const fetchSchedules = async (doctorId, token) => {
     try {
       const response = await axios.get(
-        `http://localhost:1118/api/doctor-schedules/${doctorId}`,
+        `https://swp.gicunhco.com/api/doctor-schedules/${doctorId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`

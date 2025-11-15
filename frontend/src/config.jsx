@@ -1,5 +1,5 @@
 // API Configuration
-const baseUrl = "http://localhost:1118";
+const baseUrl = "https://swp.gicunhco.com";
 
 export const API_ENDPOINTS = {
   //Đây là ví dụ khai báo url để import vào các component

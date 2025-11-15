@@ -58,7 +58,7 @@ export default function UserDetailManagement() {
           <Card className="col-span-1 flex flex-col items-center p-6">
             <Avatar className="w-40 h-40">
               <AvatarImage
-                src={`http://localhost:1118${user.avatar}`}
+                src={`https://swp.gicunhco.com${user.avatar}`}
                 alt={user.name}
               />
               <AvatarFallback>

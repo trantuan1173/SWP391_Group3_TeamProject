@@ -297,7 +297,7 @@ export default function UserManagement() {
                 <TableCell>
                   <Avatar className="h-10 w-10 rounded-2xl">
                     <AvatarImage
-                      src={`http://localhost:1118${user.avatar}`}
+                      src={`https://swp.gicunhco.com${user.avatar}`}
                       alt={user.name}
                     />
                     <AvatarFallback>
