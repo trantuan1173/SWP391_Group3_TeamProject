@@ -44,7 +44,7 @@ export const deletePatient = async (id) => {
 
 export const updatePatientStatus = async (id, isActive) => {
   const res = await axios.put(
-    `http://localhost:1118/api/admin/patients/update-status/${id}`,
+    `https://swp.gicunhco.com/api/admin/patients/update-status/${id}`,
     { isActive },
     {
       headers: {

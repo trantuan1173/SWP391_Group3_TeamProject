@@ -61,7 +61,7 @@ const navigationItems = [
     icon: FlaskConical,
   },
   {
-    title: "Policies",
+    title: "Chính sách",
     url: "/admin/policies",
     icon: FileCheckIcon,
   },

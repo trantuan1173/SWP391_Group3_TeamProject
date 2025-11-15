@@ -10,7 +10,7 @@ import axios from "axios";
 
 // 👉 TẠO axios instance, tự gắn Authorization từ localStorage
 const api = axios.create({
-  baseURL: "http://localhost:1118/api",
+  baseURL: "https://swp.gicunhco.com/api",
 });
 
 api.interceptors.request.use((config) => {
@@ -144,7 +144,7 @@ export default function AdminProfile() {
                   src={
                     user.avatar.startsWith("http")
                       ? user.avatar
-                      : `http://localhost:1118${user.avatar}`
+                      : `https://swp.gicunhco.com${user.avatar}`
                   }
                   alt={user.name}
                   className="w-full h-full object-cover"

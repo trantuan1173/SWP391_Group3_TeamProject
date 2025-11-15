@@ -215,7 +215,7 @@ router.get("/roles/:id", getRoleById);
  *       500:
  *         description: Failed to get employees
  */
-router.get("/employees", getEmployees);
+router.get("/employees", protect, getEmployees);
 router.delete("/employees/:id", deleteEmployee);
 router.put("/employees/update-status/:id", updateActiveStatus);
 router.get("/employees/:id", getEmployeeById);

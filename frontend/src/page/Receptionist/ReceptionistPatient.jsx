@@ -5,7 +5,7 @@ import dayjs from "dayjs";
 import { FaSearch, FaUser, FaHistory, FaExpandAlt } from "react-icons/fa";
 
 const API_ENDPOINTS = {
-  SEARCH_PATIENTS: "http://localhost:1118/api/medical-records/search",
+  SEARCH_PATIENTS: "https://swp.gicunhco.com/api/medical-records/search",
 };
 
 

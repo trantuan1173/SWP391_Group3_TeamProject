@@ -19,7 +19,7 @@ export default function Doctors() {
         // Accept both absolute and port-prefixed forms. Normalize to a usable URL.
         let url = API_ENDPOINTS.DOCTOR_LIST || "/api/doctors";
         if (url.startsWith(":")) {
-          url = `http://localhost${url}`; // ":1118/api/doctors" -> "http://localhost:1118/api/doctors"
+          url = `http://localhost${url}`; // ":1118/api/doctors" -> "https://swp.gicunhco.com/api/doctors"
         }
   // If axios instance has a baseURL, prefer relative paths; otherwise pass absolute URL.
   const absolute = /^https?:\/\//i.test(url);

@@ -4,7 +4,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:1118/api",
+  baseURL: "https://swp.gicunhco.com/api",
 });
 
 api.interceptors.request.use((config) => {
@@ -173,8 +173,8 @@ export default function Header() {
                   <AvatarImage
                     src={
                       user?.avatar
-                        ? `http://localhost:1118${user.avatar}`.replace(
-                            "http://localhost:1118http",
+                        ? `https://swp.gicunhco.com${user.avatar}`.replace(
+                            "https://swp.gicunhco.comhttp",
                             "http"
                           )
                         : `https:

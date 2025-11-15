@@ -288,7 +288,7 @@ export default function ReceptionistAppointmentDetail() {
       const token = localStorage.getItem("token");
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const res = await axios.post(
-        "http://localhost:1118/api/payments",
+        "https://swp.gicunhco.com/api/payments",
         {
           appointmentId: appointment.id,
           patientId: appointment.PatientId || appointment.patientId,

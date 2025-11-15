@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-
+const { protect, authorize } = require("../middleware/authMiddleware");
 const {
   createPolicy,
   getPolicies,
@@ -10,7 +10,7 @@ const {
   getActivePolicyByCategory,
 } = require("../controllers/PolicyController");
 
-router.post("/", createPolicy);
+router.post("/", protect, createPolicy);
 router.get("/", getPolicies);
 router.get("/:id", getPolicyById);
 router.put("/:id", updatePolicy);

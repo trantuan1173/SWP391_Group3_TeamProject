@@ -28,7 +28,7 @@ export default function PatientInfo({ patient, onUpdate }) {
           <img
             src={
               patient.avatar
-                ? `http://localhost:1118/uploads/avatars/${patient.avatar.replace(
+                ? `https://swp.gicunhco.com/uploads/avatars/${patient.avatar.replace(
                     "/uploads/avatars/",
                     ""
                   )}`

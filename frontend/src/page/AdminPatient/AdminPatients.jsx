@@ -183,7 +183,7 @@ export default function AdminPatients() {
                   <TableCell>
                     <Avatar className="h-10 w-10 rounded-2xl">
                       <AvatarImage
-                        src={`http://localhost:1118${p.avatar || ""}`}
+                        src={`https://swp.gicunhco.com${p.avatar || ""}`}
                         alt={p.name}
                       />
                       <AvatarFallback>

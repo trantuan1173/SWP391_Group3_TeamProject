@@ -274,7 +274,7 @@ export default function AdminPolicies() {
                     </span>
                   </TableCell>
                   <TableCell className="text-sm">
-                    {p.lastEditedBy || "—"}
+                    {p.lastEditor?.name || "—"}
                   </TableCell>
                   <TableCell className="text-sm">
                     {p.updatedAt ? new Date(p.updatedAt).toLocaleString() : "—"}
