@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import DoctorLayout from "../../components/doctor/DoctorDashboard";
 import dayjs from 'dayjs';
+import { API_ENDPOINTS } from '@/config';
 
 
 const DoctorSchedule = () => {
@@ -51,9 +52,9 @@ const DoctorSchedule = () => {
     
     while (date.getFullYear() === year) {
       const startOfWeek = new Date(date);
-      startOfWeek.setDate(date.getDate() - date.getDay() +1); //t2
+      startOfWeek.setDate(date.getDate() - date.getDay() ); //cn
       const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 6);//cn
+      endOfWeek.setDate(startOfWeek.getDate() + 5);//t7
       if (startOfWeek.getFullYear() === year || endOfWeek.getFullYear() === year) {
         weeks.push({
           weekNum,
@@ -101,8 +102,7 @@ const DoctorSchedule = () => {
         return;
       }
 
-      const response = await axios.get(
-        `https://swp.gicunhco.com/api/employees/${userId}/with-role`,
+      const response = await axios.get(	API_ENDPOINTS.GET_EMPLOYEE_WITH_ROLE(userId),
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -132,8 +132,7 @@ const DoctorSchedule = () => {
 
   const fetchSchedules = async (doctorId, token) => {
     try {
-      const response = await axios.get(
-        `https://swp.gicunhco.com/api/doctor-schedules/${doctorId}`,
+      const response = await axios.get( API_ENDPOINTS.GET_DOCTOR_SCHEDULE(doctorId),
         {
           headers: {
             Authorization: `Bearer ${token}`

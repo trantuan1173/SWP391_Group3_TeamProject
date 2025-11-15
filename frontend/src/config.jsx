@@ -15,8 +15,8 @@ export const API_ENDPOINTS = {
   FORGOT_PASSWORD: `${baseUrl}/api/patients/forgot-password`,
   RESET_PASSWORD: `${baseUrl}/api/patients/reset-password`,
   DOCTOR_LIST: `${baseUrl}/api/doctors`,
-  GET_DOCTOR_SCHEDULE: (doctorId) =>
-    `${baseUrl}/api/doctors/${doctorId}/schedule`,
+  // GET_DOCTOR_SCHEDULE: (doctorId) =>
+  //   `${baseUrl}/api/doctors/${doctorId}/schedule`,
   SPECIALITY_LIST: `${baseUrl}/api/doctors/specialties`,
   USER_LIST: `${baseUrl}/api/users`,
   GET_ALL_USERS: `${baseUrl}/api/admin/employees`,
@@ -62,7 +62,7 @@ export const API_ENDPOINTS = {
   //GET_ALL_PATIENTS: `${baseUrl}/api/medical-records/patients`,
 
   //GET_MEDICAL_RECORDS_BY_PATIENT: (patientId) => `${baseUrl}/api/medical-records/patient/${patientId}`,
-
+  GET_DOCTOR_SCHEDULE: (doctorId) => `${baseUrl}/api/doctor-schedules/${doctorId}`,
   GET_PATIENTS_BY_DOCTOR: (doctorId) =>
     `${baseUrl}/api/medical-records/doctor/${doctorId}/patients`,
   GET_PATIENT_BY_DOCTOR: (doctorId) =>

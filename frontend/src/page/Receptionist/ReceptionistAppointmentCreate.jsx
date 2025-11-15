@@ -272,13 +272,14 @@ export default function ReceptionistAppointmentCreate() {
         />
           <FormSelect
             label="Giới tính"
-            value={form.gender || ""}
+            value={form.gender || "N/A"}
             onChange={e => setForm(f => ({ ...f, gender: e.target.value || null }))}
             disabled={isDisabled}
           >
           <option value="">-- Chọn giới tính --</option>
           <option value="male">Nam</option>
           <option value="female">Nữ</option>
+          <option value="N/A">N/A</option>
         </FormSelect>
         <FormSelect
           label="Bác sĩ"
