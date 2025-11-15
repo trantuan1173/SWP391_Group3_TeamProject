@@ -12,6 +12,11 @@ export default function BookMedicalExam() {
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [message, setMessage] = useState('');
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, "0");
+  const dd = String(today.getDate()).padStart(2, "0");
+  const localToday = `${yyyy}-${mm}-${dd}`;
 
   const payload = {
     name,
@@ -23,12 +28,12 @@ export default function BookMedicalExam() {
   };
 
   function isValidCCCD(value) {
-  return /^\d{12}$/.test(value);
-}
+    return /^\d{12}$/.test(value);
+  }
 
-function isValidPhoneNumber(value) {
-  return /^\d{10}$/.test(value);
-}
+  function isValidPhoneNumber(value) {
+    return /^\d{10}$/.test(value);
+  }
 
 
   const handleSubmit = async (e) => {
@@ -36,17 +41,27 @@ function isValidPhoneNumber(value) {
     if (!name || !identityNumber || !phoneNumber || !date || !startTime) {
       setMessage("Vui lòng điền đầy đủ thông tin bắt buộc.");
       return;
-      
-    
     }
-  if (!isValidCCCD(identityNumber)) {
-    setMessage("CCCD phải gồm đúng 12 số.");
-    return;
-  }
-  if (!isValidPhoneNumber(phoneNumber)) {
-    setMessage("Số điện thoại phải gồm đúng 10 số.");
-    return;
-  }
+    if (!isValidCCCD(identityNumber)) {
+      setMessage("CCCD phải gồm đúng 12 số.");
+      return;
+    }
+    if (!isValidPhoneNumber(phoneNumber)) {
+      setMessage("Số điện thoại phải gồm đúng 10 số.");
+      return;
+    }
+
+    // JS validation for startTime
+    if (startTime < "07:00" || startTime > "17:00") {
+      setMessage("Giờ khám phải từ 07:00 đến 17:00.");
+      return;
+    }
+    const [hour, minute] = startTime.split(":");
+    if (minute !== "00" && minute !== "30") {
+      setMessage("Giờ khám phải là 00 hoặc 30 phút.");
+      return;
+    }
+
     try {
       const response = await axios.post(API_ENDPOINTS.CREATE_APPOINTMENT_WITHOUT_LOGIN, payload);
       if (!response.data) {
@@ -68,7 +83,7 @@ function isValidPhoneNumber(value) {
         <h1 className="text-center text-2xl md:text-[40px] font-bold mb-8">
           ĐĂNG KÍ KHÁM BỆNH
         </h1>
-  
+
         <div className="max-w-6xl mx-auto rounded-xl bg-[#f6fff4] p-6 md:p-8 mt-[30px]">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
             <form
@@ -85,6 +100,7 @@ function isValidPhoneNumber(value) {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  required
                 />
               </div>
               <div>
@@ -97,6 +113,7 @@ function isValidPhoneNumber(value) {
                   type="text"
                   value={identityNumber}
                   onChange={(e) => setIdentityNumber(e.target.value)}
+                  required
                 />
               </div>
               <div>
@@ -109,9 +126,16 @@ function isValidPhoneNumber(value) {
                   type="text"
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
+                  required
                 />
               </div>
-              
+              <button
+                type="submit"
+                className="w-full md:w-[60%] mx-auto bg-green-900 text-white font-bold py-3 rounded-[999px] text-base hover:bg-green-800 transition mt-4"
+                style={{ borderRadius: "10px" }}
+              >
+                ĐĂNG KÍ KHÁM BỆNH
+              </button>
             </form>
             <div className="md:col-span-5 flex flex-col items-center">
               <div className="w-full bg-[#ede9fe] rounded-2xl p-6">
@@ -130,7 +154,7 @@ function isValidPhoneNumber(value) {
                     <path d="M16 2v4M8 2v4M3 10h18" />
                   </svg>
                 </div>
-  
+
                 <div className="flex flex-col gap-4">
                   <div>
                     <label className="block text-gray-700 text-base mb-1">
@@ -138,9 +162,11 @@ function isValidPhoneNumber(value) {
                     </label>
                     <input
                       type="date"
+                      min={localToday}
                       className="w-full border-2 border-purple-400 rounded-lg px-4 py-2 text-lg focus:outline-none"
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
+                      required
                     />
                   </div>
                   <div>
@@ -149,9 +175,13 @@ function isValidPhoneNumber(value) {
                     </label>
                     <input
                       type="time"
+                      min="07:00"
+                      max="17:00"
+                      step="1800"
                       className="w-full border-2 border-purple-400 rounded-lg px-4 py-2 text-lg focus:outline-none"
                       value={startTime}
                       onChange={(e) => setStartTime(e.target.value)}
+                      required
                     />
                   </div>
                 </div>
@@ -159,16 +189,8 @@ function isValidPhoneNumber(value) {
             </div>
           </div>
           <p className="text-center text-red-500 text-sm mt-[25px]">
-                {message}
-              </p>
-              <button
-                type="submit"
-                onClick={handleSubmit}
-                className="w-full md:w-[60%] mx-auto bg-green-900 text-white font-bold py-3 rounded-[999px] text-base hover:bg-green-800 transition mt-4"
-                style={{ borderRadius: "10px" }}
-              >
-                ĐĂNG KÍ KHÁM BỆNH
-              </button>
+            {message}
+          </p>
           <p className="text-center text-gray-600 text-sm mt-[25px]">
             *Vui lòng đăng kí lịch khám mong muốn và điền chính xác thông tin, chúng tôi sẽ kiểm tra và liên hệ để xác nhận với quý khách
           </p>
@@ -176,6 +198,6 @@ function isValidPhoneNumber(value) {
       </div>
       <Footer />
     </>
-    
+
   );
 }

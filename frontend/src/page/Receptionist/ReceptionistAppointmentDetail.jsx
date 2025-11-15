@@ -42,6 +42,8 @@ export default function ReceptionistAppointmentDetail() {
   const [selectedRoomId, setSelectedRoomId] = useState("");
   const [fetchingAvailability, setFetchingAvailability] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [shouldFetchAvailability, setShouldFetchAvailability] = useState(false);
 
   const a = appointment;
 
@@ -131,10 +133,8 @@ export default function ReceptionistAppointmentDetail() {
         doctorRes.data.suggestedSlots?.length > 0
       ) {
         toast(
-          `Không có bác sĩ khả dụng trong ${
-            selectedSpeciality || "chuyên khoa này"
-          } vào khung giờ ${newStartTime}-${newEndTime}. Đã tìm thấy ${
-            doctorRes.data.suggestedSlots.length
+          `Không có bác sĩ khả dụng trong ${selectedSpeciality || "chuyên khoa này"
+          } vào khung giờ ${newStartTime}-${newEndTime}. Đã tìm thấy ${doctorRes.data.suggestedSlots.length
           } gợi ý.`,
           { icon: "💡" }
         );
@@ -157,10 +157,11 @@ export default function ReceptionistAppointmentDetail() {
   };
 
   useEffect(() => {
-    if (!loading && newDate && newStartTime) {
-      fetchAvailability();
-    }
-  }, [selectedSpeciality, newDate, newStartTime, loading]);
+    if (!loading && newDate && newStartTime && shouldFetchAvailability) {
+    fetchAvailability();
+    setShouldFetchAvailability(false);
+  }
+}, [selectedSpeciality, newDate, newStartTime, loading, shouldFetchAvailability]);
 
   const handleUpdate = async () => {
     if (
@@ -333,11 +334,10 @@ export default function ReceptionistAppointmentDetail() {
             <td>${i + 1}</td>
             <td>
               ${m.name}
-              ${
-                m.instructions
-                  ? `<div style="font-size:11px;color:#6b7280">HD: ${m.instructions}</div>`
-                  : ""
-              }
+              ${m.instructions
+            ? `<div style="font-size:11px;color:#6b7280">HD: ${m.instructions}</div>`
+            : ""
+          }
             </td>
             <td>${m.dose || "-"}</td>
             <td>${m.frequency || "-"}</td>
@@ -366,20 +366,18 @@ export default function ReceptionistAppointmentDetail() {
       <div class="info">
         <p><strong>Mã Lịch Hẹn:</strong> ${appointment.id}</p>
         <p><strong>Ngày Thanh Toán:</strong> ${dayjs().format(
-          "DD/MM/YYYY HH:mm"
-        )}</p>
+      "DD/MM/YYYY HH:mm"
+    )}</p>
         <p><strong>Bệnh Nhân:</strong> ${appointment.Patient?.name || "N/A"}</p>
-        <p><strong>Bác Sĩ Khám:</strong> ${
-          appointment.Employee?.name || "N/A"
-        }</p>
-        <p><strong>Liên hệ Bác Sĩ:</strong> ${
-          (appointment.Employee?.email
-            ? "Email: " + appointment.Employee.email
-            : "") +
-            (appointment.Employee?.phoneNumber
-              ? " — SDT: " + appointment.Employee.phoneNumber
-              : "") || "N/A"
-        }</p>
+        <p><strong>Bác Sĩ Khám:</strong> ${appointment.Employee?.name || "N/A"
+      }</p>
+        <p><strong>Liên hệ Bác Sĩ:</strong> ${(appointment.Employee?.email
+        ? "Email: " + appointment.Employee.email
+        : "") +
+      (appointment.Employee?.phoneNumber
+        ? " — SDT: " + appointment.Employee.phoneNumber
+        : "") || "N/A"
+      }</p>
       </div>
 
       <h2>Chi tiết Dịch vụ</h2>
@@ -389,9 +387,8 @@ export default function ReceptionistAppointmentDetail() {
             <th>STT</th><th>Tên Dịch vụ</th><th>SL</th><th>Đơn giá</th><th>Thành tiền</th>
           </tr>
         </thead>
-        <tbody>${
-          servicesRows || `<tr><td colspan="5">Không có dịch vụ</td></tr>`
-        }</tbody>
+        <tbody>${servicesRows || `<tr><td colspan="5">Không có dịch vụ</td></tr>`
+      }</tbody>
       </table>
 
       <h2>Thuốc đã kê</h2>
@@ -402,9 +399,8 @@ export default function ReceptionistAppointmentDetail() {
             <th>Đường dùng</th><th>SL</th><th>Đơn giá</th><th>Thành tiền</th>
           </tr>
         </thead>
-        <tbody>${
-          medicineRows || `<tr><td colspan="9">Không có thuốc</td></tr>`
-        }</tbody>
+        <tbody>${medicineRows || `<tr><td colspan="9">Không có thuốc</td></tr>`
+      }</tbody>
       </table>
 
       <div class="total">Tổng cộng: ${new Intl.NumberFormat("vi-VN").format(
@@ -420,10 +416,17 @@ export default function ReceptionistAppointmentDetail() {
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-md">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-gray-700">
-          Chi tiết lịch hẹn
-        </h1>
+      <h1 className="text-2xl font-semibold text-gray-700">
+        Chi tiết lịch hẹn
+      </h1>
+      <div className="flex gap-3">
+        <button
+          onClick={() => setIsEditing(!isEditing)}
+          className={`px-4 py-2 text-sm font-semibold rounded-md transition-colors ${isEditing ? "bg-red-500 hover:bg-red-600 text-white" : "bg-yellow-500 hover:bg-yellow-600 text-white"
+            }`}
+        >
+          {isEditing ? "Hủy Chỉnh sửa" : "📝 Chỉnh sửa Lịch hẹn"}
+        </button>
         <button
           onClick={() => navigate(-1)}
           className="px-4 py-2 text-sm bg-gray-200 hover:bg-gray-300 rounded-md"
@@ -473,9 +476,8 @@ export default function ReceptionistAppointmentDetail() {
             <p>
               <strong>Trạng thái:</strong>{" "}
               <span
-                className={`font-medium text-${
-                  a.status === "confirmed" ? "blue" : "yellow"
-                }-600`}
+                className={`font-medium text-${a.status === "confirmed" ? "blue" : "yellow"
+                  }-600`}
               >
                 {a.status}
               </span>
@@ -568,15 +570,15 @@ export default function ReceptionistAppointmentDetail() {
                         <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
                           {service.price
                             ? new Intl.NumberFormat("vi-VN").format(
-                                service.price
-                              ) + " VND"
+                              service.price
+                            ) + " VND"
                             : "N/A"}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap text-sm font-semibold text-gray-700">
                           {service.total
                             ? new Intl.NumberFormat("vi-VN").format(
-                                service.total
-                              ) + " VND"
+                              service.total
+                            ) + " VND"
                             : "N/A"}
                         </td>
                       </tr>
@@ -720,11 +722,10 @@ export default function ReceptionistAppointmentDetail() {
                   <button
                     onClick={() => handlePayment(a)}
                     disabled={newStatus === "completed" || isUpdating}
-                    className={`flex-1 px-4 py-2 text-white font-semibold rounded-md transition-colors ${
-                      newStatus === "completed" || isUpdating
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-green-600 hover:bg-green-700"
-                    }`}
+                    className={`flex-1 px-4 py-2 text-white font-semibold rounded-md transition-colors ${newStatus === "completed" || isUpdating
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-green-600 hover:bg-green-700"
+                      }`}
                   >
                     {isUpdating ? "Đang xử lý..." : "Thanh toán PayOS"}
                   </button>
@@ -749,194 +750,195 @@ export default function ReceptionistAppointmentDetail() {
           )}
 
         {/* CẬP NHẬT CHUNG */}
-        <div className="border border-blue-400 rounded-lg p-4 bg-blue-50 md:col-span-2">
-          <h2 className="text-lg font-bold mb-4 text-blue-800">
-            Cập nhật Lịch hẹn
-          </h2>
+        {isEditing && ( // <--- THÊM ĐIỀU KIỆN RENDER NÀY
+          <div className="border border-blue-400 rounded-lg p-4 bg-blue-50 md:col-span-2">
+            <h2 className="text-lg font-bold mb-4 text-blue-800">
+              Cập nhật Lịch hẹn
+            </h2>
 
-          <div className="grid grid-cols-3 gap-4 mb-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Ngày:
-              </label>
-              <input
-                type="date"
-                value={newDate}
-                onChange={(e) => setNewDate(e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-              />
+            <div className="grid grid-cols-3 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Ngày:
+                </label>
+                <input
+                  type="date"
+                  value={newDate}
+                  onChange={(e) => setNewDate(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Bắt đầu (HH:MM):
+                </label>
+                <input
+                  type="time"
+                  value={newStartTime}
+                  onChange={handleStartTimeChange}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Kết thúc (1 giờ sau):
+                </label>
+                <input
+                  type="time"
+                  value={newEndTime}
+                  readOnly
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-200 cursor-not-allowed"
+                />
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Bắt đầu (HH:MM):
-              </label>
-              <input
-                type="time"
-                value={newStartTime}
-                onChange={handleStartTimeChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Kết thúc (1 giờ sau):
-              </label>
-              <input
-                type="time"
-                value={newEndTime}
-                readOnly
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-200 cursor-not-allowed"
-              />
-            </div>
-          </div>
 
-          <div className="form-group">
-            <label>Trạng thái</label>
-            <select
-              value={newStatus}
-              onChange={handleStatusChange}
-              className={`form-control ${error ? "border-red-500" : ""}`}
-            >
-              <option value="">--Chọn trạng thái--</option>
-              <option value="pending">Pending</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="to-payment">To Payment</option>
-              <option value="completed">Completed</option>
-            </select>
-            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Lọc Bác sĩ theo Chuyên khoa:
-            </label>
-            <select
-              value={selectedSpeciality}
-              onChange={(e) => setSelectedSpeciality(e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-              disabled={fetchingAvailability || isUpdating}
-            >
-              <option value="">-- Tất cả Chuyên khoa --</option>
-              {SPECIALTIES.map((sp) => (
-                <option key={sp} value={sp}>
-                  {sp}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Chọn Bác sĩ Khả dụng:
-            </label>
-            <div className="flex gap-2 items-center">
+            <div className="form-group">
+              <label>Trạng thái</label>
               <select
-                value={selectedDoctorId}
-                onChange={(e) => setSelectedDoctorId(parseInt(e.target.value))}
+                value={newStatus}
+                onChange={handleStatusChange}
+                className={`form-control ${error ? "border-red-500" : ""}`}
+              >
+                <option value="">--Chọn trạng thái--</option>
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="to-payment">To Payment</option>
+                <option value="completed">Completed</option>
+              </select>
+              {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Lọc Bác sĩ theo Chuyên khoa:
+              </label>
+              <select
+                value={selectedSpeciality}
+                onChange={(e) => setSelectedSpeciality(e.target.value)}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                 disabled={fetchingAvailability || isUpdating}
               >
-                <option value="">-- Chọn Bác sĩ --</option>
-                {availableDoctors.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name} ({d.speciality || "Chưa rõ"})
+                <option value="">-- Tất cả Chuyên khoa --</option>
+                {SPECIALTIES.map((sp) => (
+                  <option key={sp} value={sp}>
+                    {sp}
                   </option>
                 ))}
               </select>
-              <button
-                onClick={fetchAvailability}
-                disabled={fetchingAvailability || isUpdating}
-                className={`px-4 py-2 text-sm rounded-md transition-colors ${
-                  fetchingAvailability
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Chọn Bác sĩ Khả dụng:
+              </label>
+              <div className="flex gap-2 items-center">
+                <select
+                  value={selectedDoctorId}
+                  onChange={(e) => setSelectedDoctorId(parseInt(e.target.value))}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                  disabled={fetchingAvailability || isUpdating}
+                >
+                  <option value="">-- Chọn Bác sĩ --</option>
+                  {availableDoctors.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.name} ({d.speciality || "Chưa rõ"})
+                    </option>
+                  ))}
+                </select>
+                <button
+                  onClick={fetchAvailability}
+                  disabled={fetchingAvailability || isUpdating}
+                  className={`px-4 py-2 text-sm rounded-md transition-colors ${fetchingAvailability
                     ? "bg-gray-400"
                     : "bg-indigo-600 hover:bg-indigo-700 text-white"
-                }`}
-              >
-                {fetchingAvailability ? "Đang tải..." : "Tải lại DS"}
-              </button>
+                    }`}
+                >
+                  {fetchingAvailability ? "Đang tải..." : "Tải lại DS"}
+                </button>
+              </div>
+              {availableDoctors.length === 0 &&
+                !fetchingAvailability &&
+                suggestedSlots.length === 0 && (
+                  <p className="text-red-500 text-xs mt-1">
+                    Không tìm thấy bác sĩ khả dụng vào khung giờ này.
+                  </p>
+                )}
             </div>
-            {availableDoctors.length === 0 &&
-              !fetchingAvailability &&
-              suggestedSlots.length === 0 && (
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Chọn Phòng khám Khả dụng:
+              </label>
+              <select
+                value={selectedRoomId}
+                onChange={(e) => setSelectedRoomId(parseInt(e.target.value))}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                disabled={fetchingAvailability || isUpdating}
+              >
+                <option value="">-- Chọn Phòng khám --</option>
+                {availableRooms.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.name} ({r.type})
+                  </option>
+                ))}
+              </select>
+              {availableRooms.length === 0 && !fetchingAvailability && (
                 <p className="text-red-500 text-xs mt-1">
-                  Không tìm thấy bác sĩ khả dụng vào khung giờ này.
+                  Không tìm thấy phòng khả dụng nào.
                 </p>
               )}
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Chọn Phòng khám Khả dụng:
-            </label>
-            <select
-              value={selectedRoomId}
-              onChange={(e) => setSelectedRoomId(parseInt(e.target.value))}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
-              disabled={fetchingAvailability || isUpdating}
-            >
-              <option value="">-- Chọn Phòng khám --</option>
-              {availableRooms.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.name} ({r.type})
-                </option>
-              ))}
-            </select>
-            {availableRooms.length === 0 && !fetchingAvailability && (
-              <p className="text-red-500 text-xs mt-1">
-                Không tìm thấy phòng khả dụng nào.
-              </p>
-            )}
-          </div>
-
-          {availableDoctors.length === 0 && suggestedSlots.length > 0 && (
-            <div className="mt-4 p-3 border border-red-300 bg-red-50 rounded-md">
-              <h3 className="text-md font-bold text-red-800 mb-2">
-                ⚠ Gợi ý Thời gian Khác:
-              </h3>
-              <ul className="list-disc list-inside text-sm text-red-700 space-y-1">
-                {suggestedSlots.map((slot, index) => (
-                  <li key={index}>
-                    <strong>{slot.date}</strong> lúc{" "}
-                    <strong>
-                      {slot.startTime} - {slot.endTime}
-                    </strong>
-                    : ({slot.availableDoctorsCount} bác sĩ khả dụng)
-                  </li>
-                ))}
-              </ul>
-              <p className="text-red-800 text-xs mt-2 font-semibold">
-                Bạn có thể nhập Ngày và Thời gian gợi ý vào các ô trên để kiểm
-                tra và Cập nhật.
-              </p>
             </div>
-          )}
 
-          <button
-            onClick={handleUpdate}
-            disabled={
-              !selectedDoctorId ||
-              !selectedRoomId ||
-              isUpdating ||
-              fetchingAvailability
-            }
-            className={`w-full mt-4 px-4 py-2 text-white font-semibold rounded-md transition-colors ${
-              !selectedDoctorId ||
-              !selectedRoomId ||
-              isUpdating ||
-              fetchingAvailability
+            {availableDoctors.length === 0 && suggestedSlots.length > 0 && (
+              <div className="mt-4 p-3 border border-red-300 bg-red-50 rounded-md">
+                <h3 className="text-md font-bold text-red-800 mb-2">
+                  ⚠ Gợi ý Thời gian Khác:
+                </h3>
+                <ul className="list-disc list-inside text-sm text-red-700 space-y-1">
+                  {suggestedSlots.map((slot, index) => (
+                    <li key={index}>
+                      <strong>{slot.date}</strong> lúc{" "}
+                      <strong>
+                        {slot.startTime} - {slot.endTime}
+                      </strong>
+                      : ({slot.availableDoctorsCount} bác sĩ khả dụng)
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-red-800 text-xs mt-2 font-semibold">
+                  Bạn có thể nhập Ngày và Thời gian gợi ý vào các ô trên để kiểm
+                  tra và Cập nhật.
+                </p>
+              </div>
+            )}
+
+            <button
+              onClick={handleUpdate}
+              disabled={
+                !selectedDoctorId ||
+                !selectedRoomId ||
+                isUpdating ||
+                fetchingAvailability
+              }
+              className={`w-full mt-4 px-4 py-2 text-white font-semibold rounded-md transition-colors ${!selectedDoctorId ||
+                !selectedRoomId ||
+                isUpdating ||
+                fetchingAvailability
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-blue-600 hover:bg-blue-700"
-            }`}
-          >
-            {isUpdating ? "Đang cập nhật..." : "Lưu Thay Đổi (UPDATE)"}
-          </button>
-        </div>
+                }`}
+            >
+              {isUpdating ? "Đang cập nhật..." : "Lưu Thay Đổi (UPDATE)"}
+            </button>
+          </div>
+
+        )}
 
         <div className="border rounded-lg p-4 bg-gray-50 md:col-span-3">
           <h2 className="text-lg font-semibold mb-3 text-gray-700">Ghi chú</h2>
           <p>{a.notes || "Không có ghi chú."}</p>
         </div>
       </div>
-    </div>
+    </div >
   );
 }

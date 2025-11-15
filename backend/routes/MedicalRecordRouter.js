@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { getAllMedicalRecordByPatientId, getAllMedicalRecordByAppointmentId, getMedicalRecordById, createMedicalRecord, updateMedicalRecord, deleteMedicalRecord,getMedicalRecordsByDoctor,getPatientsByDoctorV ,getPatientsByDoctor , getAllPatients, searchMedicalRecord } = require("../controllers/MedicalRecordController");
+const { getAllMedicalRecordByPatientId, getAllMedicalRecordByAppointmentId, getMedicalRecordById, createMedicalRecord, updateMedicalRecord, deleteMedicalRecord,getMedicalRecordsByDoctor,getPatientsByDoctorV ,getPatientsByDoctor , getAllPatients, searchMedicalRecord, getAllMedicalRecordsByPatient } = require("../controllers/MedicalRecordController");
 const { protect, authorize } = require("../middleware/authMiddleware");
 
 /**
@@ -88,6 +88,8 @@ router.get("/search", searchMedicalRecord);
  *         description: Failed to get medical records
  */
 router.get("/patient/:patientId", getAllMedicalRecordByPatientId);
+
+router.get("/patient-records/:id", getAllMedicalRecordsByPatient);
 
 /**
  * @swagger

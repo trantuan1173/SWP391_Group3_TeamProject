@@ -2,6 +2,18 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { API_ENDPOINTS } from "../../config";
 import { useNavigate } from "react-router-dom";
+import dayjs from "dayjs";
+
+const SPECIALTIES = [
+  "Nội khoa",
+  "Ngoại khoa",
+  "Sản - Nhi",
+  "Da liễu - Thẩm mỹ",
+  "Tâm lý - Tâm thần",
+  "Phục hồi chức năng",
+  "Y học cổ truyền",
+];
+
 
 function FormInput({ label, ...props }) {
   return (
@@ -31,6 +43,15 @@ function FormSelect({ label, children, error, ...props }) {
   );
 }
 
+const calculateEndTime = (startTime) => {
+  if (!startTime) return "";
+  const now = dayjs();
+  const [hours, minutes] = startTime.split(":").map(Number);
+  const startDateTime = now.hour(hours).minute(minutes).second(0);
+  const endDateTime = startDateTime.add(1, "hour");
+  return endDateTime.format("HH:mm");
+};
+
 export default function ReceptionistAppointmentCreate() {
   const navigate = useNavigate();
   const [patients, setPatients] = useState([]);
@@ -38,6 +59,8 @@ export default function ReceptionistAppointmentCreate() {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(false);
   const [doctorAvailable, setDoctorAvailable] = useState(true);
+  const [isFetchingAvailable, setIsFetchingAvailable] = useState(false);
+  const [specialityToSearch, setSpecialityToSearch] = useState("");
   const [form, setForm] = useState({
     patientId: "",
     name: "",
@@ -50,9 +73,16 @@ export default function ReceptionistAppointmentCreate() {
     startTime: "",
     endTime: "",
     status: "confirmed",
+    speciality: "",
   });
   const [errors, setErrors] = useState({});
   const [search, setSearch] = useState("");
+
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, "0");
+  const dd = String(today.getDate()).padStart(2, "0");
+  const localToday = `${yyyy}-${mm}-${dd}`;
 
   useEffect(() => {
     const fetchPatients = async () => {
@@ -69,27 +99,78 @@ export default function ReceptionistAppointmentCreate() {
     fetchPatients();
   }, []);
 
-  useEffect(() => {
-    axios
-      .get(API_ENDPOINTS.DOCTOR_LIST, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      })
-      .then((res) => setDoctors(res.data || res.data.data || []))
-      .catch(() => setDoctors([]));
-  }, []);
+  // useEffect(() => {
+  //   axios
+  //     .get(API_ENDPOINTS.DOCTOR_LIST, {
+  //       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+  //     })
+  //     .then((res) => setDoctors(res.data || res.data.data || []))
+  //     .catch(() => setDoctors([]));
+  // }, []);
+
+  // useEffect(() => {
+  //   axios
+  //     .get(API_ENDPOINTS.ROOM_LIST, {
+  //       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+  //     })
+  //     .then((res) => {
+  //       if (Array.isArray(res.data)) setRooms(res.data);
+  //       else if (Array.isArray(res.data.data)) setRooms(res.data.data);
+  //       else setRooms([]);
+  //     })
+  //     .catch(() => setRooms([]));
+  // }, []);
 
   useEffect(() => {
-    axios
-      .get(API_ENDPOINTS.ROOM_LIST, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      })
-      .then((res) => {
-        if (Array.isArray(res.data)) setRooms(res.data);
-        else if (Array.isArray(res.data.data)) setRooms(res.data.data);
-        else setRooms([]);
-      })
-      .catch(() => setRooms([]));
-  }, []);
+    async function fetchAvailableResources() {
+      if (!form.date || !form.startTime || !form.endTime) {
+        setDoctors([]);
+        setRooms([]);
+        return;
+      }
+
+      setIsFetchingAvailable(true);
+      setDoctorAvailable(true);
+
+      const date = form.date;
+      const startTime = form.startTime + ":00";
+      const endTime = form.endTime + ":00";
+
+      try {
+        const doctorRes = await axios.get(API_ENDPOINTS.GET_AVAILABLE_DOCTORS, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          params: { date, startTime, endTime, speciality: specialityToSearch },
+        });
+        const availableDoctors = doctorRes.data.availableDoctors || [];
+        setDoctors(availableDoctors);
+
+        const roomRes = await axios.get(API_ENDPOINTS.GET_AVAILABLE_ROOMS, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          params: { date, startTime, endTime },
+        });
+        const availableRooms = roomRes.data || [];
+        setRooms(availableRooms);
+
+        if (form.doctorId && !availableDoctors.some(d => String(d.id) === String(form.doctorId))) {
+          // setForm(f => ({ ...f, doctorId: "" })); 
+        }
+
+      } catch (err) {
+        console.error("Failed to fetch availability:", err);
+        setDoctors([]);
+        setRooms([]);
+      } finally {
+        setIsFetchingAvailable(false);
+      }
+    }
+
+    fetchAvailableResources();
+
+  }, [form.date, form.startTime, form.endTime, specialityToSearch]);
+
+  useEffect(() => {
+    setForm(f => ({ ...f, doctorId: "" }));
+  }, [specialityToSearch]);
 
   useEffect(() => {
     if (form.patientId) {
@@ -118,35 +199,6 @@ export default function ReceptionistAppointmentCreate() {
     }
   }, [form.patientId, patients]);
 
-  useEffect(() => {
-    async function checkDoctorAvailable() {
-      if (
-        !form.doctorId ||
-        !form.date ||
-        !form.startTime ||
-        !form.endTime
-      ) {
-        setDoctorAvailable(true);
-        return;
-      }
-      try {
-        const res = await axios.get(API_ENDPOINTS.GET_AVAILABLE_DOCTORS, {
-          params: {
-            date: form.date,
-            startTime: form.startTime,
-            endTime: form.endTime,
-          },
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
-        const availableIds = res.data.availableDoctors?.map((d) => String(d.id)) || [];
-        setDoctorAvailable(availableIds.includes(String(form.doctorId)));
-      } catch {
-        setDoctorAvailable(true);
-      }
-    }
-    checkDoctorAvailable();
-  }, [form.date, form.startTime, form.endTime, form.doctorId]);
-
   function validate() {
     const newErrors = {};
     if (!form.name) newErrors.name = "Vui lòng nhập tên";
@@ -154,13 +206,12 @@ export default function ReceptionistAppointmentCreate() {
       newErrors.phoneNumber = "Số điện thoại phải đủ 10 số";
     if (!form.identityNumber || !/^\d{12}$/.test(form.identityNumber))
       newErrors.identityNumber = "CCCD phải đủ 12 số";
-    if (!form.date) newErrors.date = "Chọn ngày khám";
-    if (!form.startTime) newErrors.startTime = "Chọn giờ bắt đầu";
-    if (!form.endTime) newErrors.endTime = "Chọn giờ kết thúc";
+    if (!form.date || !form.startTime || !form.endTime) {
+      newErrors.date = newErrors.date || "Vui lòng chọn Ngày và Giờ khám trước";
+    }
+
     if (!form.doctorId) newErrors.doctorId = "Chọn bác sĩ";
-    if (!doctorAvailable)
-      newErrors.doctorId =
-        "Bác sĩ đã có lịch trong khoảng thời gian này. Vui lòng chọn thời gian khác hoặc bác sĩ khác!";
+    if (!form.roomId) newErrors.roomId = "Chọn phòng khám";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
@@ -212,10 +263,10 @@ export default function ReceptionistAppointmentCreate() {
   const filteredPatients = search.trim() === ""
     ? patients
     : patients.filter(
-        (p) =>
-          (p.name && p.name.toLowerCase().includes(search.toLowerCase())) ||
-          (p.phoneNumber && p.phoneNumber.includes(search))
-      );
+      (p) =>
+        (p.name && p.name.toLowerCase().includes(search.toLowerCase())) ||
+        (p.phoneNumber && p.phoneNumber.includes(search))
+    );
   const isDisabled = !!form.patientId;
 
   return (
@@ -270,49 +321,32 @@ export default function ReceptionistAppointmentCreate() {
           disabled={isDisabled}
           error={errors.identityNumber}
         />
-          <FormSelect
-            label="Giới tính"
-            value={form.gender || ""}
-            onChange={e => setForm(f => ({ ...f, gender: e.target.value || null }))}
-            disabled={isDisabled}
-          >
+        <FormSelect
+          label="Giới tính"
+          value={form.gender || ""}
+          onChange={e => setForm(f => ({ ...f, gender: e.target.value || null }))}
+          disabled={isDisabled}
+        >
           <option value="">-- Chọn giới tính --</option>
           <option value="male">Nam</option>
           <option value="female">Nữ</option>
         </FormSelect>
         <FormSelect
-          label="Bác sĩ"
-          value={form.doctorId}
-          onChange={e => setForm(f => ({ ...f, doctorId: e.target.value }))}
-          error={errors.doctorId}
+          label="Chuyên khoa"
+          value={specialityToSearch}
+          onChange={e => setSpecialityToSearch(e.target.value)}
         >
-          <option value="">-- Chọn bác sĩ --</option>
-          {doctors.map((d) => (
-            <option key={d.id} value={d.id}>
-              {d.name} - {d.speciality}
-            </option>
-          ))}
-        </FormSelect>
-        {!doctorAvailable && (
-          <span className="text-red-500 text-sm">
-            Bác sĩ đã có lịch trong khoảng này!
-          </span>
-        )}
-        <FormSelect
-          label="Phòng"
-          value={form.roomId}
-          onChange={e => setForm(f => ({ ...f, roomId: e.target.value }))}
-        >
-          <option value="">-- Chọn phòng --</option>
-          {(Array.isArray(rooms) ? rooms : []).map((r) => (
-            <option key={r.id} value={r.id}>
-              {r.name} - {r.type}
+          <option value="">-- Chọn chuyên khoa --</option>
+          {SPECIALTIES.map(s => (
+            <option key={s} value={s}>
+              {s}
             </option>
           ))}
         </FormSelect>
         <FormInput
           label="Ngày khám"
           type="date"
+          min={localToday}
           value={form.date}
           onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
           error={errors.date}
@@ -322,18 +356,65 @@ export default function ReceptionistAppointmentCreate() {
             label="Giờ bắt đầu"
             type="time"
             value={form.startTime}
-            onChange={e => setForm(f => ({ ...f, startTime: e.target.value }))}
+            min="07:00"
+            max="17:00"
+            step="1800"
+            onChange={e => setForm(f => ({
+              ...f,
+              startTime: e.target.value,
+              endTime: calculateEndTime(e.target.value)
+            }))}
             error={errors.startTime}
           />
           <FormInput
             label="Giờ kết thúc"
             type="time"
             value={form.endTime}
-            onChange={e => setForm(f => ({ ...f, endTime: e.target.value }))}
+            readOnly
+            disabled
             error={errors.endTime}
           />
         </div>
-        
+        <FormSelect
+          label="Bác sĩ"
+          value={form.doctorId}
+          onChange={e => setForm(f => ({ ...f, doctorId: e.target.value }))}
+          error={errors.doctorId}
+          disabled={isFetchingAvailable || !form.date || !form.startTime || !form.endTime}
+        >
+          <option value="">
+            {isFetchingAvailable ? "Đang tải..." : "-- Chọn bác sĩ --"}
+          </option>
+          {doctors.map((d) => (
+            <option key={d.id} value={d.id}>
+              {d.name} - {d.speciality}
+            </option>
+          ))}
+        </FormSelect>
+        {doctors.length === 0 && !isFetchingAvailable && form.date && form.startTime && form.endTime && (
+          <span className="text-red-500 text-sm mt-1">Không tìm thấy bác sĩ khả dụng vào khung giờ này!</span>
+        )}
+        <FormSelect
+          label="Phòng"
+          value={form.roomId}
+          onChange={e => setForm(f => ({ ...f, roomId: e.target.value }))}
+          error={errors.roomId}
+          disabled={isFetchingAvailable || !form.date || !form.startTime || !form.endTime}
+        >
+          <option value="">
+            {isFetchingAvailable ? "Đang tải..." : "-- Chọn phòng --"}
+          </option>
+          {(Array.isArray(rooms) ? rooms : []).map((r) => (
+            <option key={r.id} value={r.id}>
+              {r.name} - {r.type}
+            </option>
+          ))}
+        </FormSelect>
+        {rooms.length === 0 && !isFetchingAvailable && form.date && form.startTime && form.endTime && (
+          <span className="text-red-500 text-sm mt-1">Không tìm thấy phòng khám khả dụng!</span>
+        )}
+
+
         <button
           type="submit"
           className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded transition ${loading && "opacity-50 cursor-not-allowed"}`}
