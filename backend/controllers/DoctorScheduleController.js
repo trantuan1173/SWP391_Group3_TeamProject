@@ -8,7 +8,8 @@ const getDoctorSchedule = async (req, res) => {
     const appointments = await Appointment.findAll({
       where: {
         doctorId: doctorId,
-        status: 'confirmed'
+        status: ['confirmed', 'to-payment', 'completed']
+
       },
       attributes: ["id", "doctorId", "date", "startTime", "endTime", "patientId"],
       order: [
@@ -30,7 +31,9 @@ const getDoctorSchedule = async (req, res) => {
     const formattedAppointments = appointments.map(apt => {
       const json = apt.toJSON();
       return {
-        ...json,
+        id: json.id,
+        doctorId: json.doctorId,
+        date: json.date,
         startTime: json.startTime?.slice(0, 5),
         endTime: json.endTime?.slice(0, 5),
         patient: json.Patient ? {
@@ -43,6 +46,7 @@ const getDoctorSchedule = async (req, res) => {
         } : null
       };
     });
+console.log("doctorId:", doctorId, "status:", status);
 
     res.status(200).json(formattedAppointments);
   } catch (error) {
