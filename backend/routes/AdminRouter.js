@@ -222,7 +222,7 @@ router.get("/employees/:id", getEmployeeById);
 router.put("/employees/:id", upload.single("avatar"), updateEmployee);
 router.put("/employees/update-speciality/:id", updateDoctorSpeciality);
 router.post("/patients", createPatient);
-router.get("/patients/get-all", getPatients);
+router.get("/patients/get-all",protect, authorize("admin","receptionist"), getPatients);
 router.get("/patients/:id", getPatientById);
 router.put("/patients/:id", updatePatient);
 router.delete("/patients/:id", deletePatient);

@@ -70,7 +70,7 @@ const getAllPatients = async (req, res) => {
 
 const getAllMedicalRecordsByPatient = async (req, res) => {
   try {
-    const patientId = parseInt(req.params.patientId);
+    const { patientId } = req.params;
     const medicalRecords = await MedicalRecord.findAll({
       where: { patientId },
       include: [

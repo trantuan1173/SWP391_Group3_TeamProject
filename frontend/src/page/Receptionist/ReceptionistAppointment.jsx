@@ -11,6 +11,7 @@ export default function Appointments() {
   const [searchPhone, setSearchPhone] = useState("");
   const [patientName, setPatientName] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
@@ -23,6 +24,7 @@ export default function Appointments() {
 
   const fetchAppointments = async () => {
     try {
+      setIsLoading(true);
       let url =
       // searchQuery.trim() !== ""
       searchQuery.trim().replace(/\s+/g, " ") !== ""
@@ -49,6 +51,8 @@ export default function Appointments() {
       console.log(res.data);
     } catch (error) {
       console.error("Failed to fetch appointments:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -116,14 +120,22 @@ export default function Appointments() {
         </div>
       </div>
 
-      <table className="min-w-full border border-gray-200 text-sm">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="p-3 text-left border-b">No.</th>
-            <th className="p-3 text-left border-b">Patient</th>
+      {isLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="text-gray-500 text-sm">
+            Đang tải danh sách lịch hẹn...
+          </div>
+        </div>
+      ) : (
+        <table className="min-w-full border border-gray-200 text-sm">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="p-3 text-left border-b">No.</th>
+              <th className="p-3 text-left border-b">Patient</th>
             <th className="p-3 text-left border-b">Date</th>
             <th className="p-3 text-left border-b">Time</th>
             <th className="p-3 text-left border-b">Status</th>
+            <th className="p-3 text-left border-b">Doctor</th>
             <th className="p-3 text-left border-b">Room</th>
             <th className="p-3 text-left border-b">Action</th>
           </tr>
@@ -155,6 +167,7 @@ export default function Appointments() {
                 >
                   {a.status}
                 </td>
+                <td className="p-3">{a.Employee?.name || "-"}</td>
                 <td className="p-3">{a.Room?.name || "-"}</td>
                 <td className="p-3">
                   <button
@@ -168,13 +181,14 @@ export default function Appointments() {
             ))
           ) : (
             <tr>
-              <td colSpan="7" className="text-center p-4 text-gray-500">
+              <td colSpan="8" className="text-center p-4 text-gray-500">
                 No appointments found.
               </td>
             </tr>
           )}
         </tbody>
       </table>
+      )}
 
       <div className="flex justify-center items-center mt-6 space-x-4">
         <button
