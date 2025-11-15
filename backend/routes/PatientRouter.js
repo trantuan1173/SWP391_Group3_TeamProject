@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const {
-    patientLogin,
+  patientLogin,
   register,
   createAppointment,
   getPrescriptions,
@@ -231,7 +231,7 @@ router.post("/register", register);
  *         description: Failed to create appointment
  */
 // Require authentication for creating an appointment as a logged-in patient
-router.post("/appointments", protect, createAppointment);
+router.post("/appointments/create", protect, createAppointment);
 
 /**
  * @swagger

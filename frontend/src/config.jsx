@@ -52,7 +52,7 @@ export const API_ENDPOINTS = {
   UPDATE_SERVICE: (id) => `${baseUrl}/api/services/${id}`,
   DELETE_SERVICE: (id) => `${baseUrl}/api/services/${id}`,
   //appointments
-  CREATE_APPOINTMENT: `${baseUrl}/api/patients/appointments`,
+  CREATE_APPOINTMENT: `${baseUrl}/api/patients/appointments/create`,
   CREATE_APPOINTMENT_WITHOUT_LOGIN: `${baseUrl}/api/patients/appointmentsWithoutLogin`,
   CONFIRM_APPOINTMENT: `${baseUrl}/api/patients/confirmAppointment`,
   GET_MEDICAL_RECORDS_BY_DOCTOR: (doctorId, patientId = null) =>
