@@ -24,7 +24,7 @@ export default function BookPage() {
           setBookingLoading(true);
           try {
             const token = localStorage.getItem("token");
-            const payload = { date: bookingDate, startTime: bookingStartTime, endTime: "" };
+            const payload = {patientId: id, date: bookingDate, startTime: bookingStartTime, endTime: "" };
             const headers = token ? { Authorization: `Bearer ${token}` } : {};
             const res = await axios.post(API_ENDPOINTS.CREATE_APPOINTMENT, payload, { headers });
             setBookingMessage("Đặt lịch thành công");
@@ -39,12 +39,12 @@ export default function BookPage() {
       >
         <div className="mb-3">
           <label className="block text-gray-700 text-sm mb-1">Ngày</label>
-<input
-  type="date"
-  className={`w-full border-2 rounded-lg px-3 py-2 text-sm focus:outline-none ${!bookingDate && bookingMessage ? 'border-green-500' : 'border-purple-400'}`}
-  value={bookingDate}
-  onChange={(e) => setBookingDate(e.target.value)}
-/>
+          <input
+            type="date"
+            className={`w-full border-2 rounded-lg px-3 py-2 text-sm focus:outline-none ${!bookingDate && bookingMessage ? 'border-green-500' : 'border-purple-400'}`}
+            value={bookingDate}
+            onChange={(e) => setBookingDate(e.target.value)}
+          />
         </div>
         <div className="mb-3">
           <label className="block text-gray-700 text-sm mb-1">Giờ</label>
