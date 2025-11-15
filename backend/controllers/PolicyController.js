@@ -1,11 +1,11 @@
 const { Op } = require("sequelize");
 const Policy = require("../models/Policy");
+const { Employee } = require("../models");
 
 const createPolicy = async (req, res) => {
   try {
-    const { title, contentHtml, contentDelta, category, status, lastEditedBy } =
-      req.body;
-
+    const { title, contentHtml, contentDelta, category, status } = req.body;
+    const lastEditedBy = req.userId;
     if (!title || !contentHtml) {
       return res.status(400).json({ error: "Tiêu đề và nội dung là bắt buộc" });
     }
@@ -42,19 +42,21 @@ const getPolicies = async (req, res) => {
     const offset = (page - 1) * pageSize;
 
     const whereCondition = {};
-
-    if (search) {
-      whereCondition.title = { [Op.like]: `%${search}%` };
-    }
-    if (category) {
-      whereCondition.category = category;
-    }
+    if (search) whereCondition.title = { [Op.like]: `%${search}%` };
+    if (category) whereCondition.category = category;
 
     const { rows: policies, count: total } = await Policy.findAndCountAll({
       where: whereCondition,
       order: [["updatedAt", "DESC"]],
       limit: pageSize,
       offset,
+      include: [
+        {
+          model: Employee,
+          as: "lastEditor",
+          attributes: ["id", "name", "email"],
+        },
+      ],
     });
 
     res.json({

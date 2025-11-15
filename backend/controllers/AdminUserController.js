@@ -201,15 +201,15 @@ const createEmployee = async (req, res) => {
 
 const getEmployees = async (req, res) => {
   try {
-    console.log(req.query);
-
     const page = parseInt(req.query.page) || 1;
     const pageSize = parseInt(req.query.pageSize) || 10;
     const search = req.query.search ? req.query.search.trim() : "";
     const role = req.query.role ? req.query.role.trim() : "";
     const offset = (page - 1) * pageSize;
 
-    const whereCondition = {};
+    const whereCondition = {
+      id: { [Op.ne]: req.userId },
+    };
     const roleCondition = role
       ? { name: { [Op.like]: `%${role}%` } }
       : undefined;
@@ -407,28 +407,24 @@ const createPatient = async (req, res) => {
     if (!name || !identityNumber) {
       return res.status(400).json({ error: "Tên và CCCD/CMND là bắt buộc" });
     }
-
     const existingIdentity = await Patient.findOne({
       where: { identityNumber },
     });
     if (existingIdentity) {
       return res.status(409).json({ error: "CMND/CCCD đã tồn tại" });
     }
-
     const existingEmail = email
       ? await Patient.findOne({ where: { email } })
       : null;
     if (existingEmail) {
       return res.status(409).json({ error: "Email đã tồn tại" });
     }
-
     const existingPhone = phoneNumber
       ? await Patient.findOne({ where: { phoneNumber } })
       : null;
     if (existingPhone) {
       return res.status(409).json({ error: "SĐT đã tồn tại" });
     }
-
     const patient = await Patient.create({
       name,
       email,
@@ -440,14 +436,11 @@ const createPatient = async (req, res) => {
       gender,
       isActive: true,
     });
-
     const cleanPatient = patient.get({ plain: true });
     delete cleanPatient.password;
-
     res.status(201).json({
       message: "Bệnh nhân tạo thành công",
       patient: cleanPatient,
-      l,
     });
   } catch (error) {
     res.status(500).json({ error: "Bệnh nhân tạo thất bại" });

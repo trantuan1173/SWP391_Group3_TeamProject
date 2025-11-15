@@ -17,6 +17,7 @@ const Category = require("./Category");
 const Faq = require("./Faq");
 const MedicalRecordMedicine = require("./MedicalRecordMedicine");
 const Medicine = require("./Medicine");
+const Policy = require("./Policy");
 
 Appointment.hasOne(Payment, { foreignKey: "appointmentId" });
 Payment.belongsTo(Appointment, { foreignKey: "appointmentId" });
@@ -154,6 +155,16 @@ MedicalRecordMedicine.belongsTo(Medicine, {
   foreignKey: "medicineId",
   as: "medicine",
 });
+
+Policy.belongsTo(Employee, {
+  foreignKey: "lastEditedBy",
+  as: "lastEditor",
+});
+
+Employee.hasMany(Policy, {
+  foreignKey: "lastEditedBy",
+  as: "editedPolicies",
+});
 module.exports = {
   Patient,
   Appointment,
@@ -173,4 +184,5 @@ module.exports = {
   Ticket,
   Medicine,
   MedicalRecordMedicine,
+  Policy,
 };
