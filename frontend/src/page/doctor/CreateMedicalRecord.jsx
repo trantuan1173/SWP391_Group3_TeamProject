@@ -1,5 +1,3 @@
-// frontend/src/page/doctor/CreateMedicalRecord.jsx
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -9,19 +7,19 @@ import { API_ENDPOINTS } from "../../config";
 const CreateMedicalRecord = () => {
   const [patientsWithAppointments, setPatientsWithAppointments] = useState([]);
   const [services, setServices] = useState([]);
-  const [medicines, setMedicines] = useState([]); // << thêm
+  const [medicines, setMedicines] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [symptoms, setSymptoms] = useState("");
   const [diagnosis, setDiagnosis] = useState("");
   const [treatment, setTreatment] = useState("");
   const [selectedServices, setSelectedServices] = useState([]);
-  const [selectedMedicines, setSelectedMedicines] = useState([]); // << thêm
+  const [selectedMedicines, setSelectedMedicines] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [doctorInfo, setDoctorInfo] = useState(null);
   const [activeMenu, setActiveMenu] = useState("create-record");
   const [searchService, setSearchService] = useState("");
-  const [searchMedicine, setSearchMedicine] = useState(""); // << thêm
+  const [searchMedicine, setSearchMedicine] = useState("");
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -40,7 +38,6 @@ const CreateMedicalRecord = () => {
         return;
       }
 
-      // Decode JWT (lấy userId)
       const tokenParts = token.split(".");
       if (tokenParts.length !== 3) {
         localStorage.removeItem("token");
@@ -50,7 +47,6 @@ const CreateMedicalRecord = () => {
       const payload = JSON.parse(atob(tokenParts[1]));
       const userId = payload.id || payload.userId || payload.sub;
 
-      // Kiểm tra role
       const response = await axios.get(
         API_ENDPOINTS.GET_EMPLOYEE_WITH_ROLE(userId),
         { headers: { Authorization: `Bearer ${token}` } }
@@ -64,7 +60,6 @@ const CreateMedicalRecord = () => {
       setDoctorInfo(response.data);
       console.log("Doctor info:", response.data);
 
-      // Lấy danh sách bệnh nhân (theo lịch khám)
       const patientsRes = await axios.get(
         API_ENDPOINTS.GET_PATIENT_BY_DOCTOR(userId),
         { headers: { Authorization: `Bearer ${token}` } }
@@ -79,17 +74,15 @@ const CreateMedicalRecord = () => {
         if (matchedPatient) setSelectedPatient(matchedPatient);
       }
 
-      // Lấy danh sách dịch vụ
       const servicesRes = await axios.get(API_ENDPOINTS.GET_SERVICES, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setServices(servicesRes.data.data || []);
 
-      // Lấy danh sách thuốc  << thêm
       const medsRes = await axios.get(API_ENDPOINTS.GET_MEDICINES, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      // API có thể trả { medicines } hoặc { data }
+
       setMedicines(medsRes.data.medicines || medsRes.data.data || []);
     } catch (err) {
       console.error("Error fetching data:", err);
@@ -99,7 +92,6 @@ const CreateMedicalRecord = () => {
     }
   };
 
-  // ====== Chọn dịch vụ ======
   const handleServiceChange = (serviceId, quantity) => {
     const service = services.find((s) => s.id === serviceId);
     if (!service) return;
@@ -132,7 +124,6 @@ const CreateMedicalRecord = () => {
     }
   };
 
-  // ====== Chọn thuốc (toggle)  << thêm ======
   const handleMedicineToggle = (medicineId, checked) => {
     const m = medicines.find((md) => md.id === medicineId);
     if (!m) return;
@@ -158,7 +149,6 @@ const CreateMedicalRecord = () => {
     }
   };
 
-  // ====== Cập nhật field của thuốc  << thêm ======
   const handleMedicineFieldChange = (medicineId, field, value) => {
     setSelectedMedicines((prev) => {
       const idx = prev.findIndex((x) => x.medicineId === medicineId);
@@ -180,7 +170,6 @@ const CreateMedicalRecord = () => {
     });
   };
 
-  // ====== Submit ======
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -205,7 +194,7 @@ const CreateMedicalRecord = () => {
         diagnosis,
         treatment,
         services: selectedServices,
-        // gửi thêm mảng medicines theo format backend chờ  << thêm
+
         medicines: selectedMedicines.map((m) => ({
           medicineId: m.medicineId,
           quantity: Number(m.quantity || 0),
@@ -233,7 +222,6 @@ const CreateMedicalRecord = () => {
     }
   };
 
-  // ====== Filter ======
   const filteredServices = services.filter(
     (service) =>
       (service.name || "")
@@ -250,7 +238,6 @@ const CreateMedicalRecord = () => {
       (m.description || "").toLowerCase().includes(searchMedicine.toLowerCase())
   );
 
-  // ====== Tổng ======
   const totalService = selectedServices.reduce(
     (sum, s) => sum + Number(s.total || 0),
     0
@@ -299,7 +286,7 @@ const CreateMedicalRecord = () => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* 1. Chọn bệnh nhân */}
+
           <div className="bg-blue-50 p-4 rounded-lg">
             <label className="block font-semibold mb-3 text-lg">
               1. Chọn bệnh nhân <span className="text-red-500">*</span>
@@ -331,8 +318,12 @@ const CreateMedicalRecord = () => {
                       key={patient.appointmentId}
                       value={patient.appointmentId}
                     >
-                      {patient.patientName} - {patient.appointmentDate} (
-                      {patient.appointmentTime})
+                      {patient.patientName} - {new Date(patient.appointmentDate).toLocaleDateString('vi-VN', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                      })} (
+                        {patient.appointmentTime.split(':').slice(0, 2).join(':')})
                     </option>
                   ))}
                 </select>
@@ -355,18 +346,24 @@ const CreateMedicalRecord = () => {
                     <p className="text-sm">
                       <strong>Ngày sinh:</strong>{" "}
                       {selectedPatient.patientDOB
-                        ? new Date(
-                            selectedPatient.patientDOB
-                          ).toLocaleDateString("vi-VN")
+                        ? new Date(selectedPatient.patientDOB).toLocaleDateString("vi-VN", {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                          })
                         : "N/A"}
                     </p>
                     <p className="text-sm">
                       <strong>Ngày khám:</strong>{" "}
-                      {selectedPatient.appointmentDate}
+                      {new Date(selectedPatient.appointmentDate).toLocaleDateString('vi-VN', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                      })}
                     </p>
                     <p className="text-sm">
                       <strong>Giờ khám:</strong>{" "}
-                      {selectedPatient.appointmentTime}
+                      {selectedPatient.appointmentTime.split(':').slice(0, 2).join(':')}
                     </p>
                   </div>
                 )}
@@ -374,7 +371,6 @@ const CreateMedicalRecord = () => {
             )}
           </div>
 
-          {/* 2. Triệu chứng */}
           <div>
             <label className="block font-semibold mb-2 text-lg">
               2. Triệu chứng <span className="text-red-500">*</span>
@@ -389,7 +385,6 @@ const CreateMedicalRecord = () => {
             />
           </div>
 
-          {/* 3. Chẩn đoán */}
           <div>
             <label className="block font-semibold mb-2 text-lg">
               3. Chẩn đoán <span className="text-red-500">*</span>
@@ -404,7 +399,6 @@ const CreateMedicalRecord = () => {
             />
           </div>
 
-          {/* 4. Phương pháp điều trị */}
           <div>
             <label className="block font-semibold mb-2 text-lg">
               4. Phương pháp điều trị <span className="text-red-500">*</span>
@@ -419,7 +413,6 @@ const CreateMedicalRecord = () => {
             />
           </div>
 
-          {/* 5. Chọn dịch vụ */}
           <div className="bg-green-50 p-4 rounded-lg">
             <div className="flex items-center justify-between gap-4 mb-3">
               <label className="font-semibold text-lg whitespace-nowrap">
@@ -560,7 +553,6 @@ const CreateMedicalRecord = () => {
             )}
           </div>
 
-          {/* 6. Kê thuốc */}
           <div className="bg-amber-50 p-4 rounded-lg">
             <div className="flex items-center justify-between gap-4 mb-3">
               <label className="font-semibold text-lg whitespace-nowrap">
@@ -707,7 +699,6 @@ const CreateMedicalRecord = () => {
 
                       {picked && (
                         <div className="grid grid-cols-1 md:grid-cols-6 gap-2 md:gap-3">
-                          {/* Số lượng */}
                           <div>
                             <label className="block text-sm font-medium mb-1">
                               Số lượng
@@ -727,7 +718,6 @@ const CreateMedicalRecord = () => {
                             />
                           </div>
 
-                          {/* Liều */}
                           <div>
                             <label className="block text-sm font-medium mb-1">
                               Liều
@@ -747,7 +737,6 @@ const CreateMedicalRecord = () => {
                             />
                           </div>
 
-                          {/* Tần suất */}
                           <div>
                             <label className="block text-sm font-medium mb-1">
                               Tần suất
@@ -767,7 +756,6 @@ const CreateMedicalRecord = () => {
                             />
                           </div>
 
-                          {/* Thời gian */}
                           <div>
                             <label className="block text-sm font-medium mb-1">
                               Thời gian
@@ -787,7 +775,6 @@ const CreateMedicalRecord = () => {
                             />
                           </div>
 
-                          {/* Đường dùng */}
                           <div>
                             <label className="block text-sm font-medium mb-1">
                               Đường dùng
@@ -807,7 +794,6 @@ const CreateMedicalRecord = () => {
                             />
                           </div>
 
-                          {/* Hướng dẫn */}
                           <div className="md:col-span-1">
                             <label className="block text-sm font-medium mb-1">
                               Hướng dẫn
@@ -853,7 +839,6 @@ const CreateMedicalRecord = () => {
             )}
           </div>
 
-          {/* Tổng cộng */}
           {(selectedServices.length > 0 || selectedMedicines.length > 0) && (
             <div className="mt-4 p-3 bg-white rounded border-2 border-gray-300">
               <p className="text-lg">
@@ -871,7 +856,6 @@ const CreateMedicalRecord = () => {
             </div>
           )}
 
-          {/* Nút hành động */}
           <div className="flex gap-4">
             <button
               type="submit"
