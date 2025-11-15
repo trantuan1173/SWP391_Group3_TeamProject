@@ -19,6 +19,10 @@ const getDoctorSchedule = async (req, res) => {
         {
           model: Patient,
           attributes: ["name", "identityNumber"]
+        },
+        {
+          model: Room,
+          attributes: ["id","name"]
         }
       ]
     });
@@ -32,6 +36,10 @@ const getDoctorSchedule = async (req, res) => {
         patient: json.Patient ? {
           name: json.Patient.name,
           identityNumber: json.Patient.identityNumber
+        } : null,
+        room: json.Room ? {
+          id: json.Room.id,
+          name: json.Room.name
         } : null
       };
     });

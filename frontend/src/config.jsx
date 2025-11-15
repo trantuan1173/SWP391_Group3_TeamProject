@@ -138,6 +138,6 @@ export const API_ENDPOINTS = {
   UPDATE_MEDICINE: (id) => `${baseUrl}/api/medicines/update/${id}`, // PUT
   DELETE_MEDICINE: (id) => `${baseUrl}/api/medicines/delete/${id}`, // DELETE
   MEDICINE_EXPIRING_SOON: `${baseUrl}/api/medicines/expiring/soon`, // GET
-
+  CHANGE_PASSWORD: `${baseUrl}/api/users/change-password`,
   GET_MEDICINES: `${baseUrl}/api/medicines`,
 };

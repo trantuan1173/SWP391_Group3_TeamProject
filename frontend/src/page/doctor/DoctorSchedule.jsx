@@ -19,7 +19,7 @@ const DoctorSchedule = () => {
   const handleClick = (appointment, scheduleDate) => {
   const today = dayjs().startOf('day');
   const scheduleDay = dayjs(scheduleDate).startOf('day');
-  if (scheduleDay.isBefore(today)) {
+  if (scheduleDay.isBefore(today) || scheduleDay.isAfter(today)) {
     setModalMessage("Bạn không thể tạo hồ sơ cho lịch khám này");
     setShowModal(true);
     return;
@@ -273,9 +273,14 @@ const DoctorSchedule = () => {
                         <div className="font-semibold text-sm">{s.title || 'Lịch khám'}</div>
                         <div className="text-xs text-gray-600">🕒 {s.startTime || s.from || s.start} - {s.endTime || s.to || s.end}</div>
                         {s.patient && (
-                          <div className="text-xs text-blue-700 mt-1">
+                          <div className={`text-xs mt-1 ${dayjs(day.key).isBefore(dayjs().startOf('day')) ? 'text-black' : 'text-blue-700'}`}>
                             <div>Tên bệnh nhân: <span className="font-medium">{s.patient.name}</span></div>
-                            <div>CCCD: <span className="font-medium">{s.patient.identityNumber}</span></div>
+                            {/* <div>CCCD: <span className="font-medium">{s.patient.identityNumber}</span></div> */}
+                          </div>
+                        )}
+                        {s.room && (
+                          <div className={`text-xs mt-1 ${dayjs(day.key).isBefore(dayjs().startOf('day')) ? 'text-black' : 'text-purple-700'}`}>
+                            <div>Phòng: <span className="font-medium">{s.room.name}</span></div>
                           </div>
                         )}
                         <div className="text-xs text-gray-500 mt-1">{s.note || ''}</div>

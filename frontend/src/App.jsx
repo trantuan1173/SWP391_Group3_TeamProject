@@ -59,6 +59,7 @@ import AdminPolicies from "./page/policices/AdminPolicies";
 import PolicyDetailPage from "./page/policices/PolicyDetailPage";
 import TermsAndPolicies from "./page/guest/TermsAndPolicies";
 import MedicineManagement from "./page/medicine/MedicineManagement";
+import DoctorChangePassword from "./page/doctor/DoctorChangePassword";
 
 function App() {
   const RedirectPatientId = () => {
@@ -124,6 +125,7 @@ function App() {
           <Route path="/doctor/create-records" element={<CreateMedicalRecord />} />
           <Route path="/doctor/view-feedback" element={<ViewFeedback />} />
           <Route path="/doctor/exam-records/:patientId" element={<MedicalRecordDetail />} />
+          <Route path="/doctor/change-password" element={<DoctorChangePassword />} />
         </Route>
         {/* Admin routes */}
         <Route element={<RequireAuth allowedRoles={["Admin"]} />}>
@@ -163,7 +165,7 @@ function App() {
               path="appointments/:id"
               element={<ReceptionistAppointmentDetail />}
             />
-            <Route path="appointments/create" element={<ReceptionistAppointmentCreate />} />
+            <Route path="create" element={<ReceptionistAppointmentCreate />} />
 
             <Route path="doctors" element={<ReceptionistDoctor />} />
             <Route path="news" element={<ReceptionistNews />} />

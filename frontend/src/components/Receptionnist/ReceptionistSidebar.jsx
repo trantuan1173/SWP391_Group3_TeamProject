@@ -34,6 +34,7 @@ const ReceptionistSideBar = () => {
   const navigationItems = [
     { title: "Dashboard", url: "/receptionist/dashboard", icon: LayoutDashboard },
     { title: "Lịch hẹn", url: "/receptionist/appointments", icon: Calendar },
+    { title: "Tạo lịch hẹn", url: "/receptionist/create", icon: Calendar },
     { title: "Bệnh nhân", url: "/receptionist/patients", icon: Bed },
     { title: "Bác sĩ", url: "/receptionist/doctors", icon: Users },
     { title: "Tin tức", url: "/receptionist/news", icon: Newspaper },

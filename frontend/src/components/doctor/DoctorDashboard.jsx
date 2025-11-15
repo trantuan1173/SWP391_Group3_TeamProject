@@ -59,7 +59,7 @@ export default function DoctorDashboard({ children, doctorInfo }) {
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
         <Sidebar className="border-0 h-screen bg-[#00A646]">
-          <SidebarHeader className="p-4 bg-[#00A646]">
+          <SidebarHeader className="p-4 bg-[#00A646] cursor-pointer" onClick={() => navigate('/')}>
             <img
               src="/icon/logo.png"
               alt="Healthy People Logo"
@@ -117,6 +117,12 @@ export default function DoctorDashboard({ children, doctorInfo }) {
                 <div className="text-sm text-green-200">Bác sĩ</div>
               </div>
             </div>
+            <Button
+    onClick={() => navigate('/doctor/change-password')}
+    className="bg-blue-500 hover:bg-blue-600 text-white w-full mt-2"
+  >
+    Đổi mật khẩu
+  </Button>
             <Button
               onClick={handleLogout}
               className="bg-red-500 hover:bg-red-600 text-white w-full"
