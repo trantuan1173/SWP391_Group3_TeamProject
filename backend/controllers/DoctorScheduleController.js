@@ -46,7 +46,6 @@ const getDoctorSchedule = async (req, res) => {
         } : null
       };
     });
-console.log("doctorId:", doctorId, "status:", status);
 
     res.status(200).json(formattedAppointments);
   } catch (error) {
