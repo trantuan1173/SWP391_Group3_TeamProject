@@ -1,6 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const { protect } = require("../middleware/authMiddleware");
+const { protect, authorize } = require("../middleware/authMiddleware");
+const {
+  changeProfileInfo,
+  changePassword,
+} = require("../controllers/AdminUserController");
 
 router.get("/profile", protect, (req, res) => {
   try {
@@ -21,5 +25,9 @@ router.get("/profile", protect, (req, res) => {
     res.status(500).json({ error: "Failed to fetch profile" });
   }
 });
+
+router.put("/change-profile-info", protect, changeProfileInfo);
+
+router.put("/change-password", protect, changePassword);
 
 module.exports = router;

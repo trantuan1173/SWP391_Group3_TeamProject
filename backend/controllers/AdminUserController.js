@@ -741,6 +741,165 @@ const updateDoctorSpeciality = async (req, res) => {
   }
 };
 
+const changeProfileInfo = async (req, res) => {
+  try {
+    const { userType, user } = req;
+
+    if (!user || !user.id) {
+      return res.status(401).json({ error: "Không xác thực được người dùng" });
+    }
+
+    const userId = user.id;
+    const { name, email, phoneNumber, gender, address } = req.body;
+
+    if (!name || name.trim() === "") {
+      return res.status(400).json({ error: "Tên là bắt buộc" });
+    }
+
+    if (userType === "employee") {
+      const employee = await Employee.findByPk(userId);
+      if (!employee) {
+        return res.status(404).json({ error: "Nhân viên không tìm thấy" });
+      }
+
+      if (email && email !== employee.email) {
+        const existingMail = await Employee.findOne({ where: { email } });
+        if (existingMail) {
+          return res.status(409).json({ error: "Email đã tồn tại" });
+        }
+        employee.email = email;
+      }
+
+      if (phoneNumber && phoneNumber !== employee.phoneNumber) {
+        const existingPhone = await Employee.findOne({
+          where: { phoneNumber },
+        });
+        if (existingPhone) {
+          return res.status(409).json({ error: "SĐT đã tồn tại" });
+        }
+        employee.phoneNumber = phoneNumber;
+      }
+
+      if (req.file) {
+        employee.avatar = `/uploads/avatars/${req.file.filename}`;
+      }
+
+      employee.name = name;
+      if (gender !== undefined) employee.gender = gender;
+      if (address !== undefined) employee.address = address;
+
+      await employee.save();
+
+      const updated = employee.get({ plain: true });
+      delete updated.password;
+
+      return res.json({
+        message: "Cập nhật thông tin cá nhân thành công",
+        type: "employee",
+        user: updated,
+      });
+    }
+
+    if (userType === "patient") {
+      const patient = await Patient.findByPk(userId);
+      if (!patient) {
+        return res.status(404).json({ error: "Bệnh nhân không tìm thấy" });
+      }
+
+      if (email && email !== patient.email) {
+        const existingMail = await Patient.findOne({ where: { email } });
+        if (existingMail) {
+          return res.status(409).json({ error: "Email đã tồn tại" });
+        }
+        patient.email = email;
+      }
+
+      if (phoneNumber && phoneNumber !== patient.phoneNumber) {
+        const existingPhone = await Patient.findOne({
+          where: { phoneNumber },
+        });
+        if (existingPhone) {
+          return res.status(409).json({ error: "SĐT đã tồn tại" });
+        }
+        patient.phoneNumber = phoneNumber;
+      }
+
+      patient.name = name;
+      if (gender !== undefined) patient.gender = gender;
+      if (address !== undefined) patient.address = address;
+
+      await patient.save();
+
+      const updated = patient.get({ plain: true });
+      delete updated.password;
+
+      return res.json({
+        message: "Cập nhật thông tin cá nhân thành công",
+        type: "patient",
+        user: updated,
+      });
+    }
+
+    return res.status(400).json({ error: "Loại người dùng không được hỗ trợ" });
+  } catch (error) {
+    console.error("changeProfileInfo error:", error);
+    return res
+      .status(500)
+      .json({ error: "Cập nhật thông tin cá nhân thất bại" });
+  }
+};
+
+const changePassword = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: "Không xác thực được người dùng" });
+    }
+
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res
+        .status(400)
+        .json({ error: "Mật khẩu hiện tại và mật khẩu mới là bắt buộc" });
+    }
+
+    if (newPassword.length < 6) {
+      return res
+        .status(400)
+        .json({ error: "Mật khẩu mới phải có ít nhất 6 ký tự" });
+    }
+
+    const employee = await Employee.findByPk(userId);
+    if (!employee) {
+      return res.status(404).json({ error: "Nhân viên không tìm thấy" });
+    }
+
+    const isMatch = await employee.comparePassword(currentPassword);
+    if (!isMatch) {
+      return res
+        .status(400)
+        .json({ error: "Mật khẩu hiện tại không chính xác" });
+    }
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+    employee.password = hashed;
+
+    await employee.save({ hooks: false });
+
+    const cleanEmployee = employee.get({ plain: true });
+    delete cleanEmployee.password;
+
+    return res.json({
+      message: "Đổi mật khẩu thành công",
+      employee: cleanEmployee,
+    });
+  } catch (error) {
+    console.error("changePassword error:", error);
+    return res.status(500).json({ error: "Đổi mật khẩu thất bại" });
+  }
+};
+
 module.exports = {
   updatePatientStatus,
   updateDoctorSpeciality,
@@ -766,4 +925,6 @@ module.exports = {
   getAvailableRoles,
   getRecentPatients,
   getRecentEmployees,
+  changeProfileInfo,
+  changePassword,
 };

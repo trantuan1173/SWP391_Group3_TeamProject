@@ -219,7 +219,7 @@ router.get("/employees", getEmployees);
 router.delete("/employees/:id", deleteEmployee);
 router.put("/employees/update-status/:id", updateActiveStatus);
 router.get("/employees/:id", getEmployeeById);
-router.put("/employees/:id", upload.single("avatar"));
+router.put("/employees/:id", upload.single("avatar"), updateEmployee);
 router.put("/employees/update-speciality/:id", updateDoctorSpeciality);
 router.post("/patients", createPatient);
 router.get("/patients/get-all", getPatients);

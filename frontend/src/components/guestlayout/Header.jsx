@@ -1,8 +1,19 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { jwtDecode } from "jwt-decode";
-import { fetchUserById } from "@/api/userApi";
+import axios from "axios";
+
+const api = axios.create({
+  baseURL: "http://localhost:1118/api",
+});
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 export default function Header() {
   const navigate = useNavigate();
@@ -10,33 +21,54 @@ export default function Header() {
 
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState(null);
-  const [userId, setUserId] = useState(null);
+  const [userType, setUserType] = useState(null);
+  const [userRole, setUserRole] = useState(null);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
-    if (token) {
-      try {
-        const decoded = jwtDecode(token);
-        console.log("✅ Token decoded successfully:", decoded);
-        setUserIdser(decoded.id);
-      } catch (err) {
-        console.error("❌ Token decode error:", err);
-        localStorage.removeItem("token");
-      }
+    if (!token) {
+      setUser(null);
+      setUserType(null);
+      setUserRole(null);
+      return;
     }
+
+    const fetchProfile = async () => {
+      try {
+        const res = await api.get("/users/profile");
+        const data = res.data;
+
+        if (data.employee) {
+          const emp = data.employee;
+          setUser(emp);
+          setUserType("employee");
+
+          const roleLower =
+            emp.roleLower ||
+            (Array.isArray(emp.roleNamesLower) ? emp.roleNamesLower[0] : null);
+
+          setUserRole(roleLower ? roleLower.toLowerCase() : null);
+        } else if (data.patient) {
+          setUser(data.patient);
+          setUserType("patient");
+          setUserRole(null);
+        } else {
+          setUser(null);
+          setUserType(null);
+          setUserRole(null);
+        }
+      } catch (err) {
+        console.error("❌ Fetch profile error:", err);
+        localStorage.removeItem("token");
+        setUser(null);
+        setUserType(null);
+        setUserRole(null);
+      }
+    };
+
+    fetchProfile();
   }, [token]);
 
-  useEffect(() => {
-    try {
-      const userInfo = fetchUserById(userId.id);
-      setUser(userInfo);
-    } catch (err) {
-      console.error("❌ Token decode error:", err);
-      localStorage.removeItem("token");
-    }
-  });
-
-  // Ẩn dropdown khi click ra ngoài
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -50,6 +82,27 @@ export default function Header() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/login");
+  };
+
+  const handleGoProfile = () => {
+    setOpen(false);
+    console.log("userType:", userType, "userRole:", userRole);
+
+    if (!user) return;
+
+    if (userType === "patient") {
+      navigate(`/patient/${user.id}/profile`);
+    } else if (userType === "employee") {
+      if (userRole === "doctor") {
+        navigate("/doctor/schedule");
+      } else if (userRole === "receptionist") {
+        navigate("/receptionist/dashboard");
+      } else {
+        navigate("/admin/profile");
+      }
+    } else {
+      navigate("/profile");
+    }
   };
 
   return (
@@ -69,6 +122,7 @@ export default function Header() {
         >
           <img src="/icon/logo.png" alt="Logo" className="h-[50px] w-auto" />
         </div>
+
         <nav className="flex items-center gap-[50px]">
           <a
             href="/doctor"
@@ -118,10 +172,14 @@ export default function Header() {
                 <Avatar className="w-10 h-10 border border-gray-300">
                   <AvatarImage
                     src={
-                      user?.avatar ||
-                      `https://api.dicebear.com/7.x/initials/svg?seed=${
-                        user?.name || "User"
-                      }`
+                      user?.avatar
+                        ? `http://localhost:1118${user.avatar}`.replace(
+                            "http://localhost:1118http",
+                            "http"
+                          )
+                        : `https:
+                            user?.name || "User"
+                          }`
                     }
                     alt="User Avatar"
                   />
@@ -133,17 +191,15 @@ export default function Header() {
                   {user?.name || user?.email || "Người dùng"}
                 </span>
               </div>
+
               {open && (
                 <div
-                  className="absolute right-0 top-[60px] bg-white shadow-lg rounded-lg z-50 w-[160px] border border-gray-100 animate-fadeIn"
+                  className="absolute right-0 top-[60px] bg-white shadow-lg rounded-lg z-50 w-[160px] border border-gray-100"
                   onMouseEnter={() => setOpen(true)}
                   onMouseLeave={() => setOpen(false)}
                 >
                   <button
-                    onClick={() => {
-                      setOpen(false);
-                      navigate(`/patient/${user?.id || ""}/profile`);
-                    }}
+                    onClick={handleGoProfile}
                     className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                   >
                     Hồ sơ
