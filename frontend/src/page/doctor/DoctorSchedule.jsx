@@ -54,7 +54,7 @@ const DoctorSchedule = () => {
       const startOfWeek = new Date(date);
       startOfWeek.setDate(date.getDate() - date.getDay()); //cn
       const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 5);//t7
+      endOfWeek.setDate(startOfWeek.getDate() + 6);//t7
       if (startOfWeek.getFullYear() === year || endOfWeek.getFullYear() === year) {
         weeks.push({
           weekNum,
