@@ -268,14 +268,20 @@ const DoctorSchedule = () => {
                     groupedSchedules[day.key].map((s) => (
                       <div
                         key={s.id || `${day.key}-${Math.random()}`}
-                        onClick={() => handleClick(s, day.key)}
+                        onClick={() =>
+                          !(s.status === "completed" || s.status === "to-payment") &&
+                          handleClick(s, day.key)
+                        }
                         className={`mb-2 p-2 rounded-md text-sm cursor-pointer transition border
-  ${s.status === "complete"
+  ${s.status === "completed"
                             ? "bg-yellow-100 border-yellow-300 hover:bg-yellow-200"
                             : s.status === "to-payment"
                               ? "bg-purple-100 border-purple-300 hover:bg-purple-200"
                               : "bg-green-50 border-green-100 hover:bg-green-100"
                           }
+  ${s.status === "completed" || s.status === "to-payment"
+      ? " cursor-not-allowed pointer-events-none"
+      : ""}
 `}
                       >
                         <div className="font-semibold text-sm">{s.title || 'Lịch khám'}</div>
