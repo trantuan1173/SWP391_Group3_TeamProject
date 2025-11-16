@@ -60,7 +60,7 @@ export const API_ENDPOINTS = {
       patientId ? `?patientId=${patientId}` : ""
     }`,
   //GET_ALL_PATIENTS: `${baseUrl}/api/medical-records/patients`,
-
+PATCH_PATIENT: (patientId) => `${baseUrl}/api/patients/patient/${patientId}`,
   //GET_MEDICAL_RECORDS_BY_PATIENT: (patientId) => `${baseUrl}/api/medical-records/patient/${patientId}`,
   GET_DOCTOR_SCHEDULE: (doctorId) => `${baseUrl}/api/doctor-schedules/${doctorId}`,
   GET_PATIENTS_BY_DOCTOR: (doctorId) =>

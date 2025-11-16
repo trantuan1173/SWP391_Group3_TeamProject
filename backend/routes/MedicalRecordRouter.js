@@ -89,7 +89,7 @@ router.get("/search", searchMedicalRecord);
  */
 router.get("/patient/:patientId", getAllMedicalRecordByPatientId);
 
-router.get("/patient-records/:id", getAllMedicalRecordsByPatient);
+router.get("/patient-records/:patientId", getAllMedicalRecordsByPatient);
 
 /**
  * @swagger

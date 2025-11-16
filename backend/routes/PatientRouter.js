@@ -16,6 +16,7 @@ const {
   forgotPassword,
   resetPassword,
   getAllPatients,
+  patchPatient
 } = require("../controllers/PatientController");
 const { protect, authorize } = require("../middleware/authMiddleware");
 
@@ -233,6 +234,7 @@ router.post("/register", register);
 // Require authentication for creating an appointment as a logged-in patient
 router.post("/appointments/create", protect, createAppointment);
 
+router.patch("/patient/:patientId", protect, patchPatient);
 /**
  * @swagger
  * /patients/appointmentsWithoutLogin:

@@ -9,6 +9,9 @@ const CreateMedicalRecord = () => {
   const [services, setServices] = useState([]);
   const [medicines, setMedicines] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
+  const [gender, setGender] = useState("");
+  const [dob, setDob] = useState("");
+  const baseUrl = API_ENDPOINTS.BASE_URL || "";
   const [symptoms, setSymptoms] = useState("");
   const [diagnosis, setDiagnosis] = useState("");
   const [treatment, setTreatment] = useState("");
@@ -171,6 +174,33 @@ const CreateMedicalRecord = () => {
     });
   };
 
+  const handleUpdatePatient = async () => {
+    const token = localStorage.getItem("token");
+
+    const payload = {};
+
+    if (gender) payload.gender = gender;
+    if (dob) payload.dateOfBirth = dob;
+
+    if (Object.keys(payload).length === 0) {
+      alert("Không có dữ liệu để cập nhật!");
+      return;
+    }
+
+    try {
+      const res = await axios.patch(
+        `http://localhost:1118/api/patients/patient/${selectedPatient.patientId}`,
+        payload,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      console.log("Updated:", res.data);
+      alert("Cập nhật thành công!");
+    } catch (err) {
+      console.error(err);
+      alert("Cập nhật thất bại!");
+    }
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -324,49 +354,86 @@ const CreateMedicalRecord = () => {
                         month: '2-digit',
                         year: 'numeric'
                       })} (
-                        {patient.appointmentTime.split(':').slice(0, 2).join(':')})
+                      {patient.appointmentTime.split(':').slice(0, 2).join(':')})
                     </option>
                   ))}
                 </select>
 
                 {selectedPatient && (
-                  <div className="mt-3 p-3 bg-white rounded border border-blue-200">
-                    <p className="text-sm">
-                      <strong>Họ tên:</strong> {selectedPatient.patientName}
-                    </p>
-                    <p className="text-sm">
-                      <strong>SĐT:</strong> {selectedPatient.patientPhone}
-                    </p>
-                    <p className="text-sm">
-                      <strong>Email:</strong> {selectedPatient.patientEmail}
-                    </p>
-                    <p className="text-sm">
-                      <strong>Giới tính:</strong>{" "}
-                      {selectedPatient.patientGender}
-                    </p>
-                    <p className="text-sm">
-                      <strong>Ngày sinh:</strong>{" "}
-                      {selectedPatient.patientDOB
-                        ? new Date(selectedPatient.patientDOB).toLocaleDateString("vi-VN", {
+                  <>
+                    <div className="mt-3 p-3 bg-white rounded border border-blue-200">
+                      <p className="text-sm">
+                        <strong>Họ tên:</strong> {selectedPatient.patientName}
+                      </p>
+                      <p className="text-sm">
+                        <strong>SĐT:</strong> {selectedPatient.patientPhone}
+                      </p>
+                      <p className="text-sm">
+                        <strong>Email:</strong> {selectedPatient.patientEmail}
+                      </p>
+                      <p className="text-sm">
+                        <strong>Giới tính:</strong>{" "}
+                        {selectedPatient.patientGender}
+                      </p>
+                      <p className="text-sm">
+                        <strong>Ngày sinh:</strong>{" "}
+                        {selectedPatient.patientDOB
+                          ? new Date(selectedPatient.patientDOB).toLocaleDateString("vi-VN", {
                             day: '2-digit',
                             month: '2-digit',
                             year: 'numeric'
                           })
-                        : "N/A"}
-                    </p>
-                    <p className="text-sm">
-                      <strong>Ngày khám:</strong>{" "}
-                      {new Date(selectedPatient.appointmentDate).toLocaleDateString('vi-VN', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric'
-                      })}
-                    </p>
-                    <p className="text-sm">
-                      <strong>Giờ khám:</strong>{" "}
-                      {selectedPatient.appointmentTime.split(':').slice(0, 2).join(':')}
-                    </p>
-                  </div>
+                          : "N/A"}
+                      </p>
+                      <p className="text-sm">
+                        <strong>Ngày khám:</strong>{" "}
+                        {new Date(selectedPatient.appointmentDate).toLocaleDateString('vi-VN', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric'
+                        })}
+                      </p>
+                      <p className="text-sm">
+                        <strong>Giờ khám:</strong>{" "}
+                        {selectedPatient.appointmentTime.split(':').slice(0, 2).join(':')}
+                      </p>
+                    </div>
+                    <div className="mt-4 p-4 bg-yellow-50 rounded border border-yellow-300">
+                      <p className="font-semibold mb-3 text-lg">Cập nhật thông tin bệnh nhân</p>
+
+                      <div className="mb-3">
+                        <label className="block text-sm font-medium mb-1">Giới tính</label>
+                        <select
+                          className="w-full border rounded px-3 py-2"
+                          value={gender || ""}
+                          onChange={(e) => setGender(e.target.value)}
+                        >
+                          <option value="">-- Không thay đổi --</option>
+                          <option value="male">Nam</option>
+                          <option value="female">Nữ</option>
+                          <option value="other">Khác</option>
+                        </select>
+                      </div>
+
+                      <div className="mb-3">
+                        <label className="block text-sm font-medium mb-1">Ngày sinh</label>
+                        <input
+                          type="date"
+                          className="w-full border rounded px-3 py-2"
+                          value={dob || ""}
+                          onChange={(e) => setDob(e.target.value)}
+                        />
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleUpdatePatient}
+                        className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700"
+                      >
+                        Cập nhật bệnh nhân
+                      </button>
+                    </div>
+                  </>
                 )}
               </>
             )}
@@ -632,9 +699,8 @@ const CreateMedicalRecord = () => {
                   return (
                     <div
                       key={med.id}
-                      className={`flex flex-col gap-3 p-3 bg-white rounded border transition ${
-                        expired ? "opacity-60" : "hover:border-amber-400"
-                      }`}
+                      className={`flex flex-col gap-3 p-3 bg-white rounded border transition ${expired ? "opacity-60" : "hover:border-amber-400"
+                        }`}
                     >
                       <div className="flex items-start gap-4">
                         <input

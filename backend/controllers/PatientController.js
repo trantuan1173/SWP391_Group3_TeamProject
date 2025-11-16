@@ -435,6 +435,25 @@ const resetPassword = async (req, res) => {
   }
 };
 
+const patchPatient = async (req, res) => {
+  try {
+    const { patientId } = req.params;
+    console.log(patientId);
+    const patient = await Patient.findByPk(patientId);
+    if (!patient) return res.status(404).json({ error: 'Patient not found' });
+    const allowed = ['dateOfBirth', 'gender'];
+    const payload = {};
+    for (const k of allowed) if (k in req.body) payload[k] = req.body[k];
+    await patient.update(payload);
+    const p = patient.toJSON ? patient.toJSON() : { ...patient };
+    if (p.password) delete p.password;
+    res.json({ message: 'Profile updated', patient: p });
+  } catch (error) {
+    console.error('[patchPatient] error:', error && error.stack ? error.stack : error);
+    res.status(500).json({ error: 'Failed to update patient' });
+  }
+};
+
 module.exports = {
   patientLogin,
   register,
@@ -451,6 +470,7 @@ module.exports = {
   forgotPassword,
   resetPassword,
   getAllPatients,
+  patchPatient,
 };
 
 async function updatePatient(req, res) {
