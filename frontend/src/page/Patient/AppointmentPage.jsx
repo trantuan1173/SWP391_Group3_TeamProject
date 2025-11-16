@@ -24,6 +24,28 @@ export default function AppointmentPage() {
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [feedbackContent, setFeedbackContent] = useState("");
   const [feedbackRating, setFeedbackRating] = useState(5);
+  // My feedback viewing states
+  const [myFeedback, setMyFeedback] = useState(null);
+  const [showMyFeedbackModal, setShowMyFeedbackModal] = useState(false);
+  // Fetch user's feedback for an appointment
+  const handleViewFeedback = async (appointmentId) => {
+    try {
+      const token = localStorage.getItem("token");
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      const res = await axios.get(
+        `https://swp.gicunhco.com/api/appointments/${appointmentId}/feedback`,
+        { headers }
+      );
+
+      setMyFeedback(res.data);
+      console.log("feedback", res.data);
+      setShowMyFeedbackModal(true);
+    } catch (err) {
+      console.error("Lỗi lấy feedback:", err);
+      alert(err?.response?.data?.error || "Không thể tải feedback!");
+    }
+  };
   // Submit feedback for completed appointment
   const handleSubmitFeedback = async () => {
     if (!selectedAppointment) return;
@@ -398,6 +420,15 @@ export default function AppointmentPage() {
                         Feedback
                       </button>
                     )}
+                    {/* Nút xem feedback cho lịch đã khám và đã có feedback */}
+                    {a.status === "completed" && (
+                      <button
+                        onClick={() => handleViewFeedback(a.id)}
+                        className="px-3 py-1 bg-purple-600 text-white rounded text-xs hover:bg-purple-700"
+                      >
+                        Xem Feedback
+                      </button>
+                    )}
 
                     {/* Nút Hủy */}
                     {(a.status === "pending" || a.status === "confirmed") && (
@@ -487,6 +518,27 @@ export default function AppointmentPage() {
           </div>
         </div>
       )}
+      {/* My Feedback Modal */}
+    {showMyFeedbackModal && myFeedback && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+          <h2 className="text-xl font-bold mb-4">Feedback của bạn</h2>
+          <p><strong>Rating:</strong> {myFeedback.rating} / 5</p>
+          <p className="mt-2"><strong>Nội dung:</strong> {myFeedback.content}</p>
+          <p className="mt-2 text-gray-500 text-sm">Ngày gửi: {new Date(myFeedback.createdAt).toLocaleString("vi-VN")}</p>
+          <div className="flex justify-end mt-4">
+            <button
+              onClick={() => setShowMyFeedbackModal(false)}
+              className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+            >
+              Đóng
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
     </div>
+    
   );
+
 }
