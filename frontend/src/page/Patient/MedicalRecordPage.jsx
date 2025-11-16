@@ -14,6 +14,7 @@ export default function MedicalRecordPage() {
         const data = res.data;
         const docs = data.documents || data.prescriptions || [];
         setMedicalRecords(Array.isArray(docs) ? docs : []);
+        console.log(data);
       } catch (err) {
         setMedicalRecords([]);
       }
@@ -48,7 +49,9 @@ export default function MedicalRecordPage() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-4 py-3 text-left">Ngày</th>
-                <th className="px-4 py-3 text-left">Tóm tắt</th>
+                <th className="px-4 py-3 text-left">Triệu chứng</th>
+                <th className="px-4 py-3 text-left">Chẩn đoán</th>
+                <th className="px-4 py-3 text-left">Điều trị</th>
               </tr>
             </thead>
             <tbody>
@@ -56,7 +59,15 @@ export default function MedicalRecordPage() {
                 <tr key={d.id || i} className="border-t">
                   <td className="px-4 py-3 align-top">{d.createdAt ? formatDateTime(d.createdAt) : '-'}</td>
                   <td className="px-4 py-3 align-top">
-                    <div className="font-medium">{d.treatment || d.diagnosis || 'Không có thông tin'}</div>
+                    <div className="font-medium">{d.symptoms || 'Không có thông tin'}</div>
+                    {d.notes && <div className="text-xs text-gray-500 mt-1">{d.notes}</div>}
+                  </td>
+                  <td className="px-4 py-3 align-top">
+                    <div className="font-medium">{d.diagnosis || 'Không có thông tin'}</div>
+                    {d.notes && <div className="text-xs text-gray-500 mt-1">{d.notes}</div>}
+                  </td>
+                  <td className="px-4 py-3 align-top">
+                    <div className="font-medium">{d.treatment || 'Không có thông tin'}</div>
                     {d.notes && <div className="text-xs text-gray-500 mt-1">{d.notes}</div>}
                   </td>
                 </tr>

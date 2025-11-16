@@ -69,11 +69,10 @@ const ReceptionistSideBar = () => {
                       <SidebarMenuButton asChild>
                         <button
                           onClick={() => navigate(item.url)}
-                          className={`flex w-full items-center gap-3 !p-6 !rounded-md font-bold transition-colors ${
-                            location.pathname === item.url
+                          className={`flex w-full items-center gap-3 !p-6 !rounded-md font-bold transition-colors ${location.pathname === item.url
                               ? "bg-purple-700 text-white"
                               : "text-black hover:bg-purple-700 hover:text-white active:bg-purple-800"
-                          }`}
+                            }`}
                         >
                           <item.icon className="h-4 w-4" />
                           <span>{item.title}</span>
@@ -100,6 +99,12 @@ const ReceptionistSideBar = () => {
                 </div>
               </div>
             </div>
+            <Button
+              onClick={() => navigate('/receptionist/change-password')}
+              className="bg-blue-500 hover:bg-blue-600 text-white w-full mt-2"
+            >
+              Đổi mật khẩu
+            </Button>
             <Button
               onClick={handleLogout}
               className="bg-red-500 hover:bg-red-600 text-white w-full"

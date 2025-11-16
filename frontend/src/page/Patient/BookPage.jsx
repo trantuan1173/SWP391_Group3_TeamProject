@@ -10,6 +10,12 @@ export default function BookPage() {
   const [bookingMessage, setBookingMessage] = useState("");
   const [bookingLoading, setBookingLoading] = useState(false);
 
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, "0");
+  const dd = String(today.getDate()).padStart(2, "0");
+  const localToday = `${yyyy}-${mm}-${dd}`;
+
   return (
     <div className="p-6">
       <h2 className="text-xl font-bold mb-4">Đặt lịch khám</h2>
@@ -24,7 +30,7 @@ export default function BookPage() {
           setBookingLoading(true);
           try {
             const token = localStorage.getItem("token");
-            const payload = {patientId: id, date: bookingDate, startTime: bookingStartTime, endTime: "" };
+            const payload = { patientId: id, date: bookingDate, startTime: bookingStartTime, endTime: "" };
             const headers = token ? { Authorization: `Bearer ${token}` } : {};
             const res = await axios.post(API_ENDPOINTS.CREATE_APPOINTMENT, payload, { headers });
             setBookingMessage("Đặt lịch thành công");
@@ -41,6 +47,7 @@ export default function BookPage() {
           <label className="block text-gray-700 text-sm mb-1">Ngày</label>
           <input
             type="date"
+            min={localToday}
             className={`w-full border-2 rounded-lg px-3 py-2 text-sm focus:outline-none ${!bookingDate && bookingMessage ? 'border-green-500' : 'border-purple-400'}`}
             value={bookingDate}
             onChange={(e) => setBookingDate(e.target.value)}
@@ -50,6 +57,9 @@ export default function BookPage() {
           <label className="block text-gray-700 text-sm mb-1">Giờ</label>
           <input
             type="time"
+            min="07:00"
+            max="17:00"
+            step="1800"
             value={bookingStartTime}
             onChange={(e) => setBookingStartTime(e.target.value)}
             className={`w-full border-2 rounded-lg px-3 py-2 text-sm focus:outline-none ${!bookingStartTime && bookingMessage ? 'border-green-500' : 'border-purple-400'}`}

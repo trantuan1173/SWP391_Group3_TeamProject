@@ -60,6 +60,7 @@ import PolicyDetailPage from "./page/policices/PolicyDetailPage";
 import TermsAndPolicies from "./page/guest/TermsAndPolicies";
 import MedicineManagement from "./page/medicine/MedicineManagement";
 import DoctorChangePassword from "./page/doctor/DoctorChangePassword";
+import ReceptionistChangePassword from "./page/Receptionist/ReceptionistChangePassword";
 
 function App() {
   const RedirectPatientId = () => {
@@ -157,7 +158,7 @@ function App() {
           <Route path="/receptionist" element={<ReceptionistSideBar />}>
             <Route path="tickets" element={<TicketManagement />} />
             <Route path="tickets/:id" element={<TicketDetail />} />
-
+            <Route path="change-password" element={<ReceptionistChangePassword />} />
             <Route path="dashboard" element={<ReceptionistDashboard />} />
             <Route path="patients" element={<ReceptionistPatient />} />
             <Route path="appointments" element={<ReceptionistAppointment />} />
