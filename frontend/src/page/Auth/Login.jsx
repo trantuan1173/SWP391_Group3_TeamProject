@@ -8,7 +8,7 @@ export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [isPatient, setIsPatient] = useState(false);
+  const [isPatient, setIsPatient] = useState(true);
   const { setUser } = useAuth();
   const navigate = useNavigate();
 
@@ -98,17 +98,6 @@ export default function Login() {
           <div className="flex justify-center mt-4 mb-6 space-x-4">
             <button
               type="button"
-              onClick={() => setIsPatient(false)}
-              className={`px-4 py-2 rounded-full font-medium ${
-                !isPatient
-                  ? "bg-green-600 text-white"
-                  : "bg-gray-300 text-gray-700"
-              }`}
-            >
-              Employee
-            </button>
-            <button
-              type="button"
               onClick={() => setIsPatient(true)}
               className={`px-4 py-2 rounded-full font-medium ${
                 isPatient
@@ -117,6 +106,17 @@ export default function Login() {
               }`}
             >
               Patient
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsPatient(false)}
+              className={`px-4 py-2 rounded-full font-medium ${
+                !isPatient
+                  ? "bg-green-600 text-white"
+                  : "bg-gray-300 text-gray-700"
+              }`}
+            >
+              Employee
             </button>
           </div>
 

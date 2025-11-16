@@ -17,7 +17,7 @@ export default function BookPage() {
   const localToday = `${yyyy}-${mm}-${dd}`;
 
   return (
-    <div className="p-6">
+    <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-2xl p-8">
       <h2 className="text-xl font-bold mb-4">Đặt lịch khám</h2>
       <form
         onSubmit={async (e) => {

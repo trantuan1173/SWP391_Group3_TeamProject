@@ -65,6 +65,7 @@ const CreateMedicalRecord = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const patientsList = patientsRes.data.data || [];
+      console.log(patientsList);
       setPatientsWithAppointments(patientsList);
 
       if (appointmentId && patientsList.length > 0) {

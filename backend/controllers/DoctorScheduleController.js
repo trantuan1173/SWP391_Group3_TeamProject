@@ -11,7 +11,7 @@ const getDoctorSchedule = async (req, res) => {
         status: ['confirmed', 'to-payment', 'completed']
 
       },
-      attributes: ["id", "doctorId", "date", "startTime", "endTime", "patientId"],
+      attributes: ["id", "doctorId", "date", "startTime", "endTime", "patientId", "status"],
       order: [
         ["date", "ASC"],
         ["startTime", "ASC"],
@@ -33,6 +33,7 @@ const getDoctorSchedule = async (req, res) => {
       return {
         id: json.id,
         doctorId: json.doctorId,
+        status: json.status,
         date: json.date,
         startTime: json.startTime?.slice(0, 5),
         endTime: json.endTime?.slice(0, 5),

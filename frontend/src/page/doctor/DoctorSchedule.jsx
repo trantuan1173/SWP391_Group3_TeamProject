@@ -18,24 +18,24 @@ const DoctorSchedule = () => {
 
 
   const handleClick = (appointment, scheduleDate) => {
-  const today = dayjs().startOf('day');
-  const scheduleDay = dayjs(scheduleDate).startOf('day');
-  if (scheduleDay.isBefore(today) || scheduleDay.isAfter(today)) {
-    setModalMessage("Bạn không thể tạo hồ sơ cho lịch khám này");
-    setShowModal(true);
-    return;
-  }
-  navigate(`/doctor/create-records`, {
-    state: {
-      appointmentId: appointment.id,
-      patient: appointment.patient,
-    },
-  });
-};
+    const today = dayjs().startOf('day');
+    const scheduleDay = dayjs(scheduleDate).startOf('day');
+    if (scheduleDay.isBefore(today) || scheduleDay.isAfter(today)) {
+      setModalMessage("Bạn không thể tạo hồ sơ cho lịch khám này");
+      setShowModal(true);
+      return;
+    }
+    navigate(`/doctor/create-records`, {
+      state: {
+        appointmentId: appointment.id,
+        patient: appointment.patient,
+      },
+    });
+  };
 
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedWeek, setSelectedWeek] = useState(getCurrentWeek());
-  
+
   const navigate = useNavigate();
 
   function getCurrentWeek() {
@@ -49,10 +49,10 @@ const DoctorSchedule = () => {
     const weeks = [];
     const date = new Date(year, 0, 1);
     let weekNum = 1;
-    
+
     while (date.getFullYear() === year) {
       const startOfWeek = new Date(date);
-      startOfWeek.setDate(date.getDate() - date.getDay() ); //cn
+      startOfWeek.setDate(date.getDate() - date.getDay()); //cn
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(startOfWeek.getDate() + 5);//t7
       if (startOfWeek.getFullYear() === year || endOfWeek.getFullYear() === year) {
@@ -63,11 +63,11 @@ const DoctorSchedule = () => {
           endDate: new Date(endOfWeek)
         });
       }
-      
+
       date.setDate(date.getDate() + 7);
       weekNum++;
     }
-    
+
     return weeks;
   };
 
@@ -102,7 +102,7 @@ const DoctorSchedule = () => {
         return;
       }
 
-      const response = await axios.get(	API_ENDPOINTS.GET_EMPLOYEE_WITH_ROLE(userId),
+      const response = await axios.get(API_ENDPOINTS.GET_EMPLOYEE_WITH_ROLE(userId),
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -132,7 +132,7 @@ const DoctorSchedule = () => {
 
   const fetchSchedules = async (doctorId, token) => {
     try {
-      const response = await axios.get( API_ENDPOINTS.GET_DOCTOR_SCHEDULE(doctorId),
+      const response = await axios.get(API_ENDPOINTS.GET_DOCTOR_SCHEDULE(doctorId),
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -140,13 +140,14 @@ const DoctorSchedule = () => {
         }
       );
       setSchedules(response.data);
+      console.log("Schedules:", response.data);
     } catch (error) {
       console.error("Fetch schedules error:", error.response?.data || error.message);
       setError("Không thể tải lịch làm việc.");
     }
   };
 
-  
+
 
   const getWeeklySchedules = () => {
     const selectedWeekData = weeks.find(w => w.weekNum === selectedWeek);
@@ -154,26 +155,27 @@ const DoctorSchedule = () => {
       return { weekDays: [], groupedSchedules: {} };
     }
 
-  const weekDays = [];
-  const groupedSchedules = {};
+    const weekDays = [];
+    const groupedSchedules = {};
 
-  for (let i = 0; i < 7; i++) {
-    const day = dayjs(selectedWeekData.startDate).add(i, 'day');
-    const dayKey = day.format('YYYY-MM-DD');
-    weekDays.push({
-      date: day.toDate(),
-      key: dayKey,
-      label: day.format('ddd, D/M')
-    });
+    for (let i = 0; i < 7; i++) {
+      const day = dayjs(selectedWeekData.startDate).add(i, 'day');
+      const dayKey = day.format('YYYY-MM-DD');
+      weekDays.push({
+        date: day.toDate(),
+        key: dayKey,
+        label: day.format('ddd, D/M')
+      });
 
-    groupedSchedules[dayKey] = schedules.filter(s => s.date === dayKey);
-  }
+      groupedSchedules[dayKey] = schedules.filter(s => s.date === dayKey);
+    }
 
-  return { weekDays, groupedSchedules };
-};
+    return { weekDays, groupedSchedules };
+  };
 
 
   const { weekDays, groupedSchedules } = getWeeklySchedules();
+  console.log(groupedSchedules);
 
   const handleYearChange = (e) => {
     const newYear = parseInt(e.target.value);
@@ -218,38 +220,38 @@ const DoctorSchedule = () => {
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-semibold text-gray-800">Lịch Làm Việc</h1>
           </div>
-              <div className="flex items-center gap-2 h-[50px]">
-                <label className="text-sm font-medium text-gray-600 bg-blue-50 px-3 py-1 rounded" style={{ height:'40px', justifyContent: 'center', alignContent: 'center'}}>
-                  Năm
-                </label>
-                <select
-                  value={selectedYear}
-                  onChange={handleYearChange}
-                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white h-[40px]"
-                  style={{ border: "20px" }}
-                >
-                  {years.map(year => (
-                    <option key={year} value={year} >{year}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex items-center gap-2 h-[50px]">
-                <label className="text-sm font-medium text-gray-600 bg-blue-50 px-3 py-1 rounded" style={{ height:'40px', justifyContent: 'center', alignContent: 'center'}}>
-                  Tuần
-                </label>
-                <select
-                  value={selectedWeek}
-                  onChange={handleWeekChange}
-                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white min-w-[120px] h-[40px]"
-                  style={{ border: "20px" }}
-                >
-                  {weeks.map(week => (
-                    <option key={week.weekNum} value={week.weekNum} >
-                      {week.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+          <div className="flex items-center gap-2 h-[50px]">
+            <label className="text-sm font-medium text-gray-600 bg-blue-50 px-3 py-1 rounded" style={{ height: '40px', justifyContent: 'center', alignContent: 'center' }}>
+              Năm
+            </label>
+            <select
+              value={selectedYear}
+              onChange={handleYearChange}
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white h-[40px]"
+              style={{ border: "20px" }}
+            >
+              {years.map(year => (
+                <option key={year} value={year} >{year}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center gap-2 h-[50px]">
+            <label className="text-sm font-medium text-gray-600 bg-blue-50 px-3 py-1 rounded" style={{ height: '40px', justifyContent: 'center', alignContent: 'center' }}>
+              Tuần
+            </label>
+            <select
+              value={selectedWeek}
+              onChange={handleWeekChange}
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white min-w-[120px] h-[40px]"
+              style={{ border: "20px" }}
+            >
+              {weeks.map(week => (
+                <option key={week.weekNum} value={week.weekNum} >
+                  {week.label}
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="bg-gray-50 p-4 rounded-lg">
             <div className="grid grid-cols-7 gap-3 mb-3">
               {weekDays.map(day => (
@@ -267,7 +269,14 @@ const DoctorSchedule = () => {
                       <div
                         key={s.id || `${day.key}-${Math.random()}`}
                         onClick={() => handleClick(s, day.key)}
-                        className="mb-2 p-2 rounded-md bg-green-50 border border-green-100 text-sm cursor-pointer hover:bg-green-100 transition"
+                        className={`mb-2 p-2 rounded-md text-sm cursor-pointer transition border
+  ${s.status === "complete"
+                            ? "bg-yellow-100 border-yellow-300 hover:bg-yellow-200"
+                            : s.status === "to-payment"
+                              ? "bg-purple-100 border-purple-300 hover:bg-purple-200"
+                              : "bg-green-50 border-green-100 hover:bg-green-100"
+                          }
+`}
                       >
                         <div className="font-semibold text-sm">{s.title || 'Lịch khám'}</div>
                         <div className="text-xs text-gray-600">🕒 {s.startTime || s.from || s.start} - {s.endTime || s.to || s.end}</div>
@@ -294,31 +303,31 @@ const DoctorSchedule = () => {
             </div>
           </div>
 
-          
+
         </div>
       </div>
       {showModal && (
-  <div className="absolute left-1/2 top-1/3 transform -translate-x-1/2 z-50">
-    <div className="bg-white text-black px-6 py-4 rounded-xl shadow-lg relative min-w-[300px] border border-gray-300">
-      <button
-        className="absolute top-2 right-2 text-xl font-bold text-red-500 hover:text-red-700"
-        onClick={() => setShowModal(false)}
-        style={{
-          background: 'transparent',
-          border: 'none',
-          cursor: 'pointer',
-          lineHeight: '1',
-        }}
-        aria-label="Đóng"
-      >
-        ×
-      </button>
-      <div className="text-center text-lg font-semibold">
-        Bạn không thể tạo hồ sơ cho lịch khám này
-      </div>
-    </div>
-  </div>
-)}
+        <div className="absolute left-1/2 top-1/3 transform -translate-x-1/2 z-50">
+          <div className="bg-white text-black px-6 py-4 rounded-xl shadow-lg relative min-w-[300px] border border-gray-300">
+            <button
+              className="absolute top-2 right-2 text-xl font-bold text-red-500 hover:text-red-700"
+              onClick={() => setShowModal(false)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                lineHeight: '1',
+              }}
+              aria-label="Đóng"
+            >
+              ×
+            </button>
+            <div className="text-center text-lg font-semibold">
+              Bạn không thể tạo hồ sơ cho lịch khám này
+            </div>
+          </div>
+        </div>
+      )}
 
 
 
