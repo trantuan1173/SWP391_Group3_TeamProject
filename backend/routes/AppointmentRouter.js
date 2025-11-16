@@ -289,7 +289,7 @@ router.get("/doctor/:id", protect, authorize("Admin", "Receptionist", "Doctor"),
 router.get("/status/:status", protect, authorize("Admin", "Receptionist", "Doctor"), getAppointmentByStatus);
 
 // Feedback endpoints for appointments
-router.post('/:id/feedback', protect, createFeedback);
+router.post('/:id/feedback', createFeedback);
 router.get('/:id/feedback', protect, getFeedbackForAppointment);
 
 module.exports = router;

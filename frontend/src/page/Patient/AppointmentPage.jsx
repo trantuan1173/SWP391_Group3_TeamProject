@@ -20,6 +20,31 @@ export default function AppointmentPage() {
   const [toDate, setToDate] = useState("");
   const [doctorFilter, setDoctorFilter] = useState("");
   const [doctors, setDoctors] = useState([]);
+  // Feedback modal states
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [feedbackContent, setFeedbackContent] = useState("");
+  const [feedbackRating, setFeedbackRating] = useState(5);
+  // Submit feedback for completed appointment
+  const handleSubmitFeedback = async () => {
+    if (!selectedAppointment) return;
+    try {
+      const token = localStorage.getItem("token");
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await axios.post(
+        `https://swp.gicunhco.com/api/appointments/${selectedAppointment.id}/feedback`,
+        { content: feedbackContent, rating: feedbackRating },
+        { headers }
+      );
+      alert("Gửi feedback thành công!");
+      setShowFeedbackModal(false);
+      setFeedbackContent("");
+      setFeedbackRating(5);
+      setAppointments(prev => prev.map(ap => ap.id === selectedAppointment.id ? { ...ap, hasFeedback: true } : ap));
+    } catch (err) {
+      console.error("Lỗi gửi feedback:", err);
+      alert(err?.response?.data?.error || "Gửi feedback thất bại!");
+    }
+  };
 
   const handleViewDetail = async (appointmentId) => {
     try {
@@ -35,13 +60,12 @@ export default function AppointmentPage() {
     }
   };
 
-  // ✅ Debounce search
+
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search.trim()), 300);
     return () => clearTimeout(t);
   }, [search]);
 
-  // ✅ Lấy danh sách bác sĩ
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -56,7 +80,6 @@ export default function AppointmentPage() {
     return () => (mounted = false);
   }, []);
 
-  // ✅ Lấy danh sách lịch khám
   useEffect(() => {
     let mounted = true;
     async function fetchAppointments() {
@@ -110,7 +133,6 @@ export default function AppointmentPage() {
     debouncedSearch,
   ]);
 
-  // ✅ Format
   const formatDateTime = (str) => {
     try {
       const d = new Date(str);
@@ -170,7 +192,6 @@ export default function AppointmentPage() {
     <div className="p-6">
       <h2 className="text-xl font-bold mb-4">Lịch khám</h2>
 
-      {/* --- Bộ lọc --- */}
       <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:gap-3 gap-2">
         <input
           value={search}
@@ -368,6 +389,16 @@ export default function AppointmentPage() {
                       Xem
                     </button>
 
+                    {/* Nút Feedback cho lịch đã khám và chưa feedback */}
+                    {a.status === "completed" && !a.hasFeedback && (
+                      <button
+                        onClick={() => { setSelectedAppointment(a); setShowFeedbackModal(true); }}
+                        className="px-3 py-1 bg-yellow-600 text-white rounded text-xs hover:bg-yellow-700"
+                      >
+                        Feedback
+                      </button>
+                    )}
+
                     {/* Nút Hủy */}
                     {(a.status === "pending" || a.status === "confirmed") && (
                       <button
@@ -427,6 +458,34 @@ export default function AppointmentPage() {
             </button>
           </div>
         </>
+      )}
+      {/* Feedback Modal */}
+      {showFeedbackModal && selectedAppointment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h2 className="text-xl font-bold mb-4">Gửi Feedback</h2>
+            <label className="block mb-2">Rating (1-5)</label>
+            <select
+              value={feedbackRating}
+              onChange={e => setFeedbackRating(Number(e.target.value))}
+              className="border px-3 py-2 rounded w-full mb-3"
+            >
+              {[1,2,3,4,5].map(n => <option key={n} value={n}>{n}</option>)}
+            </select>
+            <label className="block mb-2">Nội dung</label>
+            <textarea
+              value={feedbackContent}
+              onChange={e => setFeedbackContent(e.target.value)}
+              className="border px-3 py-2 rounded w-full mb-4"
+              rows="4"
+              placeholder="Nhập cảm nhận của bạn..."
+            />
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setShowFeedbackModal(false)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Hủy</button>
+              <button onClick={handleSubmitFeedback} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Gửi</button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

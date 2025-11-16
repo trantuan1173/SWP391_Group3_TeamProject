@@ -13,14 +13,14 @@ async function createFeedback(req, res) {
     if (!appointment) return res.status(404).json({ error: 'Appointment not found' });
 
 
-    if (req.userType !== 'patient' || req.userId !== appointment.patientId) {
-      return res.status(403).json({ error: 'Forbidden' });
-    }
+    // if (req.userType !== 'patient' || req.userId !== appointment.patientId) {
+    //   return res.status(403).json({ error: 'Forbidden' });
+    // }
 
     const existing = await Feedback.findOne({ where: { appointmentId } });
     if (existing) return res.status(409).json({ error: 'Feedback already submitted for this appointment' });
 
-    const fb = await Feedback.create({ appointmentId, patientId: req.userId, content, rating });
+    const fb = await Feedback.create({ appointmentId, patientId: appointment.patientId, content, rating });
     res.status(201).json({ message: 'Feedback created', feedback: fb });
   } catch (err) {
     console.error('[createFeedback] error:', err && err.stack ? err.stack : err);
